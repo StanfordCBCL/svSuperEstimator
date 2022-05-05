@@ -1,0 +1,15 @@
+.eggs/
+*.egg-info
+.DS_Store
+*.pyc
+.pytest_cache/
+.coverage*
+!.coveragerc
+.vscode/
+doc/cov
+doc/build
+doc/source/*.rst
+!doc/source/index.rst
+tmp
+.mypy_cache
+dist
