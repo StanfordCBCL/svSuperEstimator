@@ -1,0 +1,12 @@
+name: GitHub Actions Demo
+on: [push]
+jobs:
+  flake8:
+    runs-on: continuumio/miniconda3
+    steps:
+      - /bin/bash --login
+      - conda create -n punkreas python=3.9
+      - source activate punkreas
+      - conda install pip
+      - pip install flake8 flake8-docstrings
+      - flake8
