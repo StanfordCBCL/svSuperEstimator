@@ -21,8 +21,14 @@ jobs:
         run: |
           sphinx-apidoc -o doc/source svsuperestimator
           sphinx-build -b html -d doc/build/doctrees  doc/source public
-      - name: Deploy documentation
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Save documentation
+        uses: actions/upload-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          name: documentation
+          path: public
+      # Has to remain deactivated until repo is public
+      # - name: Deploy documentation
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./public
