@@ -9,7 +9,7 @@ jobs:
       - run: /bin/bash --login
       - run: conda init bash
       - run: conda create -n env39 python=3.9 -y
-      - run: /opt/conda/bin/activate env39
+      - run: activate env39
       - run: which python
       - run: conda install pip
       - run: pip install flake8 flake8-docstrings
