@@ -1,5 +1,9 @@
 name: Documentation
 on: [push]
+
+permissions:
+  contents: write
+
 jobs:
   sphinx:
     runs-on: ubuntu-latest
