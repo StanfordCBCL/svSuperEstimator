@@ -7,7 +7,7 @@ jobs:
       image: continuumio/miniconda3
     steps:
       - run: /bin/bash --login
-      - run: conda init /bin/bash
+      - run: conda init bash
       - run: conda create -n env39 python=3.9 -y
       - run: conda activate env39
       - run: conda install pip
