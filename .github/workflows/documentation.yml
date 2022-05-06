@@ -1,4 +1,4 @@
-name: Codechecks
+name: Documentation
 on: [push]
 jobs:
   sphinx:
@@ -17,7 +17,9 @@ jobs:
         run: |
           sphinx-apidoc -o doc/source svsuperestimator -f -M
           sphinx-build -b html -d doc/build/doctrees  doc/source doc/build/html
-          mv doc/build/html public
+          mv ./doc/build/html ./public
+          pwd
+          ll
       - name: Deploy documentation
         uses: peaceiris/actions-gh-pages@v3
         with:
