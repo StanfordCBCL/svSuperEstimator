@@ -20,7 +20,7 @@ exclude = "doc|tests"
 addopts = """
     --cov-report=html:doc/cov
     --cov-report=term
-    --cov=punkreas
+    --cov=svsuperestimator
     --verbose
     --ignore=examples
 """

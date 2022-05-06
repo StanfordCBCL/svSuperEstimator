@@ -14,14 +14,14 @@ pip install .
 
 ### For Contributers
 
-If you are contributing to punkreas, it is highly recommended to use a virtual
+If you are contributing to svSuperEstimator, it is highly recommended to use a virtual
 environment like [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
 After installing Miniconda you can create a new environment and enter it using:
 ```bash
 conda create -n superestimator python=3.9
 conda activate superestimator
 ```
-After that you can install punkreas **with development related dependencies**
+After that you can install the svSuperEstimator **with development related dependencies**
 using:
 ```bash
 pip install -e .[dev]
