@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools >= 40.9.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 79
+
+[tool.isort]
+profile = "black"
+line_length = 79
+src_paths = ["."]
+
+[tool.mypy]
+ignore_missing_imports = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+exclude = "doc|tests"
+
+[tool.pytest.ini_options]
+addopts = """
+    --cov-report=html:doc/cov
+    --cov-report=term
+    --cov=svsuperestimator
+    --verbose
+    --ignore=examples
+"""

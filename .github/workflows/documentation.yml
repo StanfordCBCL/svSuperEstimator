@@ -1,0 +1,32 @@
+name: Documentation
+on: [push]
+permissions:
+  contents: write
+jobs:
+  sphinx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: |
+          conda install pip
+          pip install -e .[dev]
+      - name: Build documentation
+        run: |
+          sphinx-apidoc -o doc/source svsuperestimator
+          sphinx-build -b html -d doc/build/doctrees  doc/source public
+      - name: Save documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: documentation
+          path: public
+      # Has to remain deactivated until repo is public
+      # - name: Deploy documentation
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./public
