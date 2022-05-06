@@ -1,5 +1,8 @@
 name: Codechecks
-on: [push]
+on:
+  push
+  pull_request:
+    types: [opened, reopened]
 jobs:
   flake8:
     runs-on: ubuntu-latest

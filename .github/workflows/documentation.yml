@@ -1,5 +1,8 @@
 name: Documentation
-on: [push]
+on:
+  push
+  pull_request:
+    types: [opened, reopened]
 permissions:
   contents: write
 jobs:
