@@ -7,8 +7,8 @@ jobs:
       image: continuumio/miniconda3
     steps:
       - run: /bin/bash --login
-      - run: conda create -n punkreas python=3.9
-      - run: source activate punkreas
+      - run: conda create -n env39 python=3.9
+      - run: conda activate env39
       - run: conda install pip
       - run: pip install flake8 flake8-docstrings
       - run: flake8
