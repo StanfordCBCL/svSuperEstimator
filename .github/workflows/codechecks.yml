@@ -1,8 +1,10 @@
-name: GitHub Actions Demo
+name: Codechecks
 on: [push]
 jobs:
   flake8:
-    runs-on: continuumio/miniconda3
+    runs-on: ubuntu-latest
+    container:
+      image: continuumio/miniconda3
     steps:
       - run: /bin/bash --login
       - run: conda create -n punkreas python=3.9
