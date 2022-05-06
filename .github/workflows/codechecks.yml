@@ -6,11 +6,14 @@ jobs:
     container:
       image: continuumio/miniconda3
     steps:
-      - run: /bin/bash --login
-      - run: conda init bash
-      - run: conda create -n env39 python=3.9 -y
-      - run: activate env39
-      - run: which python
-      - run: conda install pip
-      - run: pip install flake8 flake8-docstrings
-      - run: flake8
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install Dependencies
+        run: |
+          conda install pip
+          pip install flake8 flake8-docstrings
+      - name: Test
+        run: flake8
