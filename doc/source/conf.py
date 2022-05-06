@@ -6,7 +6,10 @@ sys.path.insert(0, os.path.abspath("../.."))
 sys.path.insert(0, os.path.abspath(".."))
 
 project = "svSuperEstimator"
-copyright = "Stanford University, The Regents of the University of California, and others."
+copyright = (
+    "Stanford University, The Regents of the University of"
+    " California, and others."
+)
 
 extensions = [
     "sphinx.ext.autodoc",

@@ -1,7 +1,7 @@
 name: Codechecks
 on: [push]
 jobs:
-  flake8:
+  sphinx:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,7 +15,7 @@ jobs:
           pip install -e .[dev]
       - name: Build documentation
         run: |
-          sphinx-apidoc -o doc/source punkreas -f -M
+          sphinx-apidoc -o doc/source svsuperestimator -f -M
           sphinx-build -b html -d doc/build/doctrees  doc/source doc/build/html
           mv doc/build/html public
       - name: Deploy documentation
