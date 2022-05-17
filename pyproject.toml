@@ -22,5 +22,4 @@ addopts = """
     --cov-report=term
     --cov=svsuperestimator
     --verbose
-    --ignore=examples
 """
