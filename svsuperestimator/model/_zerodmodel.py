@@ -25,23 +25,23 @@ class ZeroDModel:
         self._config = project["rom_simulation_config"]
 
         # Create python object representations for each boundary condition
-        self.boundary_conditions: list["_BoundaryCondition"] = []
+        self.boundary_conditions: list["_BoundaryCondition"] = {}
         for bc in self._config["boundary_conditions"]:
             if bc["bc_type"] == "FLOW":
-                self.boundary_conditions.append(
-                    _FlowBoundaryCondition(
-                        flow=np.array(bc["bc_values"]["Q"]),
-                        time=np.array(bc["bc_values"]["t"]),
-                    )
+                self.boundary_conditions[
+                    bc["bc_name"]
+                ] = _FlowBoundaryCondition(
+                    flow=np.array(bc["bc_values"]["Q"]),
+                    time=np.array(bc["bc_values"]["t"]),
                 )
             elif bc["bc_type"] == "RCR":
-                self.boundary_conditions.append(
-                    _RCRBoundaryCondition(
-                        capacity=bc["bc_values"]["C"],
-                        pressure_distal=bc["bc_values"]["Pd"],
-                        resistance_distal=bc["bc_values"]["Rd"],
-                        resistance_proximal=bc["bc_values"]["Rp"],
-                    )
+                self.boundary_conditions[
+                    bc["bc_name"]
+                ] = _RCRBoundaryCondition(
+                    capacity=bc["bc_values"]["C"],
+                    pressure_distal=bc["bc_values"]["Pd"],
+                    resistance_distal=bc["bc_values"]["Rd"],
+                    resistance_proximal=bc["bc_values"]["Rp"],
                 )
             else:
                 raise ValueError(
@@ -55,9 +55,8 @@ class ZeroDModel:
             config: Configuration for the svZeroDSolver.
 
         """
-        for bc, bc_obj in zip(
-            self._config["boundary_conditions"], self.boundary_conditions
-        ):
+        for bc in self._config["boundary_conditions"]:
+            bc_obj = self.boundary_conditions[bc["bc_name"]]
             if isinstance(bc_obj, _FlowBoundaryCondition):
                 bc["bc_values"].update(
                     {"Q": bc_obj.flow.tolist(), "t": bc_obj.time.tolist()}
