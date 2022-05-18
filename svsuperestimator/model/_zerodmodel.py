@@ -25,7 +25,7 @@ class ZeroDModel:
         self._config = project["rom_simulation_config"]
 
         # Create python object representations for each boundary condition
-        self.boundary_conditions: list["_BoundaryCondition"] = {}
+        self.boundary_conditions: dict[str, "_BoundaryCondition"] = {}
         for bc in self._config["boundary_conditions"]:
             if bc["bc_type"] == "FLOW":
                 self.boundary_conditions[

@@ -1,10 +1,11 @@
 """This module holds the ZeroDSolver class."""
 import json
 import os
-from tempfile import TemporaryDirectory
 import re
+from tempfile import TemporaryDirectory
 
 import numpy as np
+import pandas as pd
 from svzerodsolver import solver
 
 from ..model import ZeroDModel
@@ -56,7 +57,8 @@ class ZeroDSolver:
             ).item()
 
         # Format output nicely according to boundary conditions
-        bc_result = {}
+
+        result = pd.DataFrame(columns=["time", "name", "pressure", "flow"])
         for vessel_data in config["vessels"]:
             if "boundary_conditions" in vessel_data:
                 bc_type, bc_name = list(
@@ -73,28 +75,54 @@ class ZeroDSolver:
                             vessel_name.split("_")[0],
                             re.I,
                         )
-                    ).groups()[1]
+                    ).groups()[  # type: ignore
+                        1
+                    ]
                 )
 
                 # Extract result at boundary condition. Use inlet result for
                 # inlet BCs and outlet result for outlet BCs, respectively.
                 if bc_type == "inlet":
-                    bc_result[bc_name] = {
-                        "flow": np.array(
-                            branch_result["flow"][branch_id][0, :]
-                        ),
-                        "pressure": np.array(
-                            branch_result["pressure"][branch_id][0, :]
-                        ),
-                    }
+                    result = pd.concat(
+                        [
+                            result,
+                            pd.DataFrame.from_dict(
+                                {
+                                    "name": [bc_name]
+                                    * len(branch_result["time"]),
+                                    "time": np.array(branch_result["time"]),
+                                    "flow": np.array(
+                                        branch_result["flow"][branch_id][0, :]
+                                    ),
+                                    "pressure": np.array(
+                                        branch_result["pressure"][branch_id][
+                                            0, :
+                                        ]
+                                    ),
+                                }
+                            ),
+                        ]
+                    )
                 else:
-                    bc_result[bc_name] = {
-                        "flow": np.array(
-                            branch_result["flow"][branch_id][-1, :]
-                        ),
-                        "pressure": np.array(
-                            branch_result["pressure"][branch_id][-1, :]
-                        ),
-                    }
+                    result = pd.concat(
+                        [
+                            result,
+                            pd.DataFrame.from_dict(
+                                {
+                                    "name": [bc_name]
+                                    * len(branch_result["time"]),
+                                    "time": np.array(branch_result["time"]),
+                                    "flow": np.array(
+                                        branch_result["flow"][branch_id][-1, :]
+                                    ),
+                                    "pressure": np.array(
+                                        branch_result["pressure"][branch_id][
+                                            -1, :
+                                        ]
+                                    ),
+                                }
+                            ),
+                        ]
+                    )
 
-        return bc_result, np.array(branch_result["time"])
+        return result
