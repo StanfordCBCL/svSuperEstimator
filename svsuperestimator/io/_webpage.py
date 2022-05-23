@@ -1,7 +1,7 @@
 """This module holds the WebPage class."""
 import os
 from datetime import datetime
-from typing import Any, Union
+from typing import Any, Iterable, Union
 
 
 class WebPage:
@@ -113,7 +113,7 @@ class _HtmlFlexbox:
         Args:
             items: Items for the flexbox.
         """
-        self._items = items
+        self._items = list(items)
 
     def append(self, items: Union[list[Any], Any]) -> None:
         """Append items to the flexbox.
@@ -121,10 +121,10 @@ class _HtmlFlexbox:
         Args:
             items: Item(s) to append.
         """
-        if isinstance(items, list):
-            self._items.extend(items)
+        if isinstance(items, Iterable):
+            self._items.extend(list(items))
         else:
-            self._items.append(items)
+            self._items.append(list(items))
 
     def get_html(self) -> str:
         """Get html string respresentation of content."""

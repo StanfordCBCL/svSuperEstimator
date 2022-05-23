@@ -9,6 +9,7 @@ import pandas as pd
 from svzerodsolver import solver
 
 from ..model import ZeroDModel
+from ..io import LinePlot
 
 
 class ZeroDSolver:
@@ -126,3 +127,41 @@ class ZeroDSolver:
                     )
 
         return result
+
+    @staticmethod
+    def get_result_plots(result: pd.DataFrame) -> tuple[LinePlot, LinePlot]:
+        """Create plots for flow and pressure result.
+
+        Args:
+            result: Result dataframe.
+
+        Returns:
+            flow_plot: Line plot for the flow over time.
+            pres_plot: Line plot for pressure over time.
+        """
+        plot_result = result.copy()
+        plot_result.flow *= 3.6  # Convert cm^3/s to l/h
+        plot_result.pressure *= (
+            0.00075006156130264  # Convert g/(cm s^2) to mmHg
+        )
+        flow_plot = LinePlot(
+            plot_result,
+            x="time",
+            y="flow",
+            color="name",
+            title="Flow over time",
+            xlabel=r"$s$",
+            ylabel=r"$\frac{l}{h}$",
+            legend_title="BC Name",
+        )
+        pres_plot = LinePlot(
+            plot_result,
+            x="time",
+            y="pressure",
+            color="name",
+            title="Pressure over time",
+            xlabel=r"$s$",
+            ylabel=r"$mmHg$",
+            legend_title="BC Name",
+        )
+        return flow_plot, pres_plot

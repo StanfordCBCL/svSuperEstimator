@@ -17,10 +17,11 @@ class _PlotlyPlot:
         "template": "plotly_dark",
     }
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
         """Create a new _PlotlyPlot instance."""
         self._fig = go.Figure()
         self._layout = self._DEFAULT_LAYOUT.copy()
+        self.configure(**kwargs)
 
     def to_html(self) -> str:
         """Export plot as an html encoded string.
@@ -44,14 +45,14 @@ class _PlotlyPlot:
         self._fig.update_layout(**self._layout)
         self._fig.write_image(path)
 
-    def set_label(
+    def configure(
         self,
         title: str = None,
         xlabel: str = None,
         ylabel: str = None,
         legend_title: str = None,
     ) -> None:
-        """Set various labels for the plot.
+        """Set various configurations for the plot.
 
         Args:
             title: Figure title.
@@ -78,7 +79,53 @@ class LinePlot(_PlotlyPlot):
         x: str = None,
         y: str = None,
         color: str = None,
+        **kwargs
     ) -> None:
-        """Create a new LinePlot instance."""
-        super().__init__()
+        """Create a new LinePlot instance.
+
+        Args:
+            dataframe: The dataframe to plot.
+            x: Label of the dataframe to use for the x-axis.
+            y: Label of the dataframe to use for the y-axis.
+            color: Label of the dataframe to use for the color.
+        """
+        super().__init__(**kwargs)
         self._fig = px.line(dataframe, x=x, y=y, color=color)
+
+
+class TablePlot(_PlotlyPlot):
+    """Table plot."""
+
+    def __init__(self, dataframe: pd.DataFrame, **kwargs):
+        """Create a new TablePlot instance.
+
+        Args:
+            dataframe: The dataframe to plot.
+        """
+        super().__init__(**kwargs)
+        columns = list(dataframe.columns)
+        table = go.Table(
+            header=dict(
+                values=columns,
+                line_color="white",
+                fill_color="rgba(0,0,0,0)",
+                font=dict(color="white"),
+            ),
+            cells=dict(
+                values=[dataframe[col] for col in columns],
+                line_color="white",
+                fill_color="rgba(0,0,0,0)",
+                font=dict(color="white"),
+            ),
+        )
+        self._fig = go.Figure(
+            data=[table],
+            layout=go.Layout(
+                margin=go.layout.Margin(
+                    l=1,  # left margin
+                    r=1,  # right margin
+                    b=1,  # bottom margin
+                    t=1,  # top margin
+                )
+            ),
+        )
