@@ -13,3 +13,6 @@ doc/source/*.rst
 tmp
 .mypy_cache
 dist
+tmp*
+dashboard
+*.prof
