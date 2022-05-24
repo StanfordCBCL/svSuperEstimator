@@ -14,7 +14,7 @@ src_paths = ["."]
 ignore_missing_imports = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
-exclude = "doc|tests"
+exclude = "doc|tests|cases"
 
 [tool.pytest.ini_options]
 addopts = """

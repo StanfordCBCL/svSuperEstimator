@@ -17,7 +17,7 @@ class _PlotlyPlot:
         "template": "plotly_dark",
     }
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: str) -> None:
         """Create a new _PlotlyPlot instance."""
         self._fig = go.Figure()
         self._layout = self._DEFAULT_LAYOUT.copy()
@@ -79,7 +79,7 @@ class LinePlot(_PlotlyPlot):
         x: str = None,
         y: str = None,
         color: str = None,
-        **kwargs
+        **kwargs: str
     ) -> None:
         """Create a new LinePlot instance.
 
@@ -96,7 +96,7 @@ class LinePlot(_PlotlyPlot):
 class TablePlot(_PlotlyPlot):
     """Table plot."""
 
-    def __init__(self, dataframe: pd.DataFrame, **kwargs):
+    def __init__(self, dataframe: pd.DataFrame, **kwargs: str):
         """Create a new TablePlot instance.
 
         Args:

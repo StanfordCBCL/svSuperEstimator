@@ -1,10 +1,17 @@
-from scipy import optimize
+"""Inverse problem in 0D optimization problem.
 
-from svsuperestimator import io, model as mdl, solver as slv
+This case implements a 0D model optimization routine. It optimizes the
+distal to proximal resistance ration (denoted k) at each outlet to match
+the inlet-outlet pressure difference. k is initialized with a values of 10.0.
+"""
+import time
 
 import pandas as pd
+from scipy import optimize
 
-import time
+from svsuperestimator import io
+from svsuperestimator import model as mdl
+from svsuperestimator import solver as slv
 
 start = time.time()
 
@@ -56,7 +63,8 @@ def objective_function(k):
     """Objective function for the optimization.
 
     Evaluates the sum of the offset for the input output pressure relation for
-    each outlet."""
+    each outlet.
+    """
 
     set_boundary_conditions(k)
     result = solver.run_simulation()

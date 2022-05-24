@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 from svzerodsolver import solver
 
-from ..model import ZeroDModel
 from ..io import LinePlot
+from ..model import ZeroDModel
 
 
 class ZeroDSolver:
@@ -27,14 +27,12 @@ class ZeroDSolver:
         """
         self._model = model
 
-    def run_simulation(self) -> tuple[dict, np.ndarray]:
+    def run_simulation(self) -> pd.DataFrame:
         """Run a new 0D solver session using the provided model.
 
         Returns:
             bc_result: The resulting pressure and flow values at the boundary
-                conditions. The results for each boundary conditions are saved
-                under the name of the boundary condition.
-            time: Time steps corresponding to the pressure and flow values.
+                conditions with corresponding timestamps in a pandas dataframe.
         """
 
         # Extract configuration from model
