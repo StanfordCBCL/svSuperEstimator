@@ -90,7 +90,7 @@ optimized_k = optimize.minimize(
     K_START,
     method="Nelder-Mead",
     bounds=BOUNDS,
-    options={"maxiter": 10},
+    options={"maxiter": 100},
 ).x
 
 # Get result for optimized k
@@ -107,12 +107,18 @@ diff = (
     optimized_result[["flow", "pressure"]] - ground_truth[["flow", "pressure"]]
 )
 diff["name"], diff["time"] = optimized_result.name, optimized_result.time
-flow_plot, pres_plot = solver.get_result_plots(diff)
-flow_plot.configure(
-    title="Flow error over time", xlabel="$s$", ylabel=r"$\frac{l}{h}$"
-)
+for bc_name in outlet_bcs:
+    diff.loc[diff.name == bc_name, "flow"] *= 100.0 / (
+        ground_truth[ground_truth.name == bc_name].flow.max()
+        - ground_truth[ground_truth.name == bc_name].flow.min()
+    )
+    diff.loc[diff.name == bc_name, "pressure"] *= (
+        100.0 / ground_truth[ground_truth.name == bc_name].pressure.mean()
+    )
+flow_plot, pres_plot = solver.get_result_plots(diff[diff.name != "INFLOW"])
+flow_plot.configure(title="Flow error over time", xlabel="$s$", ylabel=r"$\%$")
 pres_plot.configure(
-    title="Pressure error over time", xlabel="$s$", ylabel="$mmHg$"
+    title="Pressure error over time", xlabel="$s$", ylabel=r"$\%$"
 )
 webpage.add_plots([flow_plot, pres_plot])
 
