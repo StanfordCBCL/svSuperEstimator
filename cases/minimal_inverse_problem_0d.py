@@ -28,6 +28,7 @@ webpage = io.WebPage("svSuperEstimator")
 # Running one simulation to determine ground truth
 ground_truth = solver.run_simulation()
 p_avg_inlet_gt = ground_truth.query("name=='INFLOW'")["pressure"].mean()
+q_avg_inlet_gt = ground_truth.query("name=='INFLOW'")["flow"].mean()
 outlet_bcs = {
     name: bc
     for name, bc in model.zerodmodel.boundary_conditions.items()
@@ -40,13 +41,18 @@ p_diff_io_gt = [
     p_avg_inlet_gt - ground_truth[ground_truth.name == bc]["pressure"].mean()
     for bc in outlet_bcs
 ]  # Pressure difference between inlet and each outlet
+q_avg_outlet_gt = [
+    ground_truth[ground_truth.name == bc]["flow"].mean() for bc in outlet_bcs
+]
 k_opt = [
     bc.resistance_distal / bc.resistance_proximal for bc in outlet_bcs.values()
 ]  # Optimal distal to proximal resistance ratio for each outlet
 
 # Plot ground truth
 webpage.add_heading("Ground Truth")
-webpage.add_plots(solver.get_result_plots(ground_truth))
+webpage.add_plots(
+    solver.get_result_plots(ground_truth[ground_truth.name != "INFLOW"])
+)
 
 
 def set_boundary_conditions(k: list[float]):
@@ -77,10 +83,16 @@ def objective_function(k):
                 p_diff_io_gt[i]
                 - (p_avg_inlet - result[result.name == bc]["pressure"].mean())
             )
+            / p_avg_inlet_gt
+            + abs(
+                q_avg_outlet_gt[i] - result[result.name == bc]["flow"].mean()
+            )
+            / q_avg_inlet_gt
             for i, bc in enumerate(outlet_bcs)
         ]
     )
     opt_progress["offset"].append(offset)
+    print(offset)
     return offset
 
 
@@ -92,6 +104,8 @@ optimized_k = optimize.minimize(
     bounds=BOUNDS,
     options={"maxiter": 100},
 ).x
+print("Optimized: ", optimized_k)
+print("Ground truth: ", k_opt)
 
 # Get result for optimized k
 set_boundary_conditions(optimized_k)
@@ -99,7 +113,11 @@ optimized_result = solver.run_simulation()
 
 # Plot optimized results
 webpage.add_heading("Optimized Result")
-webpage.add_plots(solver.get_result_plots(optimized_result))
+webpage.add_plots(
+    solver.get_result_plots(
+        optimized_result[optimized_result.name != "INFLOW"]
+    )
+)
 
 # Plot optimization error
 webpage.add_heading("Optimization Error")
