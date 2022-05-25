@@ -1,5 +1,5 @@
 name: Codechecks
-on: [push]
+on: [push, pull_request]
 jobs:
   flake8:
     runs-on: ubuntu-latest
@@ -54,6 +54,6 @@ jobs:
       - name: Install dependencies
         run: |
           conda install pip
-          pip install mypy
+          pip install mypy types-PyYAML
       - name: Run mypy
         run: mypy .
