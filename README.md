@@ -1,3 +1,7 @@
+<h1 align="center">
+<img src="doc/source/img/logo.png" width="300">
+</h1><br>
+
 # SimVascular's SuperEstimator
 
 A framework for multi-fidelity estimation of boundary condition

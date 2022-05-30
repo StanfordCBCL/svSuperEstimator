@@ -1,6 +1,49 @@
 [build-system]
-requires = ["setuptools >= 40.9.0", "wheel"]
+requires = ["setuptools>=61.0.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "svsuperestimator"
+description = "A framework for multi-fidelity estimation of boundary condition parameters for cardiovascular fluid dynamics simulations."
+keywords = ["parameter estimation", "simulation", "cfd"]
+dependencies = [
+    "numpy",
+    "scipy",
+    "vtk",
+    "plotly",
+    "svzerodsolver @ git+https://github.com/SimVascular/svZeroDSolver.git@master",
+]
+dynamic = ["version", "readme"]
+requires-python = ">=3.9"
+
+[tool.setuptools]
+packages = ["svsuperestimator"]
+
+[tool.setuptools.dynamic]
+version = {attr = "svsuperestimator.VERSION"}
+readme = {file = ["README.md"]}
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=3.8.0",
+    "pytest-cov>=2.3.1",
+    "pytest-mock",
+    "flake8",
+    "flake8-docstrings",
+    "black",
+    "sphinx",
+    "sphinx-autodoc-typehints",
+    "m2r2",
+    "pydata-sphinx-theme",
+    "sphinxcontrib-bibtex",
+    "sphinxcontrib-mermaid",
+    "isort",
+    "mypy",
+    "types-PyYAML",
+]
+
+[project.scripts]
+estimator = "TODO"
 
 [tool.black]
 line-length = 79
