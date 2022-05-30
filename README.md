@@ -8,8 +8,6 @@
 <img src="https://github.com/SimVascular/svSuperEstimator/actions/workflows/documentation.yml/badge.svg"/>
 </p>
 
-# SimVascular's SuperEstimator
-
 A framework for multi-fidelity estimation of boundary condition
 parameters for cardiovascular fluid dynamics simulations.
 
