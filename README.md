@@ -1,10 +1,12 @@
 <h1 align="center">
 <img src="doc/source/img/logo.png" width="300">
-</h1><br>
+</h1>
 
-![codechecks](https://github.com/SimVascular/svSuperEstimator/actions/workflows/codechecks.yml/badge.svg)
-![test](https://github.com/SimVascular/svSuperEstimator/actions/workflows/test.yml/badge.svg)
-![documentation](https://github.com/SimVascular/svSuperEstimator/actions/workflows/documentation.yml/badge.svg)
+<p align="center">
+<img src="https://github.com/SimVascular/svSuperEstimator/actions/workflows/codechecks.yml/badge.svg"/>
+<img src="https://github.com/SimVascular/svSuperEstimator/actions/workflows/test.yml/badge.svg"/>
+<img src="https://github.com/SimVascular/svSuperEstimator/actions/workflows/documentation.yml/badge.svg"/>
+</p>
 
 # SimVascular's SuperEstimator
 
