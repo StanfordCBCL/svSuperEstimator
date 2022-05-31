@@ -13,8 +13,7 @@ parameters for cardiovascular fluid dynamics simulations.
 
 ## Installation
 
-After cloning this repository, svSuperEstimator and all its dependencies can be
-installed easily via pip. Just navigate to the root folder of the repository and enter:
+svSuperEstimator and all its dependencies can be installed via pip:
 
 ```bash
 pip install git+https://github.com/SimVascular/svSuperEstimator.git

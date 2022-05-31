@@ -12,9 +12,16 @@ svSuperEstimator documentation
 `SimVascular <https://simvascular.github.io>`_
 
 An open-source framework for multi-fidelity estimation of boundary condition
-parameters for cardiovascular fluid dynamics simulations
+parameters for cardiovascular fluid dynamics simulations.
 
-See the References :ref:`references`
+Installation
+************
+
+svSuperEstimator and all its dependencies can be installed easily via pip:
+
+.. code-block:: bash
+
+   pip install git+https://github.com/SimVascular/svSuperEstimator.git
 
 .. toctree::
    :maxdepth: 1
