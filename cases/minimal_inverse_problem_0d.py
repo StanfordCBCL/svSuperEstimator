@@ -22,11 +22,21 @@ BOUNDS = [(1e-8, 20), (1e-8, 20), (1e-8, 20), (1e-8, 20)]
 # Setup project, model, solver and webpage
 project = io.SimVascularProject(SIMVASC_FOLDER)
 model = mdl.MultiFidelityModel(project)
-solver = slv.ZeroDSolver(model.zerodmodel)
+solver = slv.ZeroDSolver()
 webpage = io.WebPage("svSuperEstimator")
 
+# Plot 3d model
+webpage.add_heading("Selected Model")
+plot3d = io.Vtk3dPlot(
+    project["3d_mesh"],
+    title="0063_1001",
+    width=500,
+    height=500,
+)
+webpage.add_plots([plot3d])
+
 # Running one simulation to determine ground truth
-ground_truth = solver.run_simulation()
+ground_truth = solver.run_simulation(model.zerodmodel)
 p_avg_inlet_gt = ground_truth.query("name=='INFLOW'")["pressure"].mean()
 q_avg_inlet_gt = ground_truth.query("name=='INFLOW'")["flow"].mean()
 outlet_bcs = {
@@ -73,7 +83,7 @@ def objective_function(k):
     """
 
     set_boundary_conditions(k)
-    result = solver.run_simulation()
+    result = solver.run_simulation(model.zerodmodel)
 
     offset = 0.0
     p_avg_inlet = result.query("name=='INFLOW'")["pressure"].mean()
@@ -109,7 +119,7 @@ print("Ground truth: ", k_opt)
 
 # Get result for optimized k
 set_boundary_conditions(optimized_k)
-optimized_result = solver.run_simulation()
+optimized_result = solver.run_simulation(model.zerodmodel)
 
 # Plot optimized results
 webpage.add_heading("Optimized Result")

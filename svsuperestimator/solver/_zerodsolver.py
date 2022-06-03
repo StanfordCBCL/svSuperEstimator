@@ -19,44 +19,41 @@ class ZeroDSolver:
     using the svZeroDSolver.
     """
 
-    def __init__(self, model: ZeroDModel) -> None:
-        """Create a new ZeroDSolver instance.
+    def __init__(self) -> None:
+        """Create a new ZeroDSolver instance."""
+        pass
+
+    def run_simulation(self, model: ZeroDModel) -> pd.DataFrame:
+        """Run a new 0D solver session using the provided model.
 
         Args:
-            model: 0D model to simulate.
-        """
-        self._model = model
-
-    def run_simulation(self) -> pd.DataFrame:
-        """Run a new 0D solver session using the provided model.
+            model: The model to simulate.
 
         Returns:
             bc_result: The resulting pressure and flow values at the boundary
                 conditions with corresponding timestamps in a pandas dataframe.
         """
 
-        # Extract configuration from model
-        config = self._model.get_svzerodsolver_config()
-
         # Create a temporary directory to perform the simulation in
         with TemporaryDirectory() as tmpdirname:
 
-            # Save configuration file in tempdir and start simulation
-            config_file = os.path.join(tmpdirname, "config.json")
-            with open(config_file, "w") as ff:
-                json.dump(config, ff)
-            solver.set_up_and_run_0d_simulation(config_file)
+            # Make configuration in tempdir and start simulation
+            model.make_configuration(tmpdirname)
+            solver.set_up_and_run_0d_simulation(
+                os.path.join(tmpdirname, "solver_0d.in")
+            )
 
             # Load in branch result (branch result has format
             # [field][branch][branch_node, time_step] with the fiels: flow,
             # pressure, distance, and time.
             branch_result = np.load(
-                os.path.join(tmpdirname, "config_branch_results.npy"),
+                os.path.join(tmpdirname, "solver_0d_branch_results.npy"),
                 allow_pickle=True,
             ).item()
+            with open(os.path.join(tmpdirname, "solver_0d.in")) as ff:
+                config = json.load(ff)
 
         # Format output nicely according to boundary conditions
-
         result = pd.DataFrame(columns=["time", "name", "pressure", "flow"])
         for vessel_data in config["vessels"]:
             if "boundary_conditions" in vessel_data:

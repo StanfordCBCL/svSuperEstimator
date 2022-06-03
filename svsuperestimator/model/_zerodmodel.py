@@ -1,4 +1,6 @@
 """This module holds the ZeroDModel and auxiliary classes."""
+import json
+import os
 from dataclasses import dataclass
 
 import numpy as np
@@ -48,12 +50,14 @@ class ZeroDModel:
                     f"Unknown boundary condition type {bc['bc_type']}."
                 )
 
-    def get_svzerodsolver_config(self) -> dict:
-        """Get the current svZeroDSolver input configurattion.
+    def make_configuration(self, target: str) -> None:
+        """Make the configuration at a specified target.
 
-        Returns:
-            config: Configuration for the svZeroDSolver.
+        Creates all configuration files that are needed for a svZeroDSolver
+        session.
 
+        Args:
+            target: Target folder for the configuration files.
         """
         for bc in self._config["boundary_conditions"]:
             bc_obj = self.boundary_conditions[bc["bc_name"]]
@@ -74,7 +78,9 @@ class ZeroDModel:
                 raise ValueError(
                     f"Unknown boundary condition type {bc['bc_type']}."
                 )
-        return self._config
+        config_file = os.path.join(target, "solver_0d.in")
+        with open(config_file, "w") as ff:
+            json.dump(self._config, ff)
 
 
 class _BoundaryCondition:

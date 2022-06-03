@@ -31,3 +31,7 @@ rom_simulation_config:
 3d_simulation_bct:
   type: path
   path: Simulations/$CASE_NAME$/bct.dat
+
+3d_mesh:
+  type: path
+  path: Meshes/$CASE_NAME$.vtp
