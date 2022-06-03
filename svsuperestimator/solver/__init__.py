@@ -2,6 +2,7 @@
 
 Contains everything related to solving cardiovascular models.
 """
+from ._threedsolver import ThreeDSolver
 from ._zerodsolver import ZeroDSolver
 
-__all__ = ["ZeroDSolver"]
+__all__ = ["ZeroDSolver", "ThreeDSolver"]

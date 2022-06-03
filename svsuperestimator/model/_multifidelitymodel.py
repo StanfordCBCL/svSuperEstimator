@@ -1,6 +1,6 @@
 """This module holds the MultiFidelityModel class."""
 from ..io import SimVascularProject
-from . import ZeroDModel
+from . import ThreeDModel, ZeroDModel
 
 
 class MultiFidelityModel:
@@ -17,3 +17,4 @@ class MultiFidelityModel:
             project: Project object to extract the model parameters from.
         """
         self.zerodmodel = ZeroDModel(project)
+        self.threedmodel = ThreeDModel(project)

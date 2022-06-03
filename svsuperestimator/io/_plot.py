@@ -1,5 +1,6 @@
 """This module holds various plotting classes."""
 from typing import Any
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -23,8 +24,8 @@ class _PlotlyPlot:
     def __init__(self, **kwargs: str) -> None:
         """Create a new _PlotlyPlot instance."""
         self._fig = go.Figure()
-        self._layout = self._DEFAULT_LAYOUT.copy()
-        self.configure(**kwargs)
+        self._layout: dict[str, Any] = self._DEFAULT_LAYOUT.copy()
+        self.configure(**kwargs)  # type: ignore
 
     def to_html(self) -> str:
         """Export plot as an html encoded string.

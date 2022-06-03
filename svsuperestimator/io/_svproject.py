@@ -53,7 +53,26 @@ class SimVascularProject:
                     target = target.replace(regex, repl)
             with open(target) as ff:
                 data = json.load(ff)
-            return data
+        elif self._FILE_REGISTRY[key]["type"] == "plain":
+            target = os.path.join(
+                self._folder, self._FILE_REGISTRY[key]["path"]
+            )
+            if "$" in target:
+                for regex, repl in self._regex.items():
+                    target = target.replace(regex, repl)
+            with open(target) as ff:
+                data = ff.read()
+        elif self._FILE_REGISTRY[key]["type"] == "path":
+            target = self._FILE_REGISTRY[key]["path"]
+            if "$" in target:
+                for regex, repl in self._regex.items():
+                    target = target.replace(regex, repl)
+            data = os.path.join(self._folder, target)
+        else:
+            raise IndexError(
+                f"Specified element {key} doesn't support reading."
+            )
+        return data
 
     def __setitem__(self, key: str, data: Any) -> None:
         """Set data specified by a key.
@@ -77,3 +96,16 @@ class SimVascularProject:
             with open(target, "w") as ff:
                 json.dump(data, ff, indent=4)
             return data
+        elif self._FILE_REGISTRY[key]["type"] == "plain":
+            target = os.path.join(
+                self._folder, self._FILE_REGISTRY[key]["path"]
+            )
+            if "$" in target:
+                for regex, repl in self._regex.items():
+                    target = target.replace(regex, repl)
+            with open(target, "w") as ff:
+                ff.write(data)
+        else:
+            raise IndexError(
+                f"Specified element {key} doesn't support setting."
+            )

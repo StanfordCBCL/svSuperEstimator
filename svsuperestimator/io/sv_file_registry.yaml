@@ -11,3 +11,23 @@
 rom_simulation_config:
   type: json
   path: ROMSimulations/$CASE_NAME$/solver_0d.in
+
+3d_simulation_input:
+  type: path
+  path: Simulations/$CASE_NAME$/solver.inp
+
+3d_simulation_geombc:
+  type: path
+  path: Simulations/$CASE_NAME$/geombc.dat.1
+
+3d_simulation_restart:
+  type: path
+  path: Simulations/$CASE_NAME$/restart.0.1
+
+3d_simulation_numstart:
+  type: path
+  path: Simulations/$CASE_NAME$/numstart.dat
+
+3d_simulation_bct:
+  type: path
+  path: Simulations/$CASE_NAME$/bct.dat
