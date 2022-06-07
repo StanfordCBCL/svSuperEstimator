@@ -136,11 +136,12 @@ class TablePlot(_PlotlyPlot):
 class Vtk3dPlot(_PlotlyPlot):
     """3d plot from vtk file."""
 
-    def __init__(self, filename: str, **kwargs: str):
+    def __init__(self, filename: str, color: str = None, **kwargs: str):
         """Create a new Vtk3dPlot instance.
 
         Args:
             filename: Name of the vtk file to plot.
+            color: Color of the mesh.
         """
         super().__init__(**kwargs)
 
@@ -163,8 +164,11 @@ class Vtk3dPlot(_PlotlyPlot):
         x, y, z = points[:, 0], points[:, 1], points[:, 2]
         i, j, k = cells[:, 1], cells[:, 2], cells[:, 3]
 
+        mesh_args = {}
+        if color is not None:
+            mesh_args["color"] = color
         self._fig = go.Figure(
-            data=[go.Mesh3d(x=x, y=y, z=z, i=i, j=j, k=k)],
+            data=[go.Mesh3d(x=x, y=y, z=z, i=i, j=j, k=k, **mesh_args)],
         )
         self._fig.update_scenes(
             xaxis_visible=False, yaxis_visible=False, zaxis_visible=False

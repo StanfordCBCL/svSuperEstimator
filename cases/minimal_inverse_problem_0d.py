@@ -32,6 +32,7 @@ plot3d = io.Vtk3dPlot(
     title="0063_1001",
     width=500,
     height=500,
+    color="darkred",
 )
 webpage.add_plots([plot3d])
 
@@ -112,7 +113,6 @@ optimized_k = optimize.minimize(
     K_START,
     method="Nelder-Mead",
     bounds=BOUNDS,
-    options={"maxiter": 100},
 ).x
 print("Optimized: ", optimized_k)
 print("Ground truth: ", k_opt)
