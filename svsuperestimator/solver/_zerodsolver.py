@@ -1,7 +1,6 @@
 """This module holds the ZeroDSolver class."""
-import json
+import orjson  # Faster than json
 import os
-import re
 from tempfile import TemporaryDirectory
 from subprocess import call
 
@@ -69,13 +68,19 @@ class ZeroDSolver:
         with TemporaryDirectory() as tmpdir:
             infile = os.path.join(tmpdir, "input.json")
             outfile = os.path.join(tmpdir, "output.csv")
-            with open(infile, "w") as ff:
-                json.dump(config, ff)
+            with open(infile, "wb") as ff:
+                ff.write(
+                    orjson.dumps(
+                        config,
+                        option=orjson.OPT_NAIVE_UTC
+                        | orjson.OPT_SERIALIZE_NUMPY,
+                    )
+                )
             call(
                 args=[exec, infile, outfile],
                 cwd=tmpdir,
             )
-            branch_result = pd.read_csv(outfile)
+            branch_result = pd.read_csv(outfile, engine="pyarrow")
         return branch_result
 
     def run_simulation(self, model: ZeroDModel) -> pd.DataFrame:

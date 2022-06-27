@@ -20,6 +20,7 @@ class SimVascularProject:
         self._regex: dict[str, str] = {
             "$CASE_NAME$": os.path.basename(self._folder)
         }
+        self.name = os.path.basename(folder)
 
         # Read file registry
         with open(

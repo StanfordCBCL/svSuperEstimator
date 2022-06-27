@@ -131,18 +131,20 @@ class LinePlotWithUpperLower(_PlotlyPlot):
         """
         super().__init__(**kwargs)
 
+        # print(pio.templates["plotly_dark"])
+        # colors= [#636efa, #EF553B, #00cc96, #ab63fa, #FFA15A, #19d3f3, #FF6692, #B6E880, #FF97FF, #FECB52],
+
         self._fig.add_trace(
             go.Scatter(
                 name="Mean",
                 x=dataframe_mean[x],
                 y=dataframe_mean[y],
                 mode="lines",
-                showlegend=False,
             )
         )
         self._fig.add_trace(
             go.Scatter(
-                name="Upper Bound",
+                name="Upper",
                 x=dataframe_upper[x],
                 y=dataframe_upper[y],
                 mode="lines",
@@ -153,7 +155,8 @@ class LinePlotWithUpperLower(_PlotlyPlot):
         )
         self._fig.add_trace(
             go.Scatter(
-                name="Lower Bound",
+                name="Standard Deviation",
+                hovertemplate="%{y}<extra>Lower</extra>",
                 x=dataframe_lower[x],
                 y=dataframe_lower[y],
                 marker=dict(color="#444"),
@@ -161,11 +164,80 @@ class LinePlotWithUpperLower(_PlotlyPlot):
                 mode="lines",
                 fillcolor="rgba(99, 110, 250, 0.25)",
                 fill="tonexty",
-                showlegend=False,
             )
         )
         self._fig.update_layout(
             hovermode="x",
+        )
+
+    def add_trace(
+        self,
+        dataframe: pd.DataFrame,
+        x: str = None,
+        y: str = None,
+        name=None,
+    ):
+        self._fig.add_trace(
+            go.Scatter(
+                name=name,
+                x=dataframe[x],
+                y=dataframe[y],
+                mode="lines",
+                line=dict(color="#FFA15A", dash="dash"),
+            )
+        )
+
+
+class ViolinPlot(_PlotlyPlot):
+    """Violin plot."""
+
+    def __init__(
+        self,
+        dataframe: pd.DataFrame,
+        x: str = None,
+        y: str = None,
+        color: str = None,
+        **kwargs: str,
+    ) -> None:
+        """Create a new ViolinPlot instance.
+
+        Args:
+            dataframe: The dataframe to plot.
+            x: Label of the dataframe to use for the x-axis.
+            y: Label of the dataframe to use for the y-axis.
+            color: Label of the dataframe to use for the color.
+        """
+        super().__init__(**kwargs)
+        for col in dataframe.columns:
+            self._fig.add_trace(
+                go.Violin(
+                    y=dataframe[col],
+                    name=col,
+                    points="all",
+                    jitter=0.05,
+                    box_visible=True,
+                    meanline_visible=True,
+                )
+            )
+
+    def add_lines(
+        self,
+        x: list[str],
+        y: list[float],
+        name=None,
+    ):
+        self._fig.add_trace(
+            go.Scatter(
+                x=x,
+                y=y,
+                mode="markers",
+                marker_symbol=41,
+                marker_line_color="#FFA15A",
+                marker_color="#FFA15A",
+                marker_line_width=2,
+                marker_size=40,
+                name=name,
+            )
         )
 
 

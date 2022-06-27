@@ -13,6 +13,8 @@ dependencies = [
     "plotly",
     "pandas",
     "pyyaml",
+    "orjson", # Faster than json
+    "pyarrow", # For faster csv reading
     "svzerodsolver @ git+https://github.com/SimVascular/svZeroDSolver.git@master",
 ]
 dynamic = ["version", "readme"]
@@ -45,7 +47,7 @@ dev = [
 ]
 
 [project.scripts]
-estimator = "TODO"
+estimator = "cases.bc_optim_noise:main"
 
 [tool.black]
 line-length = 79

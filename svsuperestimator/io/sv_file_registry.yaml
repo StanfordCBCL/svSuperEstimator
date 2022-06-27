@@ -12,6 +12,10 @@ rom_simulation_config:
   type: json
   path: ROMSimulations/$CASE_NAME$/solver_0d.in
 
+rom_optimization_folder:
+  type: path
+  path: ROMSimulations/$CASE_NAME$/optim
+
 3d_simulation_input:
   type: path
   path: Simulations/$CASE_NAME$/solver.inp
