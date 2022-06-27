@@ -50,7 +50,12 @@ class ZeroDModel:
                     f"Unknown boundary condition type {bc['bc_type']}."
                 )
 
-    def make_configuration(self, target: str) -> None:
+    def make_configuration(
+        self,
+        target: str = None,
+        num_cardiac_cycles=None,
+        pts_per_cycle=None,
+    ) -> None:
         """Make the configuration at a specified target.
 
         Creates all configuration files that are needed for a svZeroDSolver
@@ -59,7 +64,16 @@ class ZeroDModel:
         Args:
             target: Target folder for the configuration files.
         """
-        for bc in self._config["boundary_conditions"]:
+        config = self._config.copy()
+        if num_cardiac_cycles is not None:
+            config["simulation_parameters"][
+                "number_of_cardiac_cycles"
+            ] = num_cardiac_cycles
+        if pts_per_cycle is not None:
+            config["simulation_parameters"][
+                "number_of_time_pts_per_cardiac_cycle"
+            ] = pts_per_cycle
+        for bc in config["boundary_conditions"]:
             bc_obj = self.boundary_conditions[bc["bc_name"]]
             if isinstance(bc_obj, _FlowBoundaryCondition):
                 bc["bc_values"].update(
@@ -78,9 +92,11 @@ class ZeroDModel:
                 raise ValueError(
                     f"Unknown boundary condition type {bc['bc_type']}."
                 )
-        config_file = os.path.join(target, "solver_0d.in")
-        with open(config_file, "w") as ff:
-            json.dump(self._config, ff)
+        if target is not None:
+            config_file = os.path.join(target, "solver_0d.in")
+            with open(config_file, "w") as ff:
+                json.dump(config, ff)
+        return config
 
 
 class _BoundaryCondition:

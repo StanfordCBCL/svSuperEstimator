@@ -12,6 +12,7 @@ dependencies = [
     "vtk",
     "plotly",
     "pandas",
+    "pyyaml",
     "svzerodsolver @ git+https://github.com/SimVascular/svZeroDSolver.git@master",
 ]
 dynamic = ["version", "readme"]

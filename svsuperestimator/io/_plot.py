@@ -2,6 +2,7 @@
 from typing import Any
 
 import pandas as pd
+import os
 import plotly.express as px
 import plotly.graph_objects as go
 import vtk
@@ -144,6 +145,11 @@ class Vtk3dPlot(_PlotlyPlot):
             color: Color of the mesh.
         """
         super().__init__(**kwargs)
+
+        if not os.path.exists(filename):
+            raise FileNotFoundError(
+                f"Could not plot {filename}. The specified file does not exist."
+            )
 
         camera = dict(eye=dict(x=2, y=2, z=0.1))
 

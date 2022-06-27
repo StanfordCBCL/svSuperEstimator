@@ -35,3 +35,7 @@ rom_simulation_config:
 3d_mesh:
   type: path
   path: Meshes/$CASE_NAME$.vtp
+
+centerline:
+  type: path
+  path: ROMSimulations/$CASE_NAME$/centerlines.vtp

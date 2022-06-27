@@ -4,15 +4,11 @@ import os
 from typing import Any
 
 import yaml
+from pathlib import Path
 
 
 class SimVascularProject:
     """Class handling the SimVascular project folder."""
-
-    with open(
-        os.path.join(os.path.dirname(__file__), "sv_file_registry.yaml")
-    ) as ff:
-        _FILE_REGISTRY = yaml.full_load(ff)
 
     def __init__(self, folder: str) -> None:
         """Create a new SimVascular project instance from a folder.
@@ -20,16 +16,16 @@ class SimVascularProject:
         Args:
             folder: SimVascular project folder.
         """
-        # Check if folder exists
-        if not os.path.exists(os.path.join(folder, ".svproj")):
-            raise ValueError(
-                f"Specified directory '{folder}' is not a valid SimVascular "
-                "project folder."
-            )
         self._folder = os.path.abspath(folder)
         self._regex: dict[str, str] = {
             "$CASE_NAME$": os.path.basename(self._folder)
         }
+
+        # Read file registry
+        with open(
+            os.path.join(os.path.dirname(__file__), "sv_file_registry.yaml")
+        ) as ff:
+            self._file_registry = yaml.full_load(ff)
 
     def __getitem__(self, key: str) -> Any:
         """Get data specified by a key.
@@ -42,28 +38,28 @@ class SimVascularProject:
         Args:
             key: The index of the data element.
         """
-        if key not in self._FILE_REGISTRY:
+        if key not in self._file_registry:
             raise KeyError(f"Unknown key: {key}")
-        elif self._FILE_REGISTRY[key]["type"] == "json":
+        elif self._file_registry[key]["type"] == "json":
             target = os.path.join(
-                self._folder, self._FILE_REGISTRY[key]["path"]
+                self._folder, self._file_registry[key]["path"]
             )
             if "$" in target:
                 for regex, repl in self._regex.items():
                     target = target.replace(regex, repl)
             with open(target) as ff:
                 data = json.load(ff)
-        elif self._FILE_REGISTRY[key]["type"] == "plain":
+        elif self._file_registry[key]["type"] == "plain":
             target = os.path.join(
-                self._folder, self._FILE_REGISTRY[key]["path"]
+                self._folder, self._file_registry[key]["path"]
             )
             if "$" in target:
                 for regex, repl in self._regex.items():
                     target = target.replace(regex, repl)
             with open(target) as ff:
                 data = ff.read()
-        elif self._FILE_REGISTRY[key]["type"] == "path":
-            target = self._FILE_REGISTRY[key]["path"]
+        elif self._file_registry[key]["type"] == "path":
+            target = self._file_registry[key]["path"]
             if "$" in target:
                 for regex, repl in self._regex.items():
                     target = target.replace(regex, repl)
@@ -86,9 +82,9 @@ class SimVascularProject:
             key: The index of the data element.
             data: The data to set.
         """
-        if key not in self._FILE_REGISTRY:
+        if key not in self._file_registry:
             raise KeyError(f"Unknown key: {key}")
-        elif self._FILE_REGISTRY[key]["type"] == "json":
+        elif self._file_registry[key]["type"] == "json":
             target = os.path.join(self._folder, key)
             if "$" in target:
                 for regex, repl in self._regex.items():
@@ -96,9 +92,9 @@ class SimVascularProject:
             with open(target, "w") as ff:
                 json.dump(data, ff, indent=4)
             return data
-        elif self._FILE_REGISTRY[key]["type"] == "plain":
+        elif self._file_registry[key]["type"] == "plain":
             target = os.path.join(
-                self._folder, self._FILE_REGISTRY[key]["path"]
+                self._folder, self._file_registry[key]["path"]
             )
             if "$" in target:
                 for regex, repl in self._regex.items():
