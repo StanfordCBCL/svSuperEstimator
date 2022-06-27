@@ -7,6 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import vtk
 from vtk.util.numpy_support import vtk_to_numpy
+import plotly.io as pio
 
 
 class _PlotlyPlot:
@@ -26,6 +27,7 @@ class _PlotlyPlot:
         """Create a new _PlotlyPlot instance."""
         self._fig = go.Figure()
         self._layout: dict[str, Any] = self._DEFAULT_LAYOUT.copy()
+        self._fig.update_layout(**self._layout)
         self.configure(**kwargs)  # type: ignore
 
     def to_html(self) -> str:
@@ -104,6 +106,67 @@ class LinePlot(_PlotlyPlot):
         """
         super().__init__(**kwargs)
         self._fig = px.line(dataframe, x=x, y=y, color=color)
+
+
+class LinePlotWithUpperLower(_PlotlyPlot):
+    """Line plot with error bars between upper and lower."""
+
+    def __init__(
+        self,
+        dataframe_mean: pd.DataFrame,
+        dataframe_upper: pd.DataFrame,
+        dataframe_lower: pd.DataFrame,
+        x: str = None,
+        y: str = None,
+        **kwargs: str,
+    ) -> None:
+        """Create a new LinePlotWithUpperLower instance.
+
+        Args:
+            dataframe_mean: The dataframe for the center line.
+            dataframe_upper: The dataframe for the upper line.
+            dataframe_lower: The dataframe for the lower line.
+            x: Label of the dataframe to use for the x-axis.
+            y: Label of the dataframe to use for the y-axis.
+        """
+        super().__init__(**kwargs)
+
+        self._fig.add_trace(
+            go.Scatter(
+                name="Mean",
+                x=dataframe_mean[x],
+                y=dataframe_mean[y],
+                mode="lines",
+                showlegend=False,
+            )
+        )
+        self._fig.add_trace(
+            go.Scatter(
+                name="Upper Bound",
+                x=dataframe_upper[x],
+                y=dataframe_upper[y],
+                mode="lines",
+                marker=dict(color="#444"),
+                line=dict(width=0),
+                showlegend=False,
+            )
+        )
+        self._fig.add_trace(
+            go.Scatter(
+                name="Lower Bound",
+                x=dataframe_lower[x],
+                y=dataframe_lower[y],
+                marker=dict(color="#444"),
+                line=dict(width=0),
+                mode="lines",
+                fillcolor="rgba(99, 110, 250, 0.25)",
+                fill="tonexty",
+                showlegend=False,
+            )
+        )
+        self._fig.update_layout(
+            hovermode="x",
+        )
 
 
 class TablePlot(_PlotlyPlot):
