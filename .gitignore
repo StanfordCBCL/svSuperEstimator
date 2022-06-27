@@ -18,3 +18,4 @@ tmp*
 dashboard
 *.prof
 public/
+*.in

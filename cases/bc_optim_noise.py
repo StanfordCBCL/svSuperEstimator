@@ -13,6 +13,7 @@ import click
 from svsuperestimator import io
 from svsuperestimator import model as mdl
 from svsuperestimator import solver as slv
+import shutil
 
 import numpy as np
 import os
@@ -20,20 +21,7 @@ import os
 start = time.time()
 
 
-@click.command()
-@click.option(
-    "--svproject",
-    help="Path to SimVascular project folder.",
-    required=True,
-    type=str,
-)
-@click.option(
-    "--num_samples",
-    help="Number of samples from target distribution.",
-    type=int,
-    default=10,
-)
-def main(svproject, num_samples):
+def run(svproject, num_samples):
 
     # Setup project, model, solver and webpage
     project = io.SimVascularProject(svproject)
@@ -41,7 +29,9 @@ def main(svproject, num_samples):
     solver = slv.ZeroDSolver()
     webpage = io.WebPage("svSuperEstimator")
 
-    os.mkdir(project["rom_optimization_folder"])
+    if os.path.exists(project["rom_optimization_folder"]):
+        shutil.rmtree(project["rom_optimization_folder"])
+    os.makedirs(project["rom_optimization_folder"])
 
     # Plot 3d model
     try:
@@ -106,8 +96,11 @@ def main(svproject, num_samples):
     pd.DataFrame([list(q_target)], columns=list(outlet_bcs.keys()),).to_csv(
         os.path.join(project["rom_optimization_folder"], "flow_target.csv")
     )
+    q_norm_factor = 1.0 / abs(q_target.min() - q_target.max())
 
-    p_target = np.array(
+    p_target = target[target.name == bc_map["INFLOW"]["name"]][
+        bc_map["INFLOW"]["pressure"]
+    ].mean() - np.array(
         [
             target[target.name == bc_map[bc]["name"]][
                 bc_map[bc]["pressure"]
@@ -118,6 +111,7 @@ def main(svproject, num_samples):
     pd.DataFrame([list(p_target)], columns=list(outlet_bcs.keys()),).to_csv(
         os.path.join(project["rom_optimization_folder"], "pressure_target.csv")
     )
+    p_norm_factor = 1.0 / np.mean(p_target)
 
     k_opt = [
         bc.resistance_distal / bc.resistance_proximal
@@ -186,19 +180,24 @@ def main(svproject, num_samples):
         set_boundary_conditions(k)
         result = solver.run_simulation(model.zerodmodel)
 
+        p_inflow = result[result.name == bc_map["INFLOW"]["name"]][
+            bc_map["INFLOW"]["pressure"]
+        ].mean()
+
         offset = sum(
             [
                 abs(
                     (
                         p_target_noisy[i]
                         - (
-                            result[result.name == bc_map[bc]["name"]][
+                            p_inflow
+                            - result[result.name == bc_map[bc]["name"]][
                                 bc_map[bc]["pressure"]
                             ].mean()
                         )
                     )
-                    / p_target_noisy[i]
                 )
+                * p_norm_factor
                 + abs(
                     (
                         q_target_noisy[i]
@@ -206,12 +205,11 @@ def main(svproject, num_samples):
                             bc_map[bc]["flow"]
                         ].mean()
                     )
-                    / q_target_noisy[i]
                 )
+                * q_norm_factor
                 for i, bc in enumerate(outlet_bcs)
             ]
         )
-        # print(offset)
         return offset
 
     # Run optimization
@@ -227,13 +225,11 @@ def main(svproject, num_samples):
     for i in range(num_samples):
 
         p_target_noisy = (
-            p_target + np.random.randn(len(p_target)) * p_target / 20.0
+            p_target + np.random.randn(len(p_target)) * np.mean(p_target) / 5.0
         )
         q_target_noisy = (
-            q_target + np.random.randn(len(q_target)) * q_target / 20.0
+            q_target + np.random.randn(len(q_target)) * np.mean(q_target) / 5.0
         )
-        print("Pressure target: ", p_target_noisy)
-        print("Flow target: ", q_target_noisy)
 
         optimized_k = optimize.minimize(
             fun=lambda l: objective_function(
@@ -249,8 +245,6 @@ def main(svproject, num_samples):
         set_boundary_conditions(optimized_k)
         optimized_result = solver.run_simulation(model.zerodmodel)
         optimized_result["noise_iteration"] = [i] * len(optimized_result)
-
-        print("Optimized k: ", optimized_k)
 
         frames.append(optimized_result)
         optimized_ks = pd.concat(
@@ -341,7 +335,7 @@ def main(svproject, num_samples):
 
     q_target_plot = io.ViolinPlot(
         q_targets * 3.6,  # Convert cm^3/s to l/h
-        title="Flow",
+        title="Flow out",
         ylabel=r"$\frac{l}{h}$",
     )
     q_target_plot.add_lines(
@@ -349,7 +343,7 @@ def main(svproject, num_samples):
     )
     p_target_plot = io.ViolinPlot(
         p_targets * 0.00075006156130264,  # Convert g/(cm s^2) to mmHg
-        title="Pressure",
+        title="Pressure drop to inflow",
         ylabel=r"$mmHg$",
     )
     p_target_plot.add_lines(
@@ -378,3 +372,20 @@ def main(svproject, num_samples):
 
     # Build webpage
     webpage.build(project["rom_optimization_folder"])
+
+
+@click.command()
+@click.option(
+    "--svproject",
+    help="Path to SimVascular project folder.",
+    required=True,
+    type=str,
+)
+@click.option(
+    "--num_samples",
+    help="Number of samples from target distribution.",
+    type=int,
+    default=10,
+)
+def main(svproject, num_samples):
+    run(svproject, num_samples)
