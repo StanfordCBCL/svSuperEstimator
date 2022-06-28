@@ -29,9 +29,8 @@ def run(svproject, num_samples):
     solver = slv.ZeroDSolver()
     webpage = io.WebPage("svSuperEstimator")
 
-    if os.path.exists(project["rom_optimization_folder"]):
-        shutil.rmtree(project["rom_optimization_folder"])
-    os.makedirs(project["rom_optimization_folder"])
+    if not os.path.exists(project["rom_optimization_folder"]):
+        os.makedirs(project["rom_optimization_folder"])
 
     # Plot 3d model
     try:
@@ -96,7 +95,7 @@ def run(svproject, num_samples):
     pd.DataFrame([list(q_target)], columns=list(outlet_bcs.keys()),).to_csv(
         os.path.join(project["rom_optimization_folder"], "flow_target.csv")
     )
-    q_norm_factor = 1.0 / abs(q_target.min() - q_target.max())
+    q_norm_factor = 1.0 / ((q_target.min() - q_target.max()) ** 2)
 
     p_target = target[target.name == bc_map["INFLOW"]["name"]][
         bc_map["INFLOW"]["pressure"]
@@ -111,7 +110,7 @@ def run(svproject, num_samples):
     pd.DataFrame([list(p_target)], columns=list(outlet_bcs.keys()),).to_csv(
         os.path.join(project["rom_optimization_folder"], "pressure_target.csv")
     )
-    p_norm_factor = 1.0 / np.mean(p_target)
+    p_norm_factor = 1.0 / (np.mean(p_target) ** 2)
 
     k_opt = [
         bc.resistance_distal / bc.resistance_proximal
@@ -170,7 +169,7 @@ def run(svproject, num_samples):
             bc.resistance_proximal = r_ii * 1 / (1.0 + ki)
             bc.resistance_distal = r_ii * ki / (1.0 + ki)
 
-    def objective_function(k, p_target_noisy, q_target_noisy):
+    def objective_function(k, p_target_noisy, q_target_noisy, offsets):
         """Objective function for the optimization.
 
         Evaluates the sum of the offset for the input output pressure relation for
@@ -178,15 +177,20 @@ def run(svproject, num_samples):
         """
 
         set_boundary_conditions(k)
-        result = solver.run_simulation(model.zerodmodel)
+
+        try:
+            result = solver.run_simulation(model.zerodmodel)
+        except FileNotFoundError:
+            offsets.append(None)
+            return np.inf
 
         p_inflow = result[result.name == bc_map["INFLOW"]["name"]][
             bc_map["INFLOW"]["pressure"]
         ].mean()
 
-        offset = sum(
-            [
-                abs(
+        offset = np.sqrt(
+            sum(
+                [
                     (
                         p_target_noisy[i]
                         - (
@@ -196,20 +200,21 @@ def run(svproject, num_samples):
                             ].mean()
                         )
                     )
-                )
-                * p_norm_factor
-                + abs(
-                    (
+                    ** 2
+                    * p_norm_factor
+                    + (
                         q_target_noisy[i]
                         - result[result.name == bc_map[bc]["name"]][
                             bc_map[bc]["flow"]
                         ].mean()
                     )
-                )
-                * q_norm_factor
-                for i, bc in enumerate(outlet_bcs)
-            ]
+                    ** 2
+                    * q_norm_factor
+                    for i, bc in enumerate(outlet_bcs)
+                ]
+            )
         )
+        offsets.append(offset)
         return offset
 
     # Run optimization
@@ -217,34 +222,38 @@ def run(svproject, num_samples):
     optimized_ks = pd.DataFrame(columns=list(outlet_bcs.keys()))
     p_targets = pd.DataFrame(columns=list(outlet_bcs.keys()))
     q_targets = pd.DataFrame(columns=list(outlet_bcs.keys()))
+    offsets = []
 
     np.random.seed(0)
 
     k_start = [10.0] * len(outlet_bcs)
-    bounds = [(1e-8, 20)] * len(outlet_bcs)
     for i in range(num_samples):
+        print("Generating sample: ", i + 1, "/", num_samples)
 
         p_target_noisy = (
-            p_target + np.random.randn(len(p_target)) * np.mean(p_target) / 5.0
+            p_target + np.random.randn(len(p_target)) * p_target / 10.0
         )
         q_target_noisy = (
-            q_target + np.random.randn(len(q_target)) * np.mean(q_target) / 5.0
+            q_target + np.random.randn(len(q_target)) * q_target / 10.0
         )
-
+        offset = []
         optimized_k = optimize.minimize(
             fun=lambda l: objective_function(
-                l, p_target_noisy, q_target_noisy
+                l, p_target_noisy, q_target_noisy, offset
             ),
             x0=k_start,
             method="Nelder-Mead",
-            bounds=bounds,
-            tol=1e-3,
-            options={"maxiter": 100},
+            options={"maxiter": 200},
         ).x
 
         set_boundary_conditions(optimized_k)
         optimized_result = solver.run_simulation(model.zerodmodel)
-        optimized_result["noise_iteration"] = [i] * len(optimized_result)
+        offsets.append(
+            pd.DataFrame(
+                [[j, o] for j, o in enumerate(offset)],
+                columns=["iteration", "offset"],
+            ),
+        )
 
         frames.append(optimized_result)
         optimized_ks = pd.concat(
@@ -331,6 +340,19 @@ def run(svproject, num_samples):
                 )
             )
 
+    offset_plot = io.LinePlot(
+        offsets[0],
+        x="iteration",
+        y="offset",
+        title="Error over iteration",
+    )
+    for i in range(1, len(offsets)):
+        offset_plot.add_trace(
+            offsets[i],
+            x="iteration",
+            y="offset",
+        )
+
     webpage.add_heading("Random optimization targets")
 
     q_target_plot = io.ViolinPlot(
@@ -358,17 +380,18 @@ def run(svproject, num_samples):
         ]
     )
 
-    webpage.add_heading("Optimized distal to proximal resistance ratio")
+    webpage.add_heading("Optimization details")
     k_plot = io.ViolinPlot(
         optimized_ks,
         ylabel=r"$\frac{R_d}{R_p}$",
+        title="Optimized distal to proximal resistance ratio",
     )
     k_plot.add_lines(
         list(outlet_bcs.keys()),
         k_opt,
         name="Ground Truth",
     )
-    webpage.add_plots([k_plot])
+    webpage.add_plots([k_plot, offset_plot])
 
     # Build webpage
     webpage.build(project["rom_optimization_folder"])

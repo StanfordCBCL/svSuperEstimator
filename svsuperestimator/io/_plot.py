@@ -93,6 +93,7 @@ class LinePlot(_PlotlyPlot):
         dataframe: pd.DataFrame,
         x: str = None,
         y: str = None,
+        name: str = None,
         color: str = None,
         **kwargs: str,
     ) -> None:
@@ -105,7 +106,34 @@ class LinePlot(_PlotlyPlot):
             color: Label of the dataframe to use for the color.
         """
         super().__init__(**kwargs)
-        self._fig = px.line(dataframe, x=x, y=y, color=color)
+        self._fig.add_trace(
+            go.Scatter(
+                name=name,
+                x=dataframe[x],
+                y=dataframe[y],
+                mode="lines",
+                line=dict(color="rgba(99, 110, 250, 0.5)"),
+                showlegend=False,
+            )
+        )
+
+    def add_trace(
+        self,
+        dataframe: pd.DataFrame,
+        x: str = None,
+        y: str = None,
+        name=None,
+    ):
+        self._fig.add_trace(
+            go.Scatter(
+                name=name,
+                x=dataframe[x],
+                y=dataframe[y],
+                mode="lines",
+                line=dict(color="rgba(99, 110, 250, 0.5)"),
+                showlegend=False,
+            )
+        )
 
 
 class LinePlotWithUpperLower(_PlotlyPlot):
