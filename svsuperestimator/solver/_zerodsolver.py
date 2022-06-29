@@ -64,7 +64,7 @@ class ZeroDSolver:
         return result
 
     @staticmethod
-    def _call_solver_cpp(config, exec):
+    def _call_solver_cpp(config, exec, mean=False):
         with TemporaryDirectory() as tmpdir:
             infile = os.path.join(tmpdir, "input.json")
             outfile = os.path.join(tmpdir, "output.csv")
@@ -76,14 +76,20 @@ class ZeroDSolver:
                         | orjson.OPT_SERIALIZE_NUMPY,
                     )
                 )
-            call(
-                args=[exec, infile, outfile],
-                cwd=tmpdir,
-            )
+            if mean:
+                call(
+                    args=[exec, infile, outfile, "mean"],
+                    cwd=tmpdir,
+                )
+            else:
+                call(
+                    args=[exec, infile, outfile],
+                    cwd=tmpdir,
+                )
             branch_result = pd.read_csv(outfile, engine="pyarrow")
         return branch_result
 
-    def run_simulation(self, model: ZeroDModel) -> pd.DataFrame:
+    def run_simulation(self, model: ZeroDModel, mean=False) -> pd.DataFrame:
         """Run a new 0D solver session using the provided model.
 
         Args:
@@ -96,10 +102,12 @@ class ZeroDSolver:
 
         # Start simulation
         config = model.make_configuration(
-            num_cardiac_cycles=5, pts_per_cycle=50
+            num_cardiac_cycles=5, pts_per_cycle=25
         )
         branch_result = self._call_solver_cpp(
-            config, "/Users/stanford/svZeroDSolver/Release/svzerodsolver"
+            config,
+            "/Users/stanford/svZeroDSolver/Release/svzerodsolver",
+            mean,
         )
         # branch_result = self._call_solver_python(config)
 

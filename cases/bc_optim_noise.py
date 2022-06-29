@@ -13,15 +13,14 @@ import click
 from svsuperestimator import io
 from svsuperestimator import model as mdl
 from svsuperestimator import solver as slv
-import shutil
+from scipy import stats
 
 import numpy as np
 import os
 
-start = time.time()
-
 
 def run(svproject, num_samples):
+    start = time.time()
 
     # Setup project, model, solver and webpage
     project = io.SimVascularProject(svproject)
@@ -68,7 +67,7 @@ def run(svproject, num_samples):
     def format_result(result: pd.DataFrame):
         result = result.replace(rename_map)
         for i in to_drop:
-            result = result[mean.name != i]
+            result = result[result.name != i]
         result.flow_out *= 3.6  # Convert cm^3/s to l/h
         result.pressure_out *= (
             0.00075006156130264  # Convert g/(cm s^2) to mmHg
@@ -169,7 +168,9 @@ def run(svproject, num_samples):
             bc.resistance_proximal = r_ii * 1 / (1.0 + ki)
             bc.resistance_distal = r_ii * ki / (1.0 + ki)
 
-    def objective_function(k, p_target_noisy, q_target_noisy, offsets):
+    def objective_function(
+        k, p_target_noisy, q_target_noisy, offsets, sample_id
+    ):
         """Objective function for the optimization.
 
         Evaluates the sum of the offset for the input output pressure relation for
@@ -178,15 +179,11 @@ def run(svproject, num_samples):
 
         set_boundary_conditions(k)
 
-        try:
-            result = solver.run_simulation(model.zerodmodel)
-        except FileNotFoundError:
-            offsets.append(None)
-            return np.inf
+        result = solver.run_simulation(model.zerodmodel, True)
 
         p_inflow = result[result.name == bc_map["INFLOW"]["name"]][
             bc_map["INFLOW"]["pressure"]
-        ].mean()
+        ].iloc[0]
 
         offset = np.sqrt(
             sum(
@@ -197,7 +194,7 @@ def run(svproject, num_samples):
                             p_inflow
                             - result[result.name == bc_map[bc]["name"]][
                                 bc_map[bc]["pressure"]
-                            ].mean()
+                            ].iloc[0]
                         )
                     )
                     ** 2
@@ -206,13 +203,16 @@ def run(svproject, num_samples):
                         q_target_noisy[i]
                         - result[result.name == bc_map[bc]["name"]][
                             bc_map[bc]["flow"]
-                        ].mean()
+                        ].iloc[0]
                     )
                     ** 2
                     * q_norm_factor
                     for i, bc in enumerate(outlet_bcs)
                 ]
             )
+        )
+        print(
+            f"Model: {project.name} | Sample: {sample_id:5.0f} | Iteration: {len(offsets):5.0f} | Offset: {offset}"
         )
         offsets.append(offset)
         return offset
@@ -227,8 +227,8 @@ def run(svproject, num_samples):
     np.random.seed(0)
 
     k_start = [10.0] * len(outlet_bcs)
+    bounds = [(0.1, 100)] * len(outlet_bcs)
     for i in range(num_samples):
-        print("Generating sample: ", i + 1, "/", num_samples)
 
         p_target_noisy = (
             p_target + np.random.randn(len(p_target)) * p_target / 10.0
@@ -239,10 +239,11 @@ def run(svproject, num_samples):
         offset = []
         optimized_k = optimize.minimize(
             fun=lambda l: objective_function(
-                l, p_target_noisy, q_target_noisy, offset
+                l, p_target_noisy, q_target_noisy, offset, i + 1
             ),
             x0=k_start,
             method="Nelder-Mead",
+            bounds=bounds,
             options={"maxiter": 200},
         ).x
 
@@ -263,7 +264,8 @@ def run(svproject, num_samples):
                     [list(optimized_k)],
                     columns=list(outlet_bcs.keys()),
                 ),
-            ]
+            ],
+            ignore_index=True,
         )
         p_targets = pd.concat(
             [
@@ -382,7 +384,9 @@ def run(svproject, num_samples):
 
     webpage.add_heading("Optimization details")
     k_plot = io.ViolinPlot(
-        optimized_ks,
+        optimized_ks[
+            (np.abs(stats.zscore(optimized_ks)) < 3).all(axis=1)
+        ],  # Remove outliers
         ylabel=r"$\frac{R_d}{R_p}$",
         title="Optimized distal to proximal resistance ratio",
     )
@@ -395,6 +399,10 @@ def run(svproject, num_samples):
 
     # Build webpage
     webpage.build(project["rom_optimization_folder"])
+    sum_evals = sum([len(o) for o in offsets])
+    print(
+        f"Completed in {time.time()-start:.2f}s with {sum_evals} evaluations."
+    )
 
 
 @click.command()
