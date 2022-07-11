@@ -4,7 +4,6 @@ import os
 from typing import Any
 
 import yaml
-from pathlib import Path
 
 
 class SimVascularProject:

@@ -1,9 +1,4 @@
 """This module holds the ZeroDSolver class."""
-import orjson  # Faster than json
-import os
-from tempfile import TemporaryDirectory
-from subprocess import call
-
 import numpy as np
 import pandas as pd
 from svzerodsolver import run_simulation_from_config, svzerodsolvercpp

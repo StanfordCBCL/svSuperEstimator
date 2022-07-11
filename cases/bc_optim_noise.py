@@ -20,6 +20,12 @@ import os
 
 
 def run(svproject, num_samples):
+    """Run the opimization.
+
+    Args:
+        svproject: Path to SimVascular project folder.
+        num_samples: Number of samples from target distribution.
+    """
     start = time.time()
 
     # Setup project, model, solver and webpage
@@ -163,7 +169,7 @@ def run(svproject, num_samples):
         return flow_plot, pres_plot
 
     def set_boundary_conditions(k: list[float]):
-        """Set boundary conditions based on distal to proximal resistance ratio."""
+        """Set BCs based on distal to proximal resistance ratio."""
         for ki, r_ii, bc in zip(k, r_i, outlet_bcs.values()):
             bc.resistance_proximal = r_ii * 1 / (1.0 + ki)
             bc.resistance_distal = bc.resistance_proximal * ki
@@ -179,8 +185,8 @@ def run(svproject, num_samples):
     ):
         """Objective function for the optimization.
 
-        Evaluates the sum of the offset for the input output pressure relation for
-        each outlet.
+        Evaluates the sum of the offset for the input output pressure relation
+        for each outlet.
         """
         start = time.time()
 
@@ -214,7 +220,8 @@ def run(svproject, num_samples):
 
         offset = np.linalg.norm(p_offsets) + np.linalg.norm(q_offsets)
         print(
-            f"Model: {project.name} | Sample: {sample_id:5.0f} | Iteration: {len(offsets):5.0f} | Offset: {offset}"
+            f"Model: {project.name} | Sample: {sample_id:5.0f} | "
+            f"Iteration: {len(offsets):5.0f} | Offset: {offset}"
         )
         offsets.append(offset)
         eval_stats["eval_time"] += time.time() - start
@@ -406,7 +413,8 @@ def run(svproject, num_samples):
     webpage.build(project["rom_optimization_folder"])
     sum_evals = sum([len(o) for o in offsets])
     print(
-        f"Completed in {time.time()-start:.2f}s with {sum_evals} evaluations and {sum_evals/eval_stats['eval_time']} evaluations/second."
+        f"Completed in {time.time()-start:.2f}s with {sum_evals} evaluations "
+        f"and {sum_evals/eval_stats['eval_time']} evaluations/second."
     )
 
 
@@ -424,4 +432,5 @@ def run(svproject, num_samples):
     default=10,
 )
 def main(svproject, num_samples):
+    """Run svSuperEstimator."""
     run(svproject, num_samples)

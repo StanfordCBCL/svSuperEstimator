@@ -2,7 +2,13 @@
 
 Contains everything related to input and output of files.
 """
-from ._plot import LinePlot, TablePlot, Vtk3dPlot, LinePlotWithUpperLower, ViolinPlot
+from ._plot import (
+    LinePlot,
+    TablePlot,
+    Vtk3dPlot,
+    LinePlotWithUpperLower,
+    ViolinPlot,
+)
 from ._svproject import SimVascularProject
 from ._webpage import WebPage
 
@@ -13,5 +19,5 @@ __all__ = [
     "TablePlot",
     "Vtk3dPlot",
     "LinePlotWithUpperLower",
-    "ViolinPlot"
+    "ViolinPlot",
 ]

@@ -72,6 +72,14 @@ class ZeroDModel:
 
         Args:
             target: Target folder for the configuration files.
+            num_cardiac_cycles: Number of cardiac cycles to simulate.
+            pts_per_cycle: Number of time steps per cardicac cycle.
+            absolute_tolerance: Absolute tolerance for simulation.
+            maximum_nonlinear_iterations: Maximum number of non-linear
+                iterations per time step in time integration.
+            output_interval: Interval for writing a timestep to the output.
+            steady_initial: Solve steady solution first.
+            output_mean_only: Return only mean values over time steps.
         """
         config = self._config.copy()
         if num_cardiac_cycles is not None:

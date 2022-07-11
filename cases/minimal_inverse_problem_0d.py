@@ -264,5 +264,6 @@ webpage.build("./dashboard")
 print("Optimized: ", optimized_k)
 print("Ground truth: ", k_opt)
 print(
-    f"Completed in {time.time()-start:.2f}s with {len(opt_progress['offset'])} evaluations"
+    f"Completed in {time.time()-start:.2f}s with {len(opt_progress['offset'])}"
+    " evaluations"
 )

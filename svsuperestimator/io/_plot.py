@@ -3,11 +3,9 @@ from typing import Any
 
 import pandas as pd
 import os
-import plotly.express as px
 import plotly.graph_objects as go
 import vtk
 from vtk.util.numpy_support import vtk_to_numpy
-import plotly.io as pio
 
 
 class _PlotlyPlot:
@@ -94,7 +92,6 @@ class LinePlot(_PlotlyPlot):
         x: str = None,
         y: str = None,
         name: str = None,
-        color: str = None,
         **kwargs: str,
     ) -> None:
         """Create a new LinePlot instance.
@@ -103,7 +100,7 @@ class LinePlot(_PlotlyPlot):
             dataframe: The dataframe to plot.
             x: Label of the dataframe to use for the x-axis.
             y: Label of the dataframe to use for the y-axis.
-            color: Label of the dataframe to use for the color.
+            name: Name of line.
         """
         super().__init__(**kwargs)
         self._fig.add_trace(
@@ -124,6 +121,14 @@ class LinePlot(_PlotlyPlot):
         y: str = None,
         name=None,
     ):
+        """Add a trace to the line plot.
+
+        Args:
+            dataframe: The dataframe to plot.
+            x: Label of the dataframe to use for the x-axis.
+            y: Label of the dataframe to use for the y-axis.
+            name: Name of line.
+        """
         self._fig.add_trace(
             go.Scatter(
                 name=name,
@@ -160,7 +165,8 @@ class LinePlotWithUpperLower(_PlotlyPlot):
         super().__init__(**kwargs)
 
         # print(pio.templates["plotly_dark"])
-        # colors= [#636efa, #EF553B, #00cc96, #ab63fa, #FFA15A, #19d3f3, #FF6692, #B6E880, #FF97FF, #FECB52],
+        # colors= [#636efa, #EF553B, #00cc96, #ab63fa, #FFA15A,
+        # #19d3f3, #FF6692, #B6E880, #FF97FF, #FECB52],
 
         self._fig.add_trace(
             go.Scatter(
@@ -205,6 +211,14 @@ class LinePlotWithUpperLower(_PlotlyPlot):
         y: str = None,
         name=None,
     ):
+        """Add a trace to the line plot.
+
+        Args:
+            dataframe: The dataframe to plot.
+            x: Label of the dataframe to use for the x-axis.
+            y: Label of the dataframe to use for the y-axis.
+            name: Name of line.
+        """
         self._fig.add_trace(
             go.Scatter(
                 name=name,
@@ -254,6 +268,13 @@ class ViolinPlot(_PlotlyPlot):
         y: list[float],
         name=None,
     ):
+        """Add a horizontal line marker.
+
+        Args:
+            x: Position in x-direction.
+            y: Position in y-direction.
+            name: Name of line.
+        """
         self._fig.add_trace(
             go.Scatter(
                 x=x,
@@ -311,7 +332,7 @@ class Vtk3dPlot(_PlotlyPlot):
 
         if not os.path.exists(filename):
             raise FileNotFoundError(
-                f"Could not plot {filename}. The specified file does not exist."
+                f"Error plotting {filename}. The file does not exist."
             )
 
         camera = dict(eye=dict(x=2, y=2, z=0.1))
