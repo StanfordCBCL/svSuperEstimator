@@ -6,7 +6,7 @@ from subprocess import call
 
 import numpy as np
 import pandas as pd
-from svzerodsolver import run_simulation_from_config
+from svzerodsolver import run_simulation_from_config, svzerodsolvercpp
 
 from ..model import ZeroDModel
 
@@ -18,9 +18,12 @@ class ZeroDSolver:
     using the svZeroDSolver.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, cpp=True) -> None:
         """Create a new ZeroDSolver instance."""
-        pass
+        if cpp:
+            self._solver_call = self._call_solver_cpp
+        else:
+            self._solver_call = self._call_solver_python
 
     @staticmethod
     def _call_solver_python(config):
@@ -64,30 +67,8 @@ class ZeroDSolver:
         return result
 
     @staticmethod
-    def _call_solver_cpp(config, exec, mean=False):
-        with TemporaryDirectory() as tmpdir:
-            infile = os.path.join(tmpdir, "input.json")
-            outfile = os.path.join(tmpdir, "output.csv")
-            with open(infile, "wb") as ff:
-                ff.write(
-                    orjson.dumps(
-                        config,
-                        option=orjson.OPT_NAIVE_UTC
-                        | orjson.OPT_SERIALIZE_NUMPY,
-                    )
-                )
-            if mean:
-                call(
-                    args=[exec, infile, outfile, "mean"],
-                    cwd=tmpdir,
-                )
-            else:
-                call(
-                    args=[exec, infile, outfile],
-                    cwd=tmpdir,
-                )
-            branch_result = pd.read_csv(outfile, engine="pyarrow")
-        return branch_result
+    def _call_solver_cpp(config):
+        return svzerodsolvercpp.run(config)
 
     def run_simulation(self, model: ZeroDModel, mean=False) -> pd.DataFrame:
         """Run a new 0D solver session using the provided model.
@@ -102,13 +83,6 @@ class ZeroDSolver:
 
         # Start simulation
         config = model.make_configuration(
-            num_cardiac_cycles=5, pts_per_cycle=25
+            pts_per_cycle=100, output_mean_only=mean
         )
-        branch_result = self._call_solver_cpp(
-            config,
-            "/Users/stanford/svZeroDSolver/Release/svzerodsolver",
-            mean,
-        )
-        # branch_result = self._call_solver_python(config)
-
-        return branch_result
+        return self._solver_call(config)

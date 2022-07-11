@@ -26,6 +26,10 @@ class ZeroDModel:
         self._project = project
         self._config = project["rom_simulation_config"]
 
+        # Not needed for evaluation
+        if "description" in self._config:
+            del self._config["description"]
+
         # Create python object representations for each boundary condition
         self.boundary_conditions: dict[str, "_BoundaryCondition"] = {}
         for bc in self._config["boundary_conditions"]:
@@ -55,6 +59,11 @@ class ZeroDModel:
         target: str = None,
         num_cardiac_cycles=None,
         pts_per_cycle=None,
+        absolute_tolerance=1e-8,
+        maximum_nonlinear_iterations=30,
+        output_interval=1,
+        steady_initial=True,
+        output_mean_only=False,
     ) -> None:
         """Make the configuration at a specified target.
 
@@ -73,6 +82,15 @@ class ZeroDModel:
             config["simulation_parameters"][
                 "number_of_time_pts_per_cardiac_cycle"
             ] = pts_per_cycle
+        config["simulation_parameters"].update(
+            {
+                "absolute_tolerance": absolute_tolerance,
+                "maximum_nonlinear_iterations": maximum_nonlinear_iterations,
+                "output_interval": output_interval,
+                "steady_initial": steady_initial,
+                "output_mean_only": output_mean_only,
+            }
+        )
         for bc in config["boundary_conditions"]:
             bc_obj = self.boundary_conditions[bc["bc_name"]]
             if isinstance(bc_obj, _FlowBoundaryCondition):

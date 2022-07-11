@@ -94,7 +94,7 @@ def run(svproject, num_samples):
     pd.DataFrame([list(q_target)], columns=list(outlet_bcs.keys()),).to_csv(
         os.path.join(project["rom_optimization_folder"], "flow_target.csv")
     )
-    q_norm_factor = 1.0 / ((q_target.min() - q_target.max()) ** 2)
+    q_norm_factor = 1.0 / (q_target.min() - q_target.max())
 
     p_target = target[target.name == bc_map["INFLOW"]["name"]][
         bc_map["INFLOW"]["pressure"]
@@ -109,7 +109,7 @@ def run(svproject, num_samples):
     pd.DataFrame([list(p_target)], columns=list(outlet_bcs.keys()),).to_csv(
         os.path.join(project["rom_optimization_folder"], "pressure_target.csv")
     )
-    p_norm_factor = 1.0 / (np.mean(p_target) ** 2)
+    p_norm_factor = 1.0 / (np.mean(p_target))
 
     k_opt = [
         bc.resistance_distal / bc.resistance_proximal
@@ -166,55 +166,58 @@ def run(svproject, num_samples):
         """Set boundary conditions based on distal to proximal resistance ratio."""
         for ki, r_ii, bc in zip(k, r_i, outlet_bcs.values()):
             bc.resistance_proximal = r_ii * 1 / (1.0 + ki)
-            bc.resistance_distal = r_ii * ki / (1.0 + ki)
+            bc.resistance_distal = bc.resistance_proximal * ki
+
+    bc_names = [bc_map[bc]["name"] for bc in outlet_bcs]
+    bc_pressure = [bc_map[bc]["pressure"] for bc in outlet_bcs]
+    bc_flow = [bc_map[bc]["flow"] for bc in outlet_bcs]
+    inflow_name = bc_map["INFLOW"]["name"]
+    inflow_pressure = bc_map["INFLOW"]["pressure"]
 
     def objective_function(
-        k, p_target_noisy, q_target_noisy, offsets, sample_id
+        k, p_target_noisy, q_target_noisy, offsets, sample_id, eval_stats
     ):
         """Objective function for the optimization.
 
         Evaluates the sum of the offset for the input output pressure relation for
         each outlet.
         """
+        start = time.time()
 
         set_boundary_conditions(k)
 
         result = solver.run_simulation(model.zerodmodel, True)
 
-        p_inflow = result[result.name == bc_map["INFLOW"]["name"]][
-            bc_map["INFLOW"]["pressure"]
+        p_inflow = result.loc[result.name == inflow_name][
+            inflow_pressure
         ].iloc[0]
 
-        offset = np.sqrt(
-            sum(
-                [
-                    (
-                        p_target_noisy[i]
-                        - (
-                            p_inflow
-                            - result[result.name == bc_map[bc]["name"]][
-                                bc_map[bc]["pressure"]
-                            ].iloc[0]
-                        )
-                    )
-                    ** 2
-                    * p_norm_factor
-                    + (
-                        q_target_noisy[i]
-                        - result[result.name == bc_map[bc]["name"]][
-                            bc_map[bc]["flow"]
-                        ].iloc[0]
-                    )
-                    ** 2
-                    * q_norm_factor
-                    for i, bc in enumerate(outlet_bcs)
-                ]
+        p_offsets = [
+            (
+                p_target_noisy[i]
+                - (
+                    p_inflow
+                    - result.loc[result.name == name][pressure_id].iloc[0]
+                )
             )
-        )
+            * p_norm_factor
+            for i, (name, pressure_id) in enumerate(zip(bc_names, bc_pressure))
+        ]
+        q_offsets = [
+            (
+                q_target_noisy[i]
+                - result.loc[result.name == name][flow_id].iloc[0]
+            )
+            * q_norm_factor
+            for i, (name, flow_id) in enumerate(zip(bc_names, bc_flow))
+        ]
+
+        offset = np.linalg.norm(p_offsets) + np.linalg.norm(q_offsets)
         print(
             f"Model: {project.name} | Sample: {sample_id:5.0f} | Iteration: {len(offsets):5.0f} | Offset: {offset}"
         )
         offsets.append(offset)
+        eval_stats["eval_time"] += time.time() - start
         return offset
 
     # Run optimization
@@ -223,6 +226,8 @@ def run(svproject, num_samples):
     p_targets = pd.DataFrame(columns=list(outlet_bcs.keys()))
     q_targets = pd.DataFrame(columns=list(outlet_bcs.keys()))
     offsets = []
+    eval_stats = {}
+    eval_stats["eval_time"] = 0.0
 
     np.random.seed(0)
 
@@ -239,7 +244,7 @@ def run(svproject, num_samples):
         offset = []
         optimized_k = optimize.minimize(
             fun=lambda l: objective_function(
-                l, p_target_noisy, q_target_noisy, offset, i + 1
+                l, p_target_noisy, q_target_noisy, offset, i + 1, eval_stats
             ),
             x0=k_start,
             method="Nelder-Mead",
@@ -401,7 +406,7 @@ def run(svproject, num_samples):
     webpage.build(project["rom_optimization_folder"])
     sum_evals = sum([len(o) for o in offsets])
     print(
-        f"Completed in {time.time()-start:.2f}s with {sum_evals} evaluations."
+        f"Completed in {time.time()-start:.2f}s with {sum_evals} evaluations and {sum_evals/eval_stats['eval_time']} evaluations/second."
     )
 
 
