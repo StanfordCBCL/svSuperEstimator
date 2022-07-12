@@ -8,6 +8,7 @@ from ._plot import (
     Vtk3dPlot,
     LinePlotWithUpperLower,
     ViolinPlot,
+    ParticlePlot3d
 )
 from ._svproject import SimVascularProject
 from ._webpage import WebPage
@@ -20,4 +21,5 @@ __all__ = [
     "Vtk3dPlot",
     "LinePlotWithUpperLower",
     "ViolinPlot",
+    "ParticlePlot3d"
 ]

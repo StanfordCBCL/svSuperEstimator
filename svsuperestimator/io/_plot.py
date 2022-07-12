@@ -6,6 +6,9 @@ import os
 import plotly.graph_objects as go
 import vtk
 from vtk.util.numpy_support import vtk_to_numpy
+import numpy as np
+from scipy.interpolate import griddata
+import warnings
 
 
 class _PlotlyPlot:
@@ -236,9 +239,6 @@ class ViolinPlot(_PlotlyPlot):
     def __init__(
         self,
         dataframe: pd.DataFrame,
-        x: str = None,
-        y: str = None,
-        color: str = None,
         **kwargs: str,
     ) -> None:
         """Create a new ViolinPlot instance.
@@ -287,6 +287,95 @@ class ViolinPlot(_PlotlyPlot):
                 marker_size=40,
                 name=name,
             )
+        )
+
+
+class ParticlePlot3d(_PlotlyPlot):
+    def __init__(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        z: np.ndarray,
+        **kwargs: str,
+    ) -> None:
+        """Create a new LinePlot instance.
+
+        Args:
+            dataframe: The dataframe to plot.
+            x: Label of the dataframe to use for the x-axis.
+            y: Label of the dataframe to use for the y-axis.
+            name: Name of line.
+        """
+        super().__init__(**kwargs)
+
+        # Make surface mesh from particles
+        xi = np.linspace(x.min(), x.max(), 100)
+        yi = np.linspace(y.min(), y.max(), 100)
+        X, Y = np.meshgrid(xi, yi)
+
+        Z = griddata((x, y), z, (X, Y), method="linear", rescale=True)
+
+        # self._fig = go.Figure(
+        #     go.Surface(
+        #         x=xi, y=yi, z=Z, showlegend=False, showscale=False, name=""
+        #     )
+        # )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            marginal_x = np.nanmean(Z, axis=0)
+            marginal_y = np.nanmean(Z, axis=1)
+        x_offset = (np.min(X)) * np.ones(len(marginal_x))
+        y_offset = (np.min(Y)) * np.ones(len(marginal_y))
+
+        self._fig.add_trace(
+            go.Scatter3d(
+                z=marginal_x,
+                x=x_offset,
+                y=Y[:, 0],
+                line=dict(width=5, color="#636efa"),
+                mode="lines",
+                showlegend=False,
+                hoverinfo="skip",
+            )
+        )
+        self._fig.add_trace(
+            go.Scatter3d(
+                z=marginal_y,
+                y=y_offset,
+                x=X[0, :],
+                line=dict(width=5, color="#636efa"),
+                mode="lines",
+                showlegend=False,
+                hoverinfo="skip",
+            )
+        )
+        self._fig.add_trace(
+            go.Scatter3d(
+                x=x,
+                y=y,
+                z=z,
+                marker=dict(size=5),
+                opacity=1.0,
+                mode="markers",
+                showlegend=False,
+                hoverinfo="skip",
+            ),
+        )
+        self._fig.update_layout(
+            margin=dict(l=20, b=20, r=20),
+            scene=dict(
+                xaxis=dict(
+                    showbackground=False, title=kwargs.get("xlabel", None)
+                ),
+                yaxis=dict(
+                    showbackground=False, title=kwargs.get("ylabel", None)
+                ),
+                zaxis=dict(
+                    showticklabels=False,
+                    showgrid=False,
+                ),
+                zaxis_visible=False,
+            ),
         )
 
 
@@ -362,4 +451,7 @@ class Vtk3dPlot(_PlotlyPlot):
         )
         self._fig.update_scenes(
             xaxis_visible=False, yaxis_visible=False, zaxis_visible=False
+        )
+        self._fig.update_layout(
+            margin=dict(l=0, r=0, b=0),
         )
