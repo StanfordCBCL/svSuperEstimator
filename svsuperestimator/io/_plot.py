@@ -32,6 +32,11 @@ class _PlotlyPlot:
         self._fig.update_layout(**self._layout)
         self.configure(**kwargs)  # type: ignore
 
+    @property
+    def fig(self):
+        self._fig.update_layout(**self._layout)
+        return self._fig
+
     def to_html(self) -> str:
         """Export plot as an html encoded string.
 
@@ -453,6 +458,4 @@ class Vtk3dPlot(_PlotlyPlot):
         self._fig.update_scenes(
             xaxis_visible=False, yaxis_visible=False, zaxis_visible=False
         )
-        self._fig.update_layout(
-            margin=dict(l=0, r=0, b=0),
-        )
+        self._fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
