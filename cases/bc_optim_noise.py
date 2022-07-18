@@ -4,6 +4,7 @@ This case implements a 0D model optimization routine. It optimizes the
 distal to proximal resistance ration (denoted k) at each outlet to match
 the outlet pressure and flow. k is initialized with a values of 10.0.
 """
+from __future__ import annotations
 import time
 
 import pandas as pd

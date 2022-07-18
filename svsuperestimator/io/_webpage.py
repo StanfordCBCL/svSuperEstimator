@@ -1,4 +1,5 @@
 """This module holds the WebPage class."""
+from __future__ import annotations
 import os
 from datetime import datetime
 from typing import Any, Iterable, Union
@@ -7,7 +8,7 @@ from typing import Any, Iterable, Union
 class WebPage:
     """Web page class.
 
-    This classes faciliates creation of a simple wepage for presenting
+    This class faciliates creation of a simple wepage for presenting
     plots in a comprehensive manner.
     """
 
@@ -48,7 +49,7 @@ class WebPage:
             plots: List of plots to add to the webpage.
         """
         # Append to existing flexbox if one is at the end
-        if isinstance(self._content[-1], _HtmlFlexbox):
+        if self._content and isinstance(self._content[-1], _HtmlFlexbox):
             self._content[-1].append(plots)
         else:
             self._content.append(_HtmlFlexbox(plots))

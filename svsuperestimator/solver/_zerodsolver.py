@@ -1,7 +1,7 @@
 """This module holds the ZeroDSolver class."""
 import numpy as np
 import pandas as pd
-from svzerodsolver import run_simulation_from_config, svzerodsolvercpp
+from svzerodsolver import runner, runnercpp
 
 from ..model import ZeroDModel
 
@@ -23,7 +23,7 @@ class ZeroDSolver:
     @staticmethod
     def _call_solver_python(config):
 
-        branch_result = run_simulation_from_config(config)
+        branch_result = runner.run_from_config(config)
         # Format output nicely according to boundary conditions
         result = pd.DataFrame(
             columns=[
@@ -63,7 +63,7 @@ class ZeroDSolver:
 
     @staticmethod
     def _call_solver_cpp(config):
-        return svzerodsolvercpp.run(config)
+        return runnercpp.run_from_config(config)
 
     def run_simulation(self, model: ZeroDModel, mean=False) -> pd.DataFrame:
         """Run a new 0D solver session using the provided model.
