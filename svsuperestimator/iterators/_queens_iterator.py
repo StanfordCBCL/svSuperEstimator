@@ -31,7 +31,7 @@ class QueensIterator(Iterator):
         self._config = {
             "global_settings": {
                 "output_dir": output_dir,
-                "experiment_name": type(self).__name__,
+                "experiment_name": "results",
             },
             "database": {
                 "type": "mongodb",

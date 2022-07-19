@@ -321,11 +321,11 @@ class ParticlePlot3d(_PlotlyPlot):
 
         Z = griddata((x, y), z, (X, Y), method="linear", rescale=True)
 
-        # self._fig = go.Figure(
-        #     go.Surface(
-        #         x=xi, y=yi, z=Z, showlegend=False, showscale=False, name=""
-        #     )
-        # )
+        self._fig = go.Figure(
+            go.Surface(
+                x=xi, y=yi, z=Z, showlegend=False, showscale=False, name=""
+            )
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             marginal_x = np.nanmean(Z, axis=0)

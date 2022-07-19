@@ -2,10 +2,12 @@
 import json
 import os
 from dataclasses import dataclass
+from typing import Sequence
 
 import numpy as np
 
 from ..io import SimVascularProject
+import pandas as pd
 
 
 class ZeroDModel:
@@ -123,6 +125,40 @@ class ZeroDModel:
             with open(config_file, "w") as ff:
                 json.dump(config, ff)
         return config
+
+    def get_boundary_condition_info(self):
+        bc_info = {"Name": [], "Location": [], "Parameter": []}
+        for vessel_data in self._config["vessels"]:
+            vessel_id = vessel_data["vessel_id"]
+            if "boundary_conditions" in vessel_data:
+                for location, bc_name in vessel_data[
+                    "boundary_conditions"
+                ].items():
+                    bc_info["Name"].append(bc_name)
+                    bc_info["Location"].append(f"V{vessel_id}/{location}")
+
+        bc_info["Parameter"] = [None] * len(bc_info["Name"])
+        for bc in self._config["boundary_conditions"]:
+            bc_name = bc["bc_name"]
+            bc_values = {}
+            for key, value in bc["bc_values"].items():
+                if key == "t":
+                    bc_values[
+                        key
+                    ] = f"Cycle period: {value[-1] - value[0]:.4f}s"
+
+                elif isinstance(value, Sequence):
+                    bc_values[
+                        key
+                    ] = f"Periodic min={np.min(value):.4e} max={np.max(value):.4e}"
+                else:
+                    bc_values[key] = f"{value:.4e}"
+
+            bc_info["Parameter"][bc_info["Name"].index(bc_name)] = " | ".join(
+                [f"{key}: {value}" for key, value in bc_values.items()]
+            )
+
+        return pd.DataFrame(bc_info)
 
 
 class _BoundaryCondition:
