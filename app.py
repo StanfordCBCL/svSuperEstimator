@@ -72,7 +72,7 @@ app.layout = html.Div(
     id="parent",
     children=[
         create_top_bar(),
-        html.H1("Select model"),
+        html.H1("Select Model"),
         html.Div(
             dcc.Dropdown(
                 sorted(
@@ -88,11 +88,20 @@ app.layout = html.Div(
             className="item",
         ),
         html.Div(id="project-info"),
+        html.Div(id="result-selection"),
         html.Div(id="configuration"),
-        html.Div(id="start"),
+        html.Div(id="input-parameter"),
+        # html.Div(id="start"),
         dcc.Loading(
             id="loading",
             children=[html.Div(id="results")],
+            style={"margin-top": 20, "margin-bottom": 20},
+        ),
+        dcc.Loading(
+            id="loading-2",
+            children=[
+                html.Div(id="new-case-results"),
+            ],
             style={"margin-top": 20, "margin-bottom": 20},
         ),
     ],
@@ -108,11 +117,12 @@ VALID_CASES = [
 
 @app.callback(
     Output("project-info", "children"),
+    Output("result-selection", "children"),
     Input("model-name", "value"),
 )
 def show_project_information(model_name):
     if model_name is None:
-        return None
+        return None, None
     project = io.SimVascularProject(os.path.join(MODEL_FOLDER, model_name))
     try:
         plot3d = io.Vtk3dPlot(
@@ -126,10 +136,44 @@ def show_project_information(model_name):
         model = mdl.ZeroDModel(project)
         bc_info = model.get_boundary_condition_info()
     except ValueError:
-        return html.Div("Model not supported", className="item")
+        return html.Div("Model not supported", className="item"), None
+    cases = sorted(
+        [
+            name
+            for name in os.listdir(project["rom_optimization_folder"])
+            if name.startswith("case_")
+        ]
+    )
+    cases.append("Create new case")
+    return (
+        [
+            html.H1("Project Overview"),
+            create_row([graph, create_table(bc_info)]),
+        ],
+        [
+            html.H1("Parameter Estimation"),
+            html.Div(
+                dcc.Dropdown(
+                    cases,
+                    id="selected-case",  # className="dropdown"
+                    value=cases[0]
+                    # placeholder="Select optimization case",
+                ),
+                className="item",
+            ),
+        ],
+    )
+
+
+@app.callback(
+    Output("configuration", "children"),
+    Input("selected-case", "value"),
+    Input("model-name", "value"),
+)
+def configure_optimization(selected_case, model_name):
+    if model_name is None or selected_case != "Create new case":
+        return None
     return [
-        html.H1("Project overview"),
-        create_row([graph, create_table(bc_info)]),
         html.H1("Configuration"),
         html.Div(
             dcc.Dropdown(
@@ -143,12 +187,29 @@ def show_project_information(model_name):
 
 
 @app.callback(
-    Output("configuration", "children"),
+    Output("results", "children"),
+    Input("selected-case", "value"),
+    Input("model-name", "value"),
+)
+def displace_results(selected_case, model_name):
+    if selected_case != "Create new case" and model_name is not None:
+        project = io.SimVascularProject(os.path.join(MODEL_FOLDER, model_name))
+        return visualize_results(project, selected_case)
+    return None
+
+
+@app.callback(
+    Output("input-parameter", "children"),
+    Input("selected-case", "value"),
     Input("case-selection", "value"),
     Input("model-name", "value"),
 )
-def configure_optimization(selected_case, model_name):
-    if selected_case is None or model_name is None:
+def configure_optimization(selected_case, case_selection, model_name):
+    if (
+        selected_case != "Create new case"
+        or model_name == None
+        or case_selection == None
+    ):
         return None
 
     options = [
@@ -185,31 +246,6 @@ def configure_optimization(selected_case, model_name):
     return html.Div(
         [
             create_row(options),
-        ]
-    )
-
-
-@app.callback(
-    Output("start", "children"),
-    # Output("results", "children"),
-    Input("num_procs", "value"),
-    Input("num_particles", "value"),
-    Input("num_rejuvenation_steps", "value"),
-    Input("resampling_threshold", "value"),
-)
-def start(
-    num_procs,
-    num_particles,
-    num_rejuvenation_steps,
-    resampling_threshold,
-):
-    if not None in [
-        num_procs,
-        num_particles,
-        num_rejuvenation_steps,
-        resampling_threshold,
-    ]:
-        return (
             html.Div(
                 html.Button(
                     "Start estimation",
@@ -219,28 +255,41 @@ def start(
                 ),
                 className="item",
             ),
-        )
-    return None
+        ]
+    )
 
 
 @app.callback(
-    Output("results", "children"),
+    Output("new-case-results", "children"),
     Input("num_procs", "value"),
     Input("num_particles", "value"),
     Input("num_rejuvenation_steps", "value"),
     Input("resampling_threshold", "value"),
     Input("start-simulation", "n_clicks"),
     Input("model-name", "value"),
+    Input("selected-case", "value"),
 )
 def start_thread(
     num_procs,
     num_particles,
     num_rejuvenation_steps,
     resampling_threshold,
-    start_toggle,
+    start_simulation,
     model_name,
+    selected_case,
 ):
-    if start_toggle and model_name:
+    if (
+        not None
+        in [
+            num_procs,
+            num_particles,
+            num_rejuvenation_steps,
+            resampling_threshold,
+            model_name,
+        ]
+        and start_simulation
+        and selected_case == "Create new case"
+    ):
         project = io.SimVascularProject(os.path.join(MODEL_FOLDER, model_name))
 
         config = {
@@ -250,46 +299,52 @@ def start_thread(
             "resampling_threshold": resampling_threshold,
         }
 
-        case_name = f"smc_chopin_np{config['num_particles']}_rt{10*config['resampling_threshold']:.0f}_rs{config['num_rejuvenation_steps']}"
+        case_name = f"case_smc_chopin_np{config['num_particles']}_rt{10*config['resampling_threshold']:.0f}_rs{config['num_rejuvenation_steps']}"
         windkessel_smc_chopin.run(project, config, case_name)
 
-        results = []
-
-        with open(
-            os.path.join(project["rom_optimization_folder"], "results.pickle"),
-            "rb",
-        ) as ff:
-            raw_results = pickle.load(ff)
-
-        mean = raw_results["mean"]
-        var = raw_results["var"]
-        raw_output_data = raw_results["raw_output_data"]
-
-        particles = raw_output_data["particles"]
-        weights = raw_output_data["weights"]
-        log_posterior = raw_output_data["log_posterior"]
-        mean = raw_output_data["mean"]
-        var = raw_output_data["var"]
-
-        x = particles[:, 0]
-        y = particles[:, 1]
-        z = np.exp(log_posterior - log_posterior.max())
-        z = z / np.mean(z)
-
-        particle_plot3d = io.ParticlePlot3d(
-            x,
-            y,
-            z,
-            xlabel=r"Rp",
-            ylabel=r"Rd",
-        )
-
-        results.append(
-            html.Div(dcc.Graph(figure=particle_plot3d.fig), className="item")
-        )
-        return results
+        return visualize_results(project, case_name)
 
     return None
+
+
+def visualize_results(project, case_name):
+    results = []
+
+    output_dir = os.path.join(project["rom_optimization_folder"], case_name)
+
+    with open(
+        os.path.join(output_dir, "results.pickle"),
+        "rb",
+    ) as ff:
+        raw_results = pickle.load(ff)
+
+    mean = raw_results["mean"]
+    var = raw_results["var"]
+    raw_output_data = raw_results["raw_output_data"]
+
+    particles = raw_output_data["particles"]
+    weights = raw_output_data["weights"]
+    log_posterior = raw_output_data["log_posterior"]
+    mean = raw_output_data["mean"]
+    var = raw_output_data["var"]
+
+    x = particles[:, 0]
+    y = particles[:, 1]
+    z = np.exp(log_posterior - log_posterior.max())
+    z = z / np.mean(z)
+
+    particle_plot3d = io.ParticlePlot3d(
+        x,
+        y,
+        z,
+        xlabel=r"Rp",
+        ylabel=r"Rd",
+    )
+
+    results.append(
+        html.Div(dcc.Graph(figure=particle_plot3d.fig), className="item")
+    )
+    return results
 
 
 if __name__ == "__main__":
