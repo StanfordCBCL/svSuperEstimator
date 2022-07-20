@@ -75,9 +75,12 @@ input[type=number] {
     -moz-appearance: textfield;
 }
 
-.table {
-    color: #ffffffe8;
-    font-size: 11pt;
+tr:hover {
+    background: transparent !important;
+}
+
+tr:hover td {
+    background: transparent;
 }
 
 .dropdown {

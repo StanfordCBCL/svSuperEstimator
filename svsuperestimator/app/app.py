@@ -4,6 +4,7 @@ from dash.dependencies import Input, Output
 from .. import model as mdl, visualizer, reader, problems
 import os
 import click
+import pandas as pd
 
 from . import helpers
 
@@ -164,40 +165,15 @@ def run(model_folder):
         ):
             return None
 
-        options = [
-            dcc.Input(
-                id="num_procs",
-                type="number",
-                placeholder="Number of workers",
-                className="input",
-                debounce=True,
-            ),
-            dcc.Input(
-                id="num_particles",
-                type="number",
-                placeholder="Number of particles",
-                className="input",
-                debounce=True,
-            ),
-            dcc.Input(
-                id="num_rejuvenation_steps",
-                type="number",
-                placeholder="Number of rejuvenation steps",
-                className="input",
-                debounce=True,
-            ),
-            dcc.Input(
-                id="resampling_threshold",
-                type="number",
-                placeholder="Resampling threshold",
-                className="input",
-                debounce=True,
-            ),
-        ]
+        problem_class = problems.get_problem_by_name(case_selection)
+
+        config_df = pd.DataFrame([[key, value] for key, value in problem_class.OPTIONS_WITH_DEFAULT.items()], columns=["Name", "Value"])
+
+        config_table = helpers.create_editable_table(config_df, table_id="new-case-type-parameters")
 
         return html.Div(
             [
-                helpers.create_columns(options),
+                helpers.create_box(config_table),
                 html.Div(
                     html.Button(
                         "Start estimation",
@@ -212,34 +188,21 @@ def run(model_folder):
 
     @app.callback(
         Output("new-case-results-section", "children"),
-        Input("num_procs", "value"),
-        Input("num_particles", "value"),
-        Input("num_rejuvenation_steps", "value"),
-        Input("resampling_threshold", "value"),
+        Input("new-case-type-parameters", "data"),
         Input("start-simulation", "n_clicks"),
         Input("selected-model-name", "value"),
         Input("selected-case-result", "value"),
         Input("new-case-type-selection", "value"),
     )
     def start_thread(
-        num_procs,
-        num_particles,
-        num_rejuvenation_steps,
-        resampling_threshold,
+        raw_config,
         start_simulation,
         model_name,
         selected_case,
         case_type,
     ):
         if (
-            not None
-            in [
-                num_procs,
-                num_particles,
-                num_rejuvenation_steps,
-                resampling_threshold,
-                model_name,
-            ]
+            model_name is not None
             and start_simulation
             and selected_case == "Create new case"
         ):
@@ -247,12 +210,7 @@ def run(model_folder):
                 os.path.join(model_folder, model_name)
             )
 
-            config = {
-                "num_procs": num_procs,
-                "num_particles": num_particles,
-                "num_rejuvenation_steps": num_rejuvenation_steps,
-                "resampling_threshold": resampling_threshold,
-            }
+            config = {item["Name"]: item["Value"] for item in raw_config}
 
             case_name = f"case_smc_chopin_np{config['num_particles']}_rt{10*config['resampling_threshold']:.0f}_rs{config['num_rejuvenation_steps']}"
 

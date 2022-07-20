@@ -70,7 +70,7 @@ def create_table(dataframe):
         style_cell={
             "textAlign": "left",
             "font-size": 11,
-            "font-family": "sans-serif",
+            "backgroundColor": "transparent",
         },
     )
 
@@ -90,15 +90,24 @@ def create_editable_table(dataframe, table_id):
         style_header={
             "font-weight": "bold",
             "backgroundColor": "transparent",
+            "color": "ffffffe8",
         },
         style_data={
             "backgroundColor": "transparent",
+            "color": "ffffffe8",
         },
         style_cell={
             "textAlign": "left",
             "font-size": 11,
-            "font-family": "sans-serif",
+            "color": "ffffffe8",
         },
+        css=[{
+                "selector": 'td.cell--selected, td.focused',
+                "rule": 'background-color: #FF4136;'
+            }, {
+                "selector": 'td.cell--selected *, td.focused *',
+                "rule": 'color: white !important;text-align: left;font-style: italic;'
+            }],
         id=table_id,
         editable=True,
     )
