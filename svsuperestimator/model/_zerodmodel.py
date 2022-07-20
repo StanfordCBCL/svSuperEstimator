@@ -6,7 +6,7 @@ from typing import Sequence
 
 import numpy as np
 
-from ..io import SimVascularProject
+from ..reader import SimVascularProject
 import pandas as pd
 
 

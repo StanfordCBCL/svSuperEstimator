@@ -1,69 +1,24 @@
 import dash
 from dash import html, dcc, dash_table
 from dash.dependencies import Input, Output
-from svsuperestimator import io, model as mdl
-from svsuperestimator.problems import windkessel_smc_chopin
+from .. import model as mdl, visualizer, reader
+from ..problems import windkessel_smc_chopin
 import os
 import pandas as pd
-import pickle
 import numpy as np
 
-this_file_dir = os.path.dirname(__file__)
+from . import helpers
 
-
-external_stylesheets = [
-    "https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap",
-]
-
+# Create app
 app = dash.Dash(
-    __name__,
+    "svSuperEstimator",
     title="svSuperEstimator",
-    # assets_folder=os.path.join(this_file_dir, "assets"),
-    external_stylesheets=external_stylesheets,
+    assets_folder=os.path.join(os.path.dirname(__file__), "assets"),
+    external_stylesheets=[
+        "https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap",
+    ],
 )
 
-
-def create_top_bar():
-    return html.Div(
-        children=[
-            html.H1(
-                id="H1",
-                children="svSuperEstimator",
-            ),
-        ],
-        className="topbar",
-    )
-
-
-def create_row(elements):
-    return html.Div(
-        [html.Div(ele, className="item") for ele in elements],
-        className="container",
-    )
-
-
-def create_table(dataframe):
-    return dash_table.DataTable(
-        dataframe.to_dict("records"),
-        [{"name": i, "id": i} for i in dataframe.columns],
-        style_header={
-            "font-weight": "bold",
-            "backgroundColor": "transparent",
-        },
-        style_data={
-            "backgroundColor": "transparent",
-        },
-        style_cell={
-            "textAlign": "left",
-            "font-size": 11,
-            "font-family": "sans-serif",
-        },
-    )
-
-
-df = pd.read_csv(
-    "https://raw.githubusercontent.com/plotly/datasets/master/solar.csv"
-)
 
 MODEL_FOLDER = "/Users/stanford/svSuperEstimator/models"
 
@@ -71,7 +26,7 @@ MODEL_FOLDER = "/Users/stanford/svSuperEstimator/models"
 app.layout = html.Div(
     id="parent",
     children=[
-        create_top_bar(),
+        helpers.create_top_bar("svSuperEstimator"),
         html.H1("Select Model"),
         html.Div(
             dcc.Dropdown(
@@ -91,7 +46,6 @@ app.layout = html.Div(
         html.Div(id="result-selection"),
         html.Div(id="configuration"),
         html.Div(id="input-parameter"),
-        # html.Div(id="start"),
         dcc.Loading(
             id="loading",
             children=[html.Div(id="results")],
@@ -123,9 +77,9 @@ VALID_CASES = [
 def show_project_information(model_name):
     if model_name is None:
         return None, None
-    project = io.SimVascularProject(os.path.join(MODEL_FOLDER, model_name))
+    project = reader.SimVascularProject(os.path.join(MODEL_FOLDER, model_name))
     try:
-        plot3d = io.Vtk3dPlot(
+        plot3d = visualizer.Vtk3dPlot(
             project["3d_mesh"],
             color="darkred",
         )
@@ -148,7 +102,7 @@ def show_project_information(model_name):
     return (
         [
             html.H1("Project Overview"),
-            create_row([graph, create_table(bc_info)]),
+            helpers.create_columns([graph, helpers.create_table(bc_info)]),
         ],
         [
             html.H1("Parameter Estimation"),
@@ -193,8 +147,12 @@ def configure_optimization(selected_case, model_name):
 )
 def displace_results(selected_case, model_name):
     if selected_case != "Create new case" and model_name is not None:
-        project = io.SimVascularProject(os.path.join(MODEL_FOLDER, model_name))
-        return visualize_results(project, selected_case)
+        project = reader.SimVascularProject(
+            os.path.join(MODEL_FOLDER, model_name)
+        )
+        return windkessel_smc_chopin.generate_report(
+            project, selected_case
+        ).to_dash()
     return None
 
 
@@ -245,7 +203,7 @@ def configure_optimization(selected_case, case_selection, model_name):
 
     return html.Div(
         [
-            create_row(options),
+            helpers.create_columns(options),
             html.Div(
                 html.Button(
                     "Start estimation",
@@ -290,7 +248,9 @@ def start_thread(
         and start_simulation
         and selected_case == "Create new case"
     ):
-        project = io.SimVascularProject(os.path.join(MODEL_FOLDER, model_name))
+        project = reader.SimVascularProject(
+            os.path.join(MODEL_FOLDER, model_name)
+        )
 
         config = {
             "num_procs": num_procs,
@@ -302,50 +262,12 @@ def start_thread(
         case_name = f"case_smc_chopin_np{config['num_particles']}_rt{10*config['resampling_threshold']:.0f}_rs{config['num_rejuvenation_steps']}"
         windkessel_smc_chopin.run(project, config, case_name)
 
-        return visualize_results(project, case_name)
+        return windkessel_smc_chopin.generate_report(
+            project, case_name
+        ).to_dash()
 
     return None
 
 
-def visualize_results(project, case_name):
-    results = []
-
-    output_dir = os.path.join(project["rom_optimization_folder"], case_name)
-
-    with open(
-        os.path.join(output_dir, "results.pickle"),
-        "rb",
-    ) as ff:
-        raw_results = pickle.load(ff)
-
-    mean = raw_results["mean"]
-    var = raw_results["var"]
-    raw_output_data = raw_results["raw_output_data"]
-
-    particles = raw_output_data["particles"]
-    weights = raw_output_data["weights"]
-    log_posterior = raw_output_data["log_posterior"]
-    mean = raw_output_data["mean"]
-    var = raw_output_data["var"]
-
-    x = particles[:, 0]
-    y = particles[:, 1]
-    z = np.exp(log_posterior - log_posterior.max())
-    z = z / np.mean(z)
-
-    particle_plot3d = io.ParticlePlot3d(
-        x,
-        y,
-        z,
-        xlabel=r"Rp",
-        ylabel=r"Rd",
-    )
-
-    results.append(
-        html.Div(dcc.Graph(figure=particle_plot3d.fig), className="item")
-    )
-    return results
-
-
-if __name__ == "__main__":
+def run():
     app.run_server(debug=False)

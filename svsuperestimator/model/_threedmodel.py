@@ -2,7 +2,7 @@
 import os
 from shutil import copyfile
 
-from ..io import SimVascularProject
+from ..reader import SimVascularProject
 
 
 class ThreeDModel:

@@ -48,7 +48,7 @@ dev = [
 ]
 
 [project.scripts]
-estimator = "cases.bc_optim_noise:main"
+estimator = "svsuperestimator.app.app:run"
 
 [tool.black]
 line-length = 79

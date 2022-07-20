@@ -127,11 +127,13 @@ input[type=number] {
 .button {
     border: none;
     overflow: auto;
-    outline: none;
     background-color: transparent;
     color: #ffffffe8;
-    border-color: transparent;
     width: 100%;
+}
+
+.button:active {
+    color: #ffffff3b;
 }
 
 input {

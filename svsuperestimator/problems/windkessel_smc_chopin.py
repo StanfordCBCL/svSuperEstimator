@@ -6,7 +6,10 @@ from .. import (
     solver as slv,
     forward_models,
     iterators,
+    visualizer,
 )
+import pickle
+import numpy as np
 
 
 def run(project, config, case_name=None):
@@ -57,3 +60,42 @@ def run(project, config, case_name=None):
 
     # Run the iterator
     iterator.run()
+
+
+def generate_report(project, case_name=None):
+
+    report = visualizer.Report()
+
+    output_dir = os.path.join(project["rom_optimization_folder"], case_name)
+
+    with open(
+        os.path.join(output_dir, "results.pickle"),
+        "rb",
+    ) as ff:
+        raw_results = pickle.load(ff)
+
+    mean = raw_results["mean"]
+    var = raw_results["var"]
+    raw_output_data = raw_results["raw_output_data"]
+
+    particles = raw_output_data["particles"]
+    weights = raw_output_data["weights"]
+    log_posterior = raw_output_data["log_posterior"]
+    mean = raw_output_data["mean"]
+    var = raw_output_data["var"]
+
+    x = particles[:, 0]
+    y = particles[:, 1]
+    z = np.exp(log_posterior - log_posterior.max())
+    z = z / np.mean(z)
+
+    particle_plot3d = visualizer.ParticlePlot3d(
+        x,
+        y,
+        z,
+        xlabel=r"Rp",
+        ylabel=r"Rd",
+    )
+    report.add_plots(particle_plot3d)
+
+    return report

@@ -1,5 +1,5 @@
 """This module holds the MultiFidelityModel class."""
-from ..io import SimVascularProject
+from ..reader import SimVascularProject
 from . import ThreeDModel, ZeroDModel
 
 
