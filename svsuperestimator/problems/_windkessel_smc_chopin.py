@@ -12,40 +12,46 @@ import pickle
 import numpy as np
 
 
-class WindkesselSMCChopin:
+class BivariantWindkesselSMCChopin:
 
-    OPTIONS_WITH_DEFAULT = {
-        "num_procs": 1,
-        "num_particles": 100,
-        "num_rejuvenation_steps": 2,
-        "resampling_threshold": 0.5,
-    }
 
-    PROBLEM_NAME = "Windkessel-SMC-Chopin"
+    PROBLEM_NAME = "Bivariant-Windkessel-SMC-Chopin"
 
-    @classmethod
-    def run(cls, project, config, case_name=None):
+    def __init__(self, project, case_name=None):
+        self.project = project
+        self.case_name = case_name
+
+        self.options= {
+            "num_procs": 1,
+            "num_particles": 100,
+            "num_rejuvenation_steps": 2,
+            "resampling_threshold": 0.5,
+        }
+
+        for bc_name in mdl.ZeroDModel(project).get_outlet_bcs():
+            self.options[bc_name + "_group"] = 0
+
+        optim_folder = self.project["rom_optimization_folder"]
+        if case_name is None:
+            self.output_folder = optim_folder
+        else:
+            self.output_folder = os.path.join(optim_folder, case_name)
+
+    def run(self, config):
 
         # Setup project model and solver
-        model = mdl.MultiFidelityModel(project)
+        model = mdl.MultiFidelityModel(self.project)
         solver = slv.ZeroDSolver(cpp=True)
 
-        optim_folder = project["rom_optimization_folder"]
-        if case_name is None:
-            output_folder = optim_folder
-            if not os.path.exists(output_folder):
-                os.makedirs(output_folder)
-        else:
-            output_folder = os.path.join(optim_folder, case_name)
-            os.makedirs(output_folder, exist_ok=True)
+        os.makedirs(self.output_folder, exist_ok=True)
 
         # Save parameters to file
-        with open(os.path.join(output_folder, "parameters.json"), "w") as ff:
+        with open(os.path.join(self.output_folder, "parameters.json"), "w") as ff:
             json.dump(config, ff, indent=4)
 
         # Save case name to file
-        with open(os.path.join(output_folder, "case.txt"), "w") as ff:
-            ff.write(cls.PROBLEM_NAME)
+        with open(os.path.join(self.output_folder, "case.txt"), "w") as ff:
+            ff.write(self.PROBLEM_NAME)
 
         # Create the foward model
         forward_model = forward_models.WindkesselDistalToProximalResistance0D(
@@ -64,7 +70,7 @@ class WindkesselSMCChopin:
         iterator = iterators.SmcIterator(
             forward_model=forward_model,
             y_obs=y_obs,
-            output_dir=output_folder,
+            output_dir=self.output_folder,
             num_procs=config.get("num_procs", 1),
         )
 
@@ -76,13 +82,12 @@ class WindkesselSMCChopin:
         # Run the iterator
         iterator.run()
 
-    @staticmethod
-    def generate_report(project, case_name=None):
+    def generate_report(self):
 
         report = visualizer.Report()
 
         output_dir = os.path.join(
-            project["rom_optimization_folder"], case_name
+            self.project["rom_optimization_folder"], self.case_name
         )
 
         with open(

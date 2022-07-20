@@ -146,9 +146,7 @@ def run(model_folder):
                 project, selected_case
             )
 
-            return problem_class.generate_report(
-                project, selected_case
-            ).to_dash()
+            return problem_class.generate_report().to_dash()
         return None
 
     @app.callback(
@@ -166,8 +164,12 @@ def run(model_folder):
             return None
 
         problem_class = problems.get_problem_by_name(case_selection)
+        project = reader.SimVascularProject(
+                os.path.join(model_folder, model_name)
+            )
+        problem = problem_class(project, case_selection)
 
-        config_df = pd.DataFrame([[key, value] for key, value in problem_class.OPTIONS_WITH_DEFAULT.items()], columns=["Name", "Value"])
+        config_df = pd.DataFrame([[key, value] for key, value in problem.options.items()], columns=["Name", "Value"])
 
         config_table = helpers.create_editable_table(config_df, table_id="new-case-type-parameters")
 
@@ -215,9 +217,10 @@ def run(model_folder):
             case_name = f"case_smc_chopin_np{config['num_particles']}_rt{10*config['resampling_threshold']:.0f}_rs{config['num_rejuvenation_steps']}"
 
             problem_class = problems.get_problem_by_name(case_type)
-            problem_class.run(project, config, case_name)
+            problem = problem_class(project, case_name)
+            problem.run(config)
 
-            return problem_class.generate_report(project, case_name).to_dash()
+            return problem.generate_report().to_dash()
 
         return None
 
