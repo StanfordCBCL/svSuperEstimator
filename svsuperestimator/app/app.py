@@ -1,18 +1,11 @@
 import dash
 from dash import html, dcc
 from dash.dependencies import Input, Output
-from .. import model as mdl, visualizer, reader
-from ..problems import windkessel_smc_chopin
+from .. import model as mdl, visualizer, reader, problems
 import os
 import click
 
 from . import helpers
-
-VALID_CASES = [
-    "Nelder-Mead Optimization",
-    "Grid Approximation",
-    "Sequential-Monte-Carlo",
-]
 
 
 @click.command()
@@ -91,13 +84,16 @@ def run(model_folder):
             bc_info = model.get_boundary_condition_info()
         except ValueError:
             return html.Div("Model not supported", className="item"), None
-        cases = sorted(
-            [
-                name
-                for name in os.listdir(project["rom_optimization_folder"])
-                if name.startswith("case_")
-            ]
-        )
+
+        cases = []
+        if os.path.exists(project["rom_optimization_folder"]):
+            cases = sorted(
+                [
+                    name
+                    for name in os.listdir(project["rom_optimization_folder"])
+                    if name.startswith("case_")
+                ]
+            )
         cases.append("Create new case")
         return (
             [
@@ -124,10 +120,10 @@ def run(model_folder):
         if model_name is None or selected_case != "Create new case":
             return None
         return [
-            html.H1("new-case-configuration-section"),
+            html.H1("Create new case"),
             html.Div(
                 dcc.Dropdown(
-                    VALID_CASES,
+                    problems.VALID_PROBLEMS,
                     id="new-case-type-selection",  # className="dropdown"
                     placeholder="Select problem type",
                 ),
@@ -145,7 +141,11 @@ def run(model_folder):
             project = reader.SimVascularProject(
                 os.path.join(model_folder, model_name)
             )
-            return windkessel_smc_chopin.generate_report(
+            problem_class = problems.get_problem_by_run_name(
+                project, selected_case
+            )
+
+            return problem_class.generate_report(
                 project, selected_case
             ).to_dash()
         return None
@@ -219,6 +219,7 @@ def run(model_folder):
         Input("start-simulation", "n_clicks"),
         Input("selected-model-name", "value"),
         Input("selected-case-result", "value"),
+        Input("new-case-type-selection", "value"),
     )
     def start_thread(
         num_procs,
@@ -228,6 +229,7 @@ def run(model_folder):
         start_simulation,
         model_name,
         selected_case,
+        case_type,
     ):
         if (
             not None
@@ -253,11 +255,11 @@ def run(model_folder):
             }
 
             case_name = f"case_smc_chopin_np{config['num_particles']}_rt{10*config['resampling_threshold']:.0f}_rs{config['num_rejuvenation_steps']}"
-            windkessel_smc_chopin.run(project, config, case_name)
 
-            return windkessel_smc_chopin.generate_report(
-                project, case_name
-            ).to_dash()
+            problem_class = problems.get_problem_by_name(case_type)
+            problem_class.run(project, config, case_name)
+
+            return problem_class.generate_report(project, case_name).to_dash()
 
         return None
 

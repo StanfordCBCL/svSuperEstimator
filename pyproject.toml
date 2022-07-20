@@ -16,7 +16,8 @@ dependencies = [
     "orjson", # Faster than json
     "pyarrow", # For faster csv reading
     "click", # Easy to use argument parser
-    "rich"
+    "rich",
+    "dash"
 ]
 dynamic = ["version", "readme"]
 requires-python = ">=3.8"
