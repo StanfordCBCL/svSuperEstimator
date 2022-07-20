@@ -125,17 +125,15 @@ class ZeroDModel:
             with open(config_file, "w") as ff:
                 json.dump(config, ff)
         return config
-    
 
     def get_outlet_bcs(self):
         outlet_bcs = []
         for vessel_data in self._config["vessels"]:
-            if "boundary_conditions" in vessel_data and "outlet" in vessel_data[
-                    "boundary_conditions"
-                ]:
-                outlet_bcs.append(vessel_data[
-                    "boundary_conditions"
-                ]["outlet"])
+            if (
+                "boundary_conditions" in vessel_data
+                and "outlet" in vessel_data["boundary_conditions"]
+            ):
+                outlet_bcs.append(vessel_data["boundary_conditions"]["outlet"])
         return outlet_bcs
 
     def get_boundary_condition_info(self):

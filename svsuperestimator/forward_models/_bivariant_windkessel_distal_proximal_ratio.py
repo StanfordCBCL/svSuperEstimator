@@ -1,18 +1,30 @@
 """This module holds the WindkesselDistalToProximalResistance0D class."""
+from multiprocessing.sharedctypes import Value
 from ._forward_model import ForwardModel
 from svsuperestimator import model as mdl, solver as slv
 
 import numpy as np
 
 
-class WindkesselDistalToProximalResistance0D(ForwardModel):
-    """Windkessel distal to proximal resistance 0D forward model.
+class BivariantWindkesselDistalToProximalResistance0D(ForwardModel):
+    """Bivariant Windkessel distal to proximal resistance 0D forward model.
 
     This forward model performs evaluations of a 0D model based on a
-    given distal to proximal resistance ratio."""
+    given distal to proximal resistance ratio. The boundary conditions are
+    divided into to groups.
+    """
 
-    def __init__(self, model: mdl.ZeroDModel, solver: slv.ZeroDSolver) -> None:
+    def __init__(
+        self,
+        model: mdl.ZeroDModel,
+        solver: slv.ZeroDSolver,
+        bc_group_1,
+        bc_group_2,
+    ) -> None:
         super().__init__(model, solver)
+
+        self.bc_group_1 = bc_group_1
+        self.bc_group_2 = bc_group_2
 
         self.outlet_bcs = {
             name: bc
@@ -20,10 +32,30 @@ class WindkesselDistalToProximalResistance0D(ForwardModel):
             if name != "INFLOW"
         }
 
-        self.r_i = [
-            bc.resistance_distal + bc.resistance_proximal
-            for bc in self.outlet_bcs.values()
-        ]  # Internal resistance for each outlet
+        for bc in self.outlet_bcs:
+            if (bc not in bc_group_1) + (bc not in bc_group_2) != 1:
+                raise ValueError(
+                    f"Boundary condition {bc} is not assigned correctly."
+                )
+
+        if not bc_group_1 or not bc_group_2:
+            raise ValueError("Boundary conditon group cant be empty.")
+
+        # Internal resistance for each group
+        self.r_i_1 = np.mean(
+            [
+                self.outlet_bcs[name].resistance_distal
+                + self.outlet_bcs[name].resistance_proximal
+                for name in bc_group_1
+            ]
+        )
+        self.r_i_2 = np.mean(
+            [
+                self.outlet_bcs[name].resistance_distal
+                + self.outlet_bcs[name].resistance_proximal
+                for name in bc_group_2
+            ]
+        )
 
         self.bc_map = {}
         for branch_id, vessel_data in enumerate(model._config["vessels"]):
@@ -47,17 +79,28 @@ class WindkesselDistalToProximalResistance0D(ForwardModel):
         self.inflow_name = self.bc_map["INFLOW"]["name"]
         self.inflow_pressure = self.bc_map["INFLOW"]["pressure"]
 
-    def evaluate(self, **kwargs):
+    def evaluate(self, k0, k1):
         """Objective function for the optimization.
 
         Evaluates the sum of the offsets for the input output pressure relation
         for each outlet.
         """
         # Set the resistance based on k
-        for i, bc in enumerate(self.outlet_bcs.values()):
-            ki = np.exp(kwargs[f"k{i}"])
-            bc.resistance_proximal = self.r_i[i] * 1 / (1.0 + ki)
-            bc.resistance_distal = bc.resistance_proximal * ki
+        for bc in self.bc_group_1:
+            self.outlet_bcs[bc].resistance_proximal = (
+                self.r_i_1 * 1 / (1.0 + k0)
+            )
+            self.outlet_bcs[bc].resistance_distal = (
+                self.outlet_bcs[bc].resistance_proximal * k0
+            )
+
+        for bc in self.bc_group_2:
+            self.outlet_bcs[bc].resistance_proximal = (
+                self.r_i_2 * 1 / (1.0 + k1)
+            )
+            self.outlet_bcs[bc].resistance_distal = (
+                self.outlet_bcs[bc].resistance_proximal * k1
+            )
 
         try:
             result = self.solver.run_simulation(self.model, True)

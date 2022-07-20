@@ -2,13 +2,17 @@
 
 Contains the different optimization problems.
 """
-from ._windkessel_smc_chopin import BivariantWindkesselSMCChopin
+from ._windkessel_smc_chopin import WindkesselSMCChopin
+from ._bivariant_windkessel_smc_chopin import BivariantWindkesselSMCChopin
 import os
 
 
 __all__ = ["WindkesselSMCChopin"]
 
-_problem_mapping = {BivariantWindkesselSMCChopin.PROBLEM_NAME: BivariantWindkesselSMCChopin}
+_problem_mapping = {
+    WindkesselSMCChopin.PROBLEM_NAME: WindkesselSMCChopin,
+    BivariantWindkesselSMCChopin.PROBLEM_NAME: BivariantWindkesselSMCChopin,
+}
 
 VALID_PROBLEMS = list(_problem_mapping.keys())
 

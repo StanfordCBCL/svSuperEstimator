@@ -101,13 +101,16 @@ def create_editable_table(dataframe, table_id):
             "font-size": 11,
             "color": "ffffffe8",
         },
-        css=[{
-                "selector": 'td.cell--selected, td.focused',
-                "rule": 'background-color: #FF4136;'
-            }, {
-                "selector": 'td.cell--selected *, td.focused *',
-                "rule": 'color: white !important;text-align: left;font-style: italic;'
-            }],
+        css=[
+            {
+                "selector": "td.cell--selected, td.focused",
+                "rule": "background-color: #FF4136;",
+            },
+            {
+                "selector": "td.cell--selected *, td.focused *",
+                "rule": "color: white !important;text-align: left;font-style: italic;",
+            },
+        ],
         id=table_id,
         editable=True,
     )

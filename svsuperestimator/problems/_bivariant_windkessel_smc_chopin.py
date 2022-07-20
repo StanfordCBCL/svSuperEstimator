@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+from multiprocessing.sharedctypes import Value
 import os
 from .. import (
     model as mdl,
@@ -12,9 +13,9 @@ import pickle
 import numpy as np
 
 
-class WindkesselSMCChopin:
+class BivariantWindkesselSMCChopin:
 
-    PROBLEM_NAME = "Windkessel-SMC-Chopin"
+    PROBLEM_NAME = "Bivariant-Windkessel-SMC-Chopin"
 
     def __init__(self, project, case_name=None):
         self.project = project
@@ -27,6 +28,9 @@ class WindkesselSMCChopin:
             "resampling_threshold": 0.5,
         }
 
+        for bc_name in mdl.ZeroDModel(project).get_outlet_bcs():
+            self.options[bc_name + "_group"] = 0
+
         optim_folder = self.project["rom_optimization_folder"]
         if case_name is None:
             self.output_folder = optim_folder
@@ -36,8 +40,9 @@ class WindkesselSMCChopin:
     def run(self, config):
 
         # Setup project model and solver
-        model = mdl.MultiFidelityModel(self.project)
+        model = mdl.ZeroDModel(self.project)
         solver = slv.ZeroDSolver(cpp=True)
+        print(config)
 
         os.makedirs(self.output_folder, exist_ok=True)
 
@@ -51,19 +56,55 @@ class WindkesselSMCChopin:
         with open(os.path.join(self.output_folder, "case.txt"), "w") as ff:
             ff.write(self.PROBLEM_NAME)
 
+        bc_group_0 = []
+        bc_group_1 = []
+        for bc_name in model.get_outlet_bcs():
+            group_id = int(config[bc_name + "_group"])
+            if group_id == 0:
+                bc_group_0.append(bc_name)
+            elif group_id == 1:
+                bc_group_1.append(bc_name)
+            else:
+                raise ValueError(
+                    f"Invalid boundary condition group {group_id}."
+                )
+
+        print(bc_group_0)
+        print(bc_group_1)
+
         # Create the foward model
-        forward_model = forward_models.WindkesselDistalToProximalResistance0D(
-            model.zerodmodel, solver
+        forward_model = (
+            forward_models.BivariantWindkesselDistalToProximalResistance0D(
+                model, solver, bc_group_0, bc_group_1
+            )
         )
 
         # Get ground truth distal to proximal ratio
-        target_k = {
-            f"k{i}": bc.resistance_distal / bc.resistance_proximal
-            for i, bc in enumerate(forward_model.outlet_bcs.values())
-        }
+        k0 = np.mean(
+            [
+                forward_model.outlet_bcs[name].resistance_distal
+                for name in bc_group_0
+            ]
+        ) / np.mean(
+            [
+                forward_model.outlet_bcs[name].resistance_proximal
+                for name in bc_group_0
+            ]
+        )
+        k1 = np.mean(
+            [
+                forward_model.outlet_bcs[name].resistance_distal
+                for name in bc_group_1
+            ]
+        ) / np.mean(
+            [
+                forward_model.outlet_bcs[name].resistance_proximal
+                for name in bc_group_1
+            ]
+        )
 
         # Running one simulation to determine targets
-        y_obs = forward_model.evaluate(**target_k)
+        y_obs = forward_model.evaluate(k0=k0, k1=k1)
 
         iterator = iterators.SmcIterator(
             forward_model=forward_model,
@@ -72,7 +113,7 @@ class WindkesselSMCChopin:
             num_procs=config.get("num_procs", 1),
         )
 
-        for i in range(len(target_k)):
+        for i in range(2):
             iterator.add_random_variable(
                 f"k{i}", "uniform", lower_bound=-2, upper_bound=3
             )

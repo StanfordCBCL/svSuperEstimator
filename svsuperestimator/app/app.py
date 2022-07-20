@@ -145,8 +145,9 @@ def run(model_folder):
             problem_class = problems.get_problem_by_run_name(
                 project, selected_case
             )
+            problem = problem_class(project, selected_case)
 
-            return problem_class.generate_report().to_dash()
+            return problem.generate_report().to_dash()
         return None
 
     @app.callback(
@@ -165,13 +166,18 @@ def run(model_folder):
 
         problem_class = problems.get_problem_by_name(case_selection)
         project = reader.SimVascularProject(
-                os.path.join(model_folder, model_name)
-            )
+            os.path.join(model_folder, model_name)
+        )
         problem = problem_class(project, case_selection)
 
-        config_df = pd.DataFrame([[key, value] for key, value in problem.options.items()], columns=["Name", "Value"])
+        config_df = pd.DataFrame(
+            [[key, value] for key, value in problem.options.items()],
+            columns=["Name", "Value"],
+        )
 
-        config_table = helpers.create_editable_table(config_df, table_id="new-case-type-parameters")
+        config_table = helpers.create_editable_table(
+            config_df, table_id="new-case-type-parameters"
+        )
 
         return html.Div(
             [
