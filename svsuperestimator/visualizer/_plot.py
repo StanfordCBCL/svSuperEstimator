@@ -12,6 +12,11 @@ import numpy as np
 from scipy.interpolate import griddata
 import warnings
 
+from pqueens.utils.pdf_estimation import (
+    estimate_bandwidth_for_kde,
+    estimate_pdf,
+)
+
 
 class _PlotlyPlot:
     """Base class for plotting classes based on plotly.
@@ -105,7 +110,6 @@ class LinePlot(_PlotlyPlot):
 
     def __init__(
         self,
-        dataframe: pd.DataFrame,
         x: str = None,
         y: str = None,
         name: str = None,
@@ -114,17 +118,15 @@ class LinePlot(_PlotlyPlot):
         """Create a new LinePlot instance.
 
         Args:
-            dataframe: The dataframe to plot.
-            x: Label of the dataframe to use for the x-axis.
-            y: Label of the dataframe to use for the y-axis.
+
             name: Name of line.
         """
         super().__init__(**kwargs)
         self._fig.add_trace(
             go.Scatter(
+                x=x,
+                y=y,
                 name=name,
-                x=dataframe[x],
-                y=dataframe[y],
                 mode="lines",
                 line=dict(color="rgba(99, 110, 250, 0.5)"),
                 showlegend=False,
@@ -311,6 +313,7 @@ class ParticlePlot3d(_PlotlyPlot):
         y: np.ndarray,
         z: np.ndarray,
         surface=True,
+        marginals=False,
         **kwargs: str,
     ) -> None:
         """Create a new LinePlot instance.
@@ -324,11 +327,11 @@ class ParticlePlot3d(_PlotlyPlot):
         super().__init__(**kwargs)
 
         # Make surface mesh from particles
-        xi = np.linspace(x.min(), x.max(), 100)
-        yi = np.linspace(y.min(), y.max(), 100)
+        xi = np.linspace(x.min(), x.max(), 1000)
+        yi = np.linspace(y.min(), y.max(), 1000)
         X, Y = np.meshgrid(xi, yi)
 
-        Z = griddata((x, y), z, (X, Y), method="linear", rescale=True)
+        Z = griddata((x, y), z, (X, Y), method="cubic", rescale=True)
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -338,28 +341,6 @@ class ParticlePlot3d(_PlotlyPlot):
         y_offset = (np.min(Y)) * np.ones(len(marginal_y))
 
         self._fig = go.Figure(
-            go.Scatter3d(
-                z=marginal_x,
-                x=x_offset,
-                y=Y[:, 0],
-                line=dict(width=5, color="#636efa"),
-                mode="lines",
-                showlegend=False,
-                hoverinfo="skip",
-            )
-        )
-        self._fig.add_trace(
-            go.Scatter3d(
-                z=marginal_y,
-                y=y_offset,
-                x=X[0, :],
-                line=dict(width=5, color="#636efa"),
-                mode="lines",
-                showlegend=False,
-                hoverinfo="skip",
-            )
-        )
-        self._fig.add_trace(
             go.Scatter3d(
                 x=x,
                 y=y,
@@ -371,6 +352,30 @@ class ParticlePlot3d(_PlotlyPlot):
                 hoverinfo="skip",
             ),
         )
+
+        if marginals:
+            self._fig.add_trace(
+                go.Scatter3d(
+                    z=marginal_x,
+                    x=x_offset,
+                    y=Y[:, 0],
+                    line=dict(width=5, color="#636efa"),
+                    mode="lines",
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
+            self._fig.add_trace(
+                go.Scatter3d(
+                    z=marginal_y,
+                    y=y_offset,
+                    x=X[0, :],
+                    line=dict(width=5, color="#636efa"),
+                    mode="lines",
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
         if surface:
             self._fig.add_trace(
                 go.Surface(
@@ -395,36 +400,76 @@ class ParticlePlot3d(_PlotlyPlot):
         )
 
 
-class TablePlot(_PlotlyPlot):
-    """Table plot."""
-
-    def __init__(
-        self,
-        dataframe: pd.DataFrame,
-        **kwargs: str,
-    ):
-        """Create a new TablePlot instance.
-
-        Args:
-            dataframe: The dataframe to plot.
-        """
+class DistPlot(_PlotlyPlot):
+    def __init__(self, samples, **kwargs):
         super().__init__(**kwargs)
-        columns = list(dataframe.columns)
-        table = go.Table(
-            header=dict(
-                values=columns,
-                line_color="white",
-                fill_color="rgba(0,0,0,0)",
-                font=dict(color="white"),
-            ),
-            cells=dict(
-                values=[dataframe[col] for col in columns],
-                line_color="white",
-                fill_color="rgba(0,0,0,0)",
-                font=dict(color="white"),
-            ),
+
+        bandwidth_x = estimate_bandwidth_for_kde(
+            samples, np.amin(samples), np.amax(samples)
         )
-        self._fig = go.Figure(data=[table])
+        pdf_x, support_points = estimate_pdf(samples, bandwidth_x)
+
+        self._fig.add_trace(
+            go.Histogram(
+                x=samples.ravel(),
+                histnorm="probability density",
+                showlegend=False,
+                opacity=0.5,
+                nbinsx=50,
+                # marker=dict(colorscale="viridis"),
+            )
+        )
+        self._fig.add_trace(
+            go.Scatter(
+                x=support_points.ravel(),
+                y=pdf_x.ravel(),
+                name="PDF",
+                mode="lines",
+                opacity=1,
+                line=dict(width=2),
+                showlegend=False,
+            )
+        )
+
+
+class HistogramContourPlot2D(_PlotlyPlot):
+    def __init__(self, x: np.ndarray, y: np.ndarray, **kwargs):
+        super().__init__(**kwargs)
+        self._fig = go.Figure(
+            go.Histogram2dContour(
+                x=x, y=y, xaxis="x", yaxis="y", colorscale="viridis"
+            )
+        )
+        self._fig.add_trace(
+            go.Scatter(
+                x=x,
+                y=y,
+                xaxis="x",
+                yaxis="y",
+                mode="markers",
+                marker=dict(color="rgba(0,0,0,0.3)", size=3),
+            )
+        )
+        self._fig.add_trace(
+            go.Histogram(
+                y=y, xaxis="x2", marker=dict(colorscale="viridis"), nbinsy=50
+            )
+        )
+
+        self._fig.add_trace(
+            go.Histogram(
+                x=x, yaxis="y2", marker=dict(colorscale="viridis"), nbinsx=50
+            )
+        )
+        self._fig.update_layout(
+            xaxis=dict(zeroline=False, domain=[0, 0.85], showgrid=False),
+            yaxis=dict(zeroline=False, domain=[0, 0.85], showgrid=False),
+            xaxis2=dict(zeroline=False, domain=[0.85, 1], showgrid=False),
+            yaxis2=dict(zeroline=False, domain=[0.85, 1], showgrid=False),
+            bargap=0,
+            hovermode="closest",
+            showlegend=False,
+        )
 
 
 class Vtk3dPlot(_PlotlyPlot):

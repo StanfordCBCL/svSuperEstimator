@@ -8,8 +8,6 @@ from typing import Any
 from dash import html, dcc
 import pandas as pd
 
-from ._plot import TablePlot
-
 from ..app.helpers import create_columns, create_box, create_table
 
 

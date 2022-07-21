@@ -1,4 +1,5 @@
 """This module holds the QueensIterator class."""
+import json
 from tempfile import TemporaryDirectory
 import os
 from pqueens.main import main as run_queens
@@ -126,6 +127,20 @@ class QueensIterator(Iterator):
             # Set output directory to temporary directory if not set
             if self._config["global_settings"]["output_dir"] is None:
                 self._config["global_settings"]["output_dir"] = tmpdir
+
+            with open(
+                os.path.join(
+                    self._config["global_settings"]["output_dir"],
+                    "queens_input.json",
+                ),
+                "w",
+            ) as ff:
+                json.dump(
+                    self._config,
+                    ff,
+                    indent=4,
+                    default=lambda o: "<not serializable>",
+                )
 
             # Run queens
             run_queens(options=self._config)

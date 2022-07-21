@@ -15,7 +15,6 @@ import numpy as np
 from .. import visualizer
 import pandas as pd
 from datetime import datetime
-from ..app.helpers import create_table
 
 
 class BivariantWindkesselSMCChopin:
@@ -168,56 +167,34 @@ class BivariantWindkesselSMCChopin:
         with open(os.path.join(output_dir, "parameters.json")) as ff:
             parameters = json.load(ff)
 
-        mean = raw_results["mean"]
-        var = raw_results["var"]
         raw_output_data = raw_results["raw_output_data"]
 
         particles = raw_output_data["particles"]
         weights = raw_output_data["weights"]
-        log_posterior = raw_output_data["log_posterior"]
-        mean = raw_output_data["mean"]
-        var = raw_output_data["var"]
 
         x = np.exp(particles[:, 0])
         y = np.exp(particles[:, 1])
-        z = log_posterior
 
         particle_plot3d = visualizer.ParticlePlot3d(
             x,
             y,
-            z,
+            weights.ravel(),
             xlabel=r"k1",
             ylabel=r"k2",
-            title="Bivariate log-posterior",
+            title="Bivariate posterior",
+            width=800,
+            height=800,
         )
 
-        k0_plot = visualizer.ViolinPlot(
-            pd.DataFrame(
-                x,
-                columns=[
-                    "k0",
-                ],
-            ),
-            title="Particle distribution for k0",
-            ylabel="",
+        histogram_plot2d = visualizer.HistogramContourPlot2D(
+            x, y, title="Particle density", width=800, height=800
         )
-        k0_gt = parameters["x_obs"]["k0"]
-        k0_plot.add_lines(["k0"], [k0_gt], name="Ground Truth")
 
-        k1_plot = visualizer.ViolinPlot(
-            pd.DataFrame(
-                y,
-                columns=[
-                    "k1",
-                ],
-            ),
-            title="Particle distribution for k1",
-            ylabel="",
-        )
-        k1_gt = parameters["x_obs"]["k1"]
-        k1_plot.add_lines(["k1"], [k1_gt], name="Ground Truth")
+        distplot_x = visualizer.DistPlot(x, title="Kernel density of k0")
+        distplot_y = visualizer.DistPlot(y, title="Kernel density of k1")
 
-        report.add_plots([k0_plot, k1_plot, particle_plot3d])
+        report.add_plots([histogram_plot2d, particle_plot3d])
+        report.add_plots([distplot_x, distplot_y])
 
         report.add_title(f"Parameters")
         param_data = {
