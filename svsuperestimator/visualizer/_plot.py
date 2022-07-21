@@ -58,6 +58,13 @@ class _PlotlyPlot:
             path: Target path for image.
         """
         self._fig.update_layout(**self._layout)
+        self._fig.update_layout(
+            {
+                "template": "plotly_white",
+                "plot_bgcolor": "white",
+                "paper_bgcolor": "white",
+            }
+        )
         self._fig.write_image(path)
 
     def configure(
@@ -303,6 +310,7 @@ class ParticlePlot3d(_PlotlyPlot):
         x: np.ndarray,
         y: np.ndarray,
         z: np.ndarray,
+        surface=True,
         **kwargs: str,
     ) -> None:
         """Create a new LinePlot instance.
@@ -322,11 +330,6 @@ class ParticlePlot3d(_PlotlyPlot):
 
         Z = griddata((x, y), z, (X, Y), method="linear", rescale=True)
 
-        self._fig = go.Figure(
-            go.Surface(
-                x=xi, y=yi, z=Z, showlegend=False, showscale=False, name=""
-            )
-        )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             marginal_x = np.nanmean(Z, axis=0)
@@ -334,7 +337,7 @@ class ParticlePlot3d(_PlotlyPlot):
         x_offset = (np.min(X)) * np.ones(len(marginal_x))
         y_offset = (np.min(Y)) * np.ones(len(marginal_y))
 
-        self._fig.add_trace(
+        self._fig = go.Figure(
             go.Scatter3d(
                 z=marginal_x,
                 x=x_offset,
@@ -368,6 +371,12 @@ class ParticlePlot3d(_PlotlyPlot):
                 hoverinfo="skip",
             ),
         )
+        if surface:
+            self._fig.add_trace(
+                go.Surface(
+                    x=xi, y=yi, z=Z, showlegend=False, showscale=False, name=""
+                )
+            )
         self._fig.update_layout(
             margin=dict(l=20, b=20, r=20),
             scene=dict(
@@ -389,7 +398,11 @@ class ParticlePlot3d(_PlotlyPlot):
 class TablePlot(_PlotlyPlot):
     """Table plot."""
 
-    def __init__(self, dataframe: pd.DataFrame, **kwargs: str):
+    def __init__(
+        self,
+        dataframe: pd.DataFrame,
+        **kwargs: str,
+    ):
         """Create a new TablePlot instance.
 
         Args:

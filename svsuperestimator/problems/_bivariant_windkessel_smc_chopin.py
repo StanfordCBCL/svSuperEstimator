@@ -2,7 +2,6 @@ from __future__ import annotations
 import json
 import os
 
-from scipy.fftpack import fft
 from .. import (
     model as mdl,
     solver as slv,
@@ -10,6 +9,7 @@ from .. import (
     iterators,
     visualizer,
 )
+from ..visualizer import utils as plotutils
 import pickle
 import numpy as np
 from .. import visualizer
@@ -32,6 +32,8 @@ class BivariantWindkesselSMCChopin:
             "num_particles": 100,
             "num_rejuvenation_steps": 2,
             "resampling_threshold": 0.5,
+            "noise_factor": 0.05,
+            "noise_type": "fixed_variance",
         }
 
         for bc_name in mdl.ZeroDModel(project).get_outlet_bcs():
@@ -55,9 +57,6 @@ class BivariantWindkesselSMCChopin:
         # Setup project model and solver
         model = mdl.ZeroDModel(self.project)
         solver = slv.ZeroDSolver(cpp=True)
-
-        # Save case name to file
-        parameters["case_id"] = self.PROBLEM_NAME
 
         # Extract boundary condition groups
         bc_group_0 = []
@@ -113,7 +112,12 @@ class BivariantWindkesselSMCChopin:
             forward_model=forward_model,
             y_obs=y_obs,
             output_dir=self.output_folder,
-            num_procs=config.get("num_procs", 1),
+            num_procs=int(config.get("num_procs")),
+            num_particles=int(config.get("num_particles")),
+            num_rejuvenation_steps=int(config.get("num_rejuvenation_steps")),
+            resampling_threshold=float(config.get("resampling_threshold")),
+            noise_value=float(config["noise_factor"]) * np.mean(y_obs.ravel()),
+            noise_type=str(config["noise_type"]),
         )
 
         for i in range(2):
@@ -132,14 +136,23 @@ class BivariantWindkesselSMCChopin:
             json.dump(parameters, ff, indent=4)
 
         # Generate static report
-        report = self.generate_report()
+        report = self.generate_report(project_overview=True)
         report_folder = os.path.join(self.output_folder, "report")
         report.to_html(report_folder)
-        report.to_pngs(report_folder)
+        report.to_files(report_folder)
 
-    def generate_report(self):
+    def generate_report(self, project_overview=False):
 
         report = visualizer.Report()
+
+        if project_overview:
+            plot3d = plotutils.create_3d_model_and_centerline_plot(
+                self.project
+            )
+            model = mdl.ZeroDModel(self.project)
+            report.add_title("Project overview")
+            report.add_plots([model.get_boundary_condition_info(), plot3d])
+
         report.add_title(f"Results")
 
         output_dir = os.path.join(
@@ -167,8 +180,7 @@ class BivariantWindkesselSMCChopin:
 
         x = np.exp(particles[:, 0])
         y = np.exp(particles[:, 1])
-        z = np.exp(log_posterior - log_posterior.max())
-        z = z / np.mean(z)
+        z = log_posterior
 
         particle_plot3d = visualizer.ParticlePlot3d(
             x,
@@ -176,7 +188,7 @@ class BivariantWindkesselSMCChopin:
             z,
             xlabel=r"k1",
             ylabel=r"k2",
-            title="Bivariate posterior",
+            title="Bivariate log-posterior",
         )
 
         k0_plot = visualizer.ViolinPlot(

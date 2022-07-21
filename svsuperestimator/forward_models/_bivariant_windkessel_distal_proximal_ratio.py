@@ -18,13 +18,13 @@ class BivariantWindkesselDistalToProximalResistance0D(ForwardModel):
         self,
         model: mdl.ZeroDModel,
         solver: slv.ZeroDSolver,
+        bc_group_0,
         bc_group_1,
-        bc_group_2,
     ) -> None:
         super().__init__(model, solver)
 
+        self.bc_group_0 = bc_group_0
         self.bc_group_1 = bc_group_1
-        self.bc_group_2 = bc_group_2
 
         self.outlet_bcs = {
             name: bc
@@ -33,27 +33,27 @@ class BivariantWindkesselDistalToProximalResistance0D(ForwardModel):
         }
 
         for bc in self.outlet_bcs:
-            if (bc not in bc_group_1) + (bc not in bc_group_2) != 1:
+            if (bc not in bc_group_0) + (bc not in bc_group_1) != 1:
                 raise ValueError(
                     f"Boundary condition {bc} is not assigned correctly."
                 )
 
-        if not bc_group_1 or not bc_group_2:
+        if not bc_group_0 or not bc_group_1:
             raise ValueError("Boundary conditon group cant be empty.")
 
         # Internal resistance for each group
+        self.r_i_0 = np.mean(
+            [
+                self.outlet_bcs[name].resistance_distal
+                + self.outlet_bcs[name].resistance_proximal
+                for name in bc_group_0
+            ]
+        )
         self.r_i_1 = np.mean(
             [
                 self.outlet_bcs[name].resistance_distal
                 + self.outlet_bcs[name].resistance_proximal
                 for name in bc_group_1
-            ]
-        )
-        self.r_i_2 = np.mean(
-            [
-                self.outlet_bcs[name].resistance_distal
-                + self.outlet_bcs[name].resistance_proximal
-                for name in bc_group_2
             ]
         )
 
@@ -89,17 +89,17 @@ class BivariantWindkesselDistalToProximalResistance0D(ForwardModel):
         k1_exp = np.exp(k1)
 
         # Set the resistance based on k
-        for bc in self.bc_group_1:
+        for bc in self.bc_group_0:
             self.outlet_bcs[bc].resistance_proximal = (
-                self.r_i_1 * 1 / (1.0 + k0_exp)
+                self.r_i_0 * 1 / (1.0 + k0_exp)
             )
             self.outlet_bcs[bc].resistance_distal = (
                 self.outlet_bcs[bc].resistance_proximal * k0_exp
             )
 
-        for bc in self.bc_group_2:
+        for bc in self.bc_group_1:
             self.outlet_bcs[bc].resistance_proximal = (
-                self.r_i_2 * 1 / (1.0 + k1_exp)
+                self.r_i_1 * 1 / (1.0 + k1_exp)
             )
             self.outlet_bcs[bc].resistance_distal = (
                 self.outlet_bcs[bc].resistance_proximal * k1_exp

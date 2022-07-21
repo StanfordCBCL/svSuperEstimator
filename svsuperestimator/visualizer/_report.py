@@ -6,6 +6,9 @@ from datetime import datetime
 from typing import Any
 
 from dash import html, dcc
+import pandas as pd
+
+from ._plot import TablePlot
 
 from ..app.helpers import create_columns, create_box, create_table
 
@@ -52,7 +55,7 @@ class Report:
             elif item_type in [_ContentType.PLOTS, _ContentType.PLOT]:
                 formatted_content.append(_HtmlFlexbox(item))
             elif item_type == _ContentType.TABLE:
-                pass  # TODO
+                formatted_content.append(_HtmlFlexbox(item))
             else:
                 raise RuntimeError("Unknown content type.")
 
@@ -65,32 +68,102 @@ class Report:
 <style>{style}</style>
 <script src=""></script>
 <body>
-<div class="topbar"><div class="element">
-</div><div class="element"><h1>{title} Dashboard</h1></div>
-<div class="element"><div class="timestamp">{timestamp}</div></div>
-</div>{body}</body>
+<div class="topbar"><h1>{title} Dashboard</h1></div>
+{body}
+</body>
 </html>
 """  # noqa
+
+        stylesheet = """body {
+    margin: 0;
+    font-family: 'Open Sans', sans-serif;
+    background-color: #121212;
+    color: #ffffffe8;
+  }
+
+  table {
+    width: 100%;
+    font-family: monospace, monospace;
+    font-size: 10pt;
+    font-weight: lighter;
+    text-align: left;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 5px;
+  }
+
+  .topbar {
+    overflow: hidden;
+    background-color: #212121;
+    text-align: center;
+    margin-bottom: 30px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.07), 0 4px 8px rgba(0, 0, 0, 0.07), 0 8px 16px rgba(0, 0, 0, 0.07), 0 16px 32px rgba(0, 0, 0, 0.07), 0 32px 64px rgba(0, 0, 0, 0.07);
+  }
+
+  .element {
+    display: inline-block;
+    width: 33%;
+  }
+
+  .timestamp {
+    text-align: right;
+    color: #ffffffb5;
+    padding-right: 20px;
+    font-size: 10pt;
+  }
+
+  .topbar h1 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-weight: lighter;
+  }
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    padding: 10px;
+    align-items: flex-start;
+  }
+
+  .item {
+    flex: 0 calc(50% - 40px);
+    background-color: #212121;
+    border-radius: 10px;
+    padding: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.07), 0 4px 8px rgba(0, 0, 0, 0.07), 0 8px 16px rgba(0, 0, 0, 0.07), 0 16px 32px rgba(0, 0, 0, 0.07), 0 32px 64px rgba(0, 0, 0, 0.07);
+  }
+
+  h1 {
+    font-size: 16pt;
+    margin-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-size: 14pt;
+  }
+"""
 
         # Create the folder if it doesn't exist
         if not os.path.isdir(folder):
             os.mkdir(folder)
-
-        # Read css stylesheet
-        stylesheet_path = os.path.join(
-            os.path.dirname(__file__), "../app/assets/stylesheet.css"
-        )
-        with open(stylesheet_path) as ff:
-            style = ff.read()
 
         # Build and write html page
         with open(os.path.join(folder, "index.html"), "w") as ff:
             ff.write(
                 sceleton.format(
                     title="svSuperEstimator",
-                    style=style,
+                    style=stylesheet,
                     timestamp=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
-                    body="\n".join([c.get_html() for c in formatted_content]),
+                    body="\n".join([c.to_html() for c in formatted_content]),
                 )
             )
 
@@ -116,7 +189,7 @@ class Report:
 
         return formatted_content
 
-    def to_pngs(self, folder):
+    def to_files(self, folder):
 
         current_heading = ""
         item_in_section_counter = 0
@@ -133,16 +206,24 @@ class Report:
                 item_in_section_counter += 1
             elif item_type == _ContentType.PLOTS:
                 for iitem in item:
-                    iitem.to_png(
-                        os.path.join(
-                            folder,
-                            current_heading
-                            + f"_{item_in_section_counter}.png",
+                    try:
+                        iitem.to_png(
+                            os.path.join(
+                                folder,
+                                current_heading
+                                + f"_{item_in_section_counter}.png",
+                            )
                         )
-                    )
+                    except AttributeError:
+                        iitem.to_csv(
+                            os.path.join(
+                                folder,
+                                current_heading
+                                + f"_{item_in_section_counter}.csv",
+                            )
+                        )
                     item_in_section_counter += 1
             elif item_type in [_ContentType.TABLE]:
-                # TODO: Save png and not csv
                 item.to_csv(
                     os.path.join(
                         folder,
@@ -167,7 +248,7 @@ class _HtmlHeading:
         self._text = text
         self._level = level
 
-    def get_html(self) -> str:
+    def to_html(self) -> str:
         """Get html string respresentation of content."""
         return f"<h{self._level}>{self._text}</h{self._level}>"
 
@@ -181,12 +262,20 @@ class _HtmlFlexbox:
         Args:
             items: Items for the flexbox.
         """
-        self._items = list(items)
+        if not isinstance(items, list) and not isinstance(items, tuple):
+            self._items = [items]
+        else:
+            self._items = items
 
-    def get_html(self) -> str:
+    def to_html(self) -> str:
         """Get html string respresentation of content."""
         html = "<div class='container'>\n"
         for item in self._items:
-            html += f"<div class='item'>{item.to_html()}</div>\n"
+            if isinstance(item, pd.DataFrame):
+                html += (
+                    f"<div class='item'>{item.to_html(index=False)}</div>\n"
+                )
+            else:
+                html += f"<div class='item'>{item.to_html()}</div>\n"
         html += "</div>"
         return html
