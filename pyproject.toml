@@ -17,7 +17,8 @@ dependencies = [
     "pyarrow", # For faster csv reading
     "click", # Easy to use argument parser
     "rich",
-    "dash"
+    "dash",
+    "kaleido"
 ]
 dynamic = ["version", "readme"]
 requires-python = ">=3.8"

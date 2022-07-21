@@ -2,6 +2,7 @@ import dash
 from dash import html, dcc
 from dash.dependencies import Input, Output
 from .. import model as mdl, visualizer, reader, problems
+from ..visualizer import utils as plotutils
 import os
 import click
 import pandas as pd
@@ -73,11 +74,12 @@ def run(model_folder):
             os.path.join(model_folder, model_name)
         )
         try:
-            plot3d = visualizer.Vtk3dPlot(
-                project["3d_mesh"],
-                color="darkred",
+            graph = dcc.Graph(
+                figure=plotutils.create_3d_model_and_centerline_plot(
+                    project
+                ).fig,
+                config={"displayModeBar": False},
             )
-            graph = dcc.Graph(figure=plot3d.fig)
         except FileNotFoundError:
             graph = "No 3D geometry found"
         try:
@@ -92,14 +94,16 @@ def run(model_folder):
                 [
                     name
                     for name in os.listdir(project["rom_optimization_folder"])
-                    if name.startswith("case_")
+                    if os.path.isdir(
+                        os.path.join(project["rom_optimization_folder"], name)
+                    )
                 ]
             )
         cases.append("Create new case")
         return (
             [
                 html.H1("Project Overview"),
-                helpers.create_columns([graph, helpers.create_table(bc_info)]),
+                helpers.create_columns([helpers.create_table(bc_info), graph]),
             ],
             [
                 html.H1("Parameter Estimation"),

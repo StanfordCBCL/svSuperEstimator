@@ -1,6 +1,3 @@
-"""Visualization helper functions"""
-
-
 def cgs_pressure_to_mmgh(cgs_pressure):
     """Convert pressure from g/(cm s^2) to mmHg.
 

@@ -72,6 +72,7 @@ def create_table(dataframe):
             "font-size": 11,
             "backgroundColor": "transparent",
         },
+        editable=False,
     )
 
 

@@ -5,6 +5,7 @@ Contains the different optimization problems.
 from ._windkessel_smc_chopin import WindkesselSMCChopin
 from ._bivariant_windkessel_smc_chopin import BivariantWindkesselSMCChopin
 import os
+import json
 
 
 __all__ = ["WindkesselSMCChopin"]
@@ -23,7 +24,9 @@ def get_problem_by_name(name):
 
 def get_problem_by_run_name(project, run_name):
     with open(
-        os.path.join(project["rom_optimization_folder"], run_name, "case.txt")
+        os.path.join(
+            project["rom_optimization_folder"], run_name, "parameters.json"
+        )
     ) as ff:
-        case_id = ff.read()
+        case_id = json.load(ff)["problem_type"]
     return _problem_mapping[case_id]

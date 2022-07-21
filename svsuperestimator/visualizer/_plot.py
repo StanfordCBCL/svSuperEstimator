@@ -1,6 +1,7 @@
 """This module holds various plotting classes."""
 from __future__ import annotations
 from typing import Any
+from matplotlib.pyplot import legend
 
 import pandas as pd
 import os
@@ -48,7 +49,7 @@ class _PlotlyPlot:
             include_plotlyjs="cdn", include_mathjax="cdn", full_html=False
         )
 
-    def to_image_file(self, path: str) -> None:
+    def to_png(self, path: str) -> None:
         """Export plot as image file.
 
         Supported formats png, jpg, jpeg, webp, svg, pdf, eps.
@@ -416,7 +417,9 @@ class TablePlot(_PlotlyPlot):
 class Vtk3dPlot(_PlotlyPlot):
     """3d plot from vtk file."""
 
-    def __init__(self, filename: str, color: str = None, **kwargs: str):
+    def __init__(
+        self, filename: str, color: str = None, name=None, **kwargs: str
+    ):
         """Create a new Vtk3dPlot instance.
 
         Args:
@@ -453,9 +456,22 @@ class Vtk3dPlot(_PlotlyPlot):
         if color is not None:
             mesh_args["color"] = color
         self._fig = go.Figure(
-            data=[go.Mesh3d(x=x, y=y, z=z, i=i, j=j, k=k, **mesh_args)],
+            data=[
+                go.Mesh3d(
+                    x=x,
+                    y=y,
+                    z=z,
+                    i=i,
+                    j=j,
+                    k=k,
+                    showlegend=True,
+                    opacity=0.5,
+                    name=name,
+                    **mesh_args,
+                )
+            ],
         )
         self._fig.update_scenes(
             xaxis_visible=False, yaxis_visible=False, zaxis_visible=False
         )
-        self._fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
+        self._fig.update_layout(margin=dict(l=0, r=0, b=0, t=10))

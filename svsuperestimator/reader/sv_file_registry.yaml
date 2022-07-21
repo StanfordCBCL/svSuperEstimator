@@ -12,6 +12,10 @@ rom_simulation_config:
   type: json
   path: ROMSimulations/$CASE_NAME$/solver_0d.in
 
+rom_centerline:
+  type: path
+  path: ROMSimulations/$CASE_NAME$/$CASE_NAME$.vtp
+
 rom_optimization_folder:
   type: path
   path: ROMSimulations/$CASE_NAME$/optim

@@ -2,7 +2,7 @@
 
 Contains everything related to visualization.
 """
-from ._plotclasses import (
+from ._plot import (
     LinePlot,
     TablePlot,
     Vtk3dPlot,

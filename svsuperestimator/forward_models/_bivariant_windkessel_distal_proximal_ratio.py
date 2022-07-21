@@ -79,27 +79,30 @@ class BivariantWindkesselDistalToProximalResistance0D(ForwardModel):
         self.inflow_name = self.bc_map["INFLOW"]["name"]
         self.inflow_pressure = self.bc_map["INFLOW"]["pressure"]
 
-    def evaluate(self, k0, k1):
+    def evaluate(self, k0, k1, **kwargs):
         """Objective function for the optimization.
 
         Evaluates the sum of the offsets for the input output pressure relation
         for each outlet.
         """
+        k0_exp = np.exp(k0)
+        k1_exp = np.exp(k1)
+
         # Set the resistance based on k
         for bc in self.bc_group_1:
             self.outlet_bcs[bc].resistance_proximal = (
-                self.r_i_1 * 1 / (1.0 + k0)
+                self.r_i_1 * 1 / (1.0 + k0_exp)
             )
             self.outlet_bcs[bc].resistance_distal = (
-                self.outlet_bcs[bc].resistance_proximal * k0
+                self.outlet_bcs[bc].resistance_proximal * k0_exp
             )
 
         for bc in self.bc_group_2:
             self.outlet_bcs[bc].resistance_proximal = (
-                self.r_i_2 * 1 / (1.0 + k1)
+                self.r_i_2 * 1 / (1.0 + k1_exp)
             )
             self.outlet_bcs[bc].resistance_distal = (
-                self.outlet_bcs[bc].resistance_proximal * k1
+                self.outlet_bcs[bc].resistance_proximal * k1_exp
             )
 
         try:

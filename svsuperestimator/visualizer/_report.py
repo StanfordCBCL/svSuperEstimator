@@ -7,13 +7,14 @@ from typing import Any
 
 from dash import html, dcc
 
-from ..app.helpers import create_columns, create_box
+from ..app.helpers import create_columns, create_box, create_table
 
 
 class _ContentType(Enum):
     HEADING = 1
     PLOT = 2
     PLOTS = 3
+    TABLE = 4
 
 
 class Report:
@@ -29,6 +30,9 @@ class Report:
             self._content.append((_ContentType.PLOTS, plots))
         else:
             self._content.append((_ContentType.PLOT, plots))
+
+    def add_table(self, dataframe):
+        self._content.append((_ContentType.TABLE, dataframe))
 
     def to_html(self, folder):
         """Convert the report to a static html website in the folder.
@@ -47,6 +51,8 @@ class Report:
                 formatted_content.append(_HtmlHeading(item))
             elif item_type in [_ContentType.PLOTS, _ContentType.PLOT]:
                 formatted_content.append(_HtmlFlexbox(item))
+            elif item_type == _ContentType.TABLE:
+                pass  # TODO
             else:
                 raise RuntimeError("Unknown content type.")
 
@@ -72,7 +78,7 @@ class Report:
 
         # Read css stylesheet
         stylesheet_path = os.path.join(
-            os.path.dirname(__file__), "stylesheet.css"
+            os.path.dirname(__file__), "../app/assets/stylesheet.css"
         )
         with open(stylesheet_path) as ff:
             style = ff.read()
@@ -103,6 +109,8 @@ class Report:
                         [dcc.Graph(figure=iitem.fig) for iitem in item]
                     )
                 )
+            elif item_type in [_ContentType.TABLE]:
+                formatted_content.append(create_box(create_table(item)))
             else:
                 raise RuntimeError("Unknown content type.")
 
@@ -116,22 +124,32 @@ class Report:
             if item_type == _ContentType.HEADING:
                 current_heading = item
                 item_in_section_counter = 0
-            elif item_type in [_ContentType.PLOT]:
+            elif item_type == _ContentType.PLOT:
                 item.to_png(
                     os.path.join(
                         folder, current_heading + f"_{item_in_section_counter}"
                     )
                 )
                 item_in_section_counter += 1
-            elif item_type in [_ContentType.PLOTS]:
+            elif item_type == _ContentType.PLOTS:
                 for iitem in item:
                     iitem.to_png(
                         os.path.join(
                             folder,
-                            current_heading + f"_{item_in_section_counter}",
+                            current_heading
+                            + f"_{item_in_section_counter}.png",
                         )
                     )
                     item_in_section_counter += 1
+            elif item_type in [_ContentType.TABLE]:
+                # TODO: Save png and not csv
+                item.to_csv(
+                    os.path.join(
+                        folder,
+                        current_heading + f"_{item_in_section_counter}.csv",
+                    )
+                )
+                item_in_section_counter += 1
             else:
                 raise RuntimeError("Unknown content type.")
 
