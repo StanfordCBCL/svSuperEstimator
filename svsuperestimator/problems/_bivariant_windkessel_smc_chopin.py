@@ -79,27 +79,33 @@ class BivariantWindkesselSMCChopin:
         )
 
         # Get ground truth distal to proximal ratio
-        k0 = np.mean(
-            [
-                forward_model.outlet_bcs[name].resistance_distal
-                for name in bc_group_0
-            ]
-        ) / np.mean(
-            [
-                forward_model.outlet_bcs[name].resistance_proximal
-                for name in bc_group_0
-            ]
+        k0 = np.log(
+            np.mean(
+                [
+                    forward_model.outlet_bcs[name].resistance_distal
+                    for name in bc_group_0
+                ]
+            )
+            / np.mean(
+                [
+                    forward_model.outlet_bcs[name].resistance_proximal
+                    for name in bc_group_0
+                ]
+            )
         )
-        k1 = np.mean(
-            [
-                forward_model.outlet_bcs[name].resistance_distal
-                for name in bc_group_1
-            ]
-        ) / np.mean(
-            [
-                forward_model.outlet_bcs[name].resistance_proximal
-                for name in bc_group_1
-            ]
+        k1 = np.log(
+            np.mean(
+                [
+                    forward_model.outlet_bcs[name].resistance_distal
+                    for name in bc_group_1
+                ]
+            )
+            / np.mean(
+                [
+                    forward_model.outlet_bcs[name].resistance_proximal
+                    for name in bc_group_1
+                ]
+            )
         )
         parameters["x_obs"] = {"k0": k0, "k1": k1}
 
@@ -170,7 +176,9 @@ class BivariantWindkesselSMCChopin:
         raw_output_data = raw_results["raw_output_data"]
 
         particles = raw_output_data["particles"]
-        weights = raw_output_data["weights"]
+        weights = raw_output_data["weights"] / np.mean(
+            raw_output_data["weights"]
+        )
 
         x = np.exp(particles[:, 0])
         y = np.exp(particles[:, 1])
@@ -179,19 +187,39 @@ class BivariantWindkesselSMCChopin:
             x,
             y,
             weights.ravel(),
-            xlabel=r"k1",
-            ylabel=r"k2",
+            xlabel="k0",
+            ylabel="k1",
             title="Bivariate posterior",
             width=800,
             height=800,
         )
 
         histogram_plot2d = visualizer.HistogramContourPlot2D(
-            x, y, title="Particle density", width=800, height=800
+            x,
+            y,
+            title="Particle density",
+            width=800,
+            height=800,
+            xlabel="k0",
+            ylabel="k1",
+        )
+        histogram_plot2d.add_dot(
+            np.exp(parameters["x_obs"]["k0"]),
+            np.exp(parameters["x_obs"]["k1"]),
         )
 
-        distplot_x = visualizer.DistPlot(x, title="Kernel density of k0")
-        distplot_y = visualizer.DistPlot(y, title="Kernel density of k1")
+        distplot_x = visualizer.DistPlot(
+            x,
+            title="Kernel density of k0",
+            xlabel="k0",
+            ylabel="PDF",
+        )
+        distplot_y = visualizer.DistPlot(
+            y,
+            title="Kernel density of k1",
+            xlabel="k1",
+            ylabel="PDF",
+        )
 
         report.add_plots([histogram_plot2d, particle_plot3d])
         report.add_plots([distplot_x, distplot_y])

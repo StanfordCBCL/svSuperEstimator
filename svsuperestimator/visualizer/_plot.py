@@ -10,12 +10,13 @@ import vtk
 from vtk.util.numpy_support import vtk_to_numpy
 import numpy as np
 from scipy.interpolate import griddata
-import warnings
 
 from pqueens.utils.pdf_estimation import (
     estimate_bandwidth_for_kde,
     estimate_pdf,
 )
+
+from scipy import ndimage
 
 
 class _PlotlyPlot:
@@ -327,25 +328,24 @@ class ParticlePlot3d(_PlotlyPlot):
         super().__init__(**kwargs)
 
         # Make surface mesh from particles
-        xi = np.linspace(x.min(), x.max(), 1000)
-        yi = np.linspace(y.min(), y.max(), 1000)
+        xi = np.linspace(x.min(), x.max(), 100)
+        yi = np.linspace(y.min(), y.max(), 100)
         X, Y = np.meshgrid(xi, yi)
 
-        Z = griddata((x, y), z, (X, Y), method="cubic", rescale=True)
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            marginal_x = np.nanmean(Z, axis=0)
-            marginal_y = np.nanmean(Z, axis=1)
-        x_offset = (np.min(X)) * np.ones(len(marginal_x))
-        y_offset = (np.min(Y)) * np.ones(len(marginal_y))
+        Z = np.clip(
+            griddata((x, y), z, (X, Y), method="linear"),
+            a_min=0.0,
+            a_max=None,
+        )
+        Z = ndimage.gaussian_filter(Z, sigma=1.0)
+        Z[Z == 0.0] = np.nan
 
         self._fig = go.Figure(
             go.Scatter3d(
                 x=x,
                 y=y,
                 z=z,
-                marker=dict(size=5),
+                marker=dict(size=3),
                 opacity=1.0,
                 mode="markers",
                 showlegend=False,
@@ -353,33 +353,17 @@ class ParticlePlot3d(_PlotlyPlot):
             ),
         )
 
-        if marginals:
-            self._fig.add_trace(
-                go.Scatter3d(
-                    z=marginal_x,
-                    x=x_offset,
-                    y=Y[:, 0],
-                    line=dict(width=5, color="#636efa"),
-                    mode="lines",
-                    showlegend=False,
-                    hoverinfo="skip",
-                )
-            )
-            self._fig.add_trace(
-                go.Scatter3d(
-                    z=marginal_y,
-                    y=y_offset,
-                    x=X[0, :],
-                    line=dict(width=5, color="#636efa"),
-                    mode="lines",
-                    showlegend=False,
-                    hoverinfo="skip",
-                )
-            )
         if surface:
             self._fig.add_trace(
                 go.Surface(
-                    x=xi, y=yi, z=Z, showlegend=False, showscale=False, name=""
+                    x=xi,
+                    y=yi,
+                    z=Z,
+                    showlegend=False,
+                    showscale=False,
+                    opacity=0.7,
+                    name="",
+                    colorscale="viridis",
                 )
             )
         self._fig.update_layout(
@@ -396,6 +380,7 @@ class ParticlePlot3d(_PlotlyPlot):
                     showgrid=False,
                 ),
                 zaxis_visible=False,
+                aspectratio=dict(x=1, y=1, z=0.5),
             ),
         )
 
@@ -430,6 +415,17 @@ class DistPlot(_PlotlyPlot):
                 showlegend=False,
             )
         )
+        self._fig.add_annotation(
+            text=f"Kernel: Gaussian | Optimized bandwith: {bandwidth_x:.3f}",
+            align="right",
+            showarrow=False,
+            xref="paper",
+            yref="paper",
+            x=1.0,
+            y=-0.2,
+            # bordercolor="black",
+            # borderwidth=1,
+        )
 
 
 class HistogramContourPlot2D(_PlotlyPlot):
@@ -437,7 +433,13 @@ class HistogramContourPlot2D(_PlotlyPlot):
         super().__init__(**kwargs)
         self._fig = go.Figure(
             go.Histogram2dContour(
-                x=x, y=y, xaxis="x", yaxis="y", colorscale="viridis"
+                x=x,
+                y=y,
+                xaxis="x",
+                yaxis="y",
+                colorscale="viridis",
+                # nbinsx=50,
+                # nbinsy=50,
             )
         )
         self._fig.add_trace(
@@ -447,7 +449,7 @@ class HistogramContourPlot2D(_PlotlyPlot):
                 xaxis="x",
                 yaxis="y",
                 mode="markers",
-                marker=dict(color="rgba(0,0,0,0.3)", size=3),
+                marker=dict(color="whitesmoke", size=2, opacity=0.5),
             )
         )
         self._fig.add_trace(
@@ -469,6 +471,20 @@ class HistogramContourPlot2D(_PlotlyPlot):
             bargap=0,
             hovermode="closest",
             showlegend=False,
+        )
+
+    def add_dot(self, x, y):
+        self._fig.add_trace(
+            go.Scatter(
+                x=[x],
+                y=[y],
+                mode="markers",
+                name="Ground Truth",
+                marker=dict(color="orange", size=7),
+            )
+        )
+        self._fig.add_annotation(
+            x=x, y=y, text="Ground Truth", showarrow=True, arrowhead=1
         )
 
 

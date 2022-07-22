@@ -42,20 +42,10 @@ class BivariantWindkesselDistalToProximalResistance0D(ForwardModel):
             raise ValueError("Boundary conditon group cant be empty.")
 
         # Internal resistance for each group
-        self.r_i_0 = np.mean(
-            [
-                self.outlet_bcs[name].resistance_distal
-                + self.outlet_bcs[name].resistance_proximal
-                for name in bc_group_0
-            ]
-        )
-        self.r_i_1 = np.mean(
-            [
-                self.outlet_bcs[name].resistance_distal
-                + self.outlet_bcs[name].resistance_proximal
-                for name in bc_group_1
-            ]
-        )
+        self.r_i = [
+            bc.resistance_distal + bc.resistance_proximal
+            for bc in self.outlet_bcs.values()
+        ]  # Internal resistance for each outlet
 
         self.bc_map = {}
         for branch_id, vessel_data in enumerate(model._config["vessels"]):
@@ -88,38 +78,32 @@ class BivariantWindkesselDistalToProximalResistance0D(ForwardModel):
         k0_exp = np.exp(k0)
         k1_exp = np.exp(k1)
 
-        # Set the resistance based on k
-        for bc in self.bc_group_0:
-            self.outlet_bcs[bc].resistance_proximal = (
-                self.r_i_0 * 1 / (1.0 + k0_exp)
-            )
-            self.outlet_bcs[bc].resistance_distal = (
-                self.outlet_bcs[bc].resistance_proximal * k0_exp
-            )
+        for i, (bc_name, bc) in enumerate(self.outlet_bcs.items()):
 
-        for bc in self.bc_group_1:
-            self.outlet_bcs[bc].resistance_proximal = (
-                self.r_i_1 * 1 / (1.0 + k1_exp)
-            )
-            self.outlet_bcs[bc].resistance_distal = (
-                self.outlet_bcs[bc].resistance_proximal * k1_exp
-            )
+            if bc_name in self.bc_group_0:
+                bc.resistance_proximal = self.r_i[i] * 1 / (1.0 + k0_exp)
+                bc.resistance_distal = bc.resistance_proximal * k0_exp
+            else:
+                bc.resistance_proximal = self.r_i[i] * 1 / (1.0 + k1_exp)
+                bc.resistance_distal = bc.resistance_proximal * k1_exp
 
         try:
-            result = self.solver.run_simulation(self.model, True)
+            result = self.solver.run_simulation(self.model, False)
         except RuntimeError:
             return np.array([np.nan] * len(self.outlet_bcs) * 2)
 
-        p_inflow = result.loc[result.name == self.inflow_name][
-            self.inflow_pressure
-        ].iloc[0]
+        # p_inflow = result.loc[result.name == self.inflow_name][
+        #     self.inflow_pressure
+        # ].iloc[0]
 
-        p_eval = [
-            p_inflow - result.loc[result.name == name][pressure_id].iloc[0]
-            for name, pressure_id in zip(self.bc_names, self.bc_pressure)
-        ]
-        q_eval = [
-            result.loc[result.name == name][flow_id].iloc[0]
+        # p_eval = [
+        #     p_inflow - result.loc[result.name == name][pressure_id].iloc[0]
+        #     for name, pressure_id in zip(self.bc_names, self.bc_pressure)
+        # ]
+
+        flow_amplitude = [
+            result.loc[result.name == name][flow_id].max()
+            - result.loc[result.name == name][flow_id].min()
             for name, flow_id in zip(self.bc_names, self.bc_flow)
         ]
-        return np.array(p_eval + q_eval)
+        return np.array(flow_amplitude)  # np.array(p_eval + q_eval)
