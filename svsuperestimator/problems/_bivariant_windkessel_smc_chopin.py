@@ -183,6 +183,11 @@ class BivariantWindkesselSMCChopin:
         x = np.exp(particles[:, 0])
         y = np.exp(particles[:, 1])
 
+        gt = [
+            np.exp(parameters["x_obs"]["k0"]),
+            np.exp(parameters["x_obs"]["k1"]),
+        ]
+
         particle_plot3d = visualizer.ParticlePlot3d(
             x,
             y,
@@ -192,6 +197,7 @@ class BivariantWindkesselSMCChopin:
             title="Bivariate posterior",
             width=800,
             height=800,
+            ground_truth=gt,
         )
 
         histogram_plot2d = visualizer.HistogramContourPlot2D(
@@ -213,12 +219,14 @@ class BivariantWindkesselSMCChopin:
             title="Kernel density of k0",
             xlabel="k0",
             ylabel="PDF",
+            ground_truth=gt[0],
         )
         distplot_y = visualizer.DistPlot(
             y,
             title="Kernel density of k1",
             xlabel="k1",
             ylabel="PDF",
+            ground_truth=gt[1],
         )
 
         report.add_plots([histogram_plot2d, particle_plot3d])

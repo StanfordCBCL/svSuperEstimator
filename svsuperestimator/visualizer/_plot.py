@@ -315,6 +315,7 @@ class ParticlePlot3d(_PlotlyPlot):
         z: np.ndarray,
         surface=True,
         marginals=False,
+        ground_truth=None,
         **kwargs: str,
     ) -> None:
         """Create a new LinePlot instance.
@@ -328,8 +329,8 @@ class ParticlePlot3d(_PlotlyPlot):
         super().__init__(**kwargs)
 
         # Make surface mesh from particles
-        xi = np.linspace(x.min(), x.max(), 100)
-        yi = np.linspace(y.min(), y.max(), 100)
+        xi = np.linspace(x.min(), x.max(), 1000)
+        yi = np.linspace(y.min(), y.max(), 1000)
         X, Y = np.meshgrid(xi, yi)
 
         Z = np.clip(
@@ -337,7 +338,7 @@ class ParticlePlot3d(_PlotlyPlot):
             a_min=0.0,
             a_max=None,
         )
-        Z = ndimage.gaussian_filter(Z, sigma=1.0)
+        # Z = ndimage.gaussian_filter(Z, sigma=5.0)
         Z[Z == 0.0] = np.nan
 
         self._fig = go.Figure(
@@ -349,7 +350,6 @@ class ParticlePlot3d(_PlotlyPlot):
                 opacity=1.0,
                 mode="markers",
                 showlegend=False,
-                hoverinfo="skip",
             ),
         )
 
@@ -364,7 +364,24 @@ class ParticlePlot3d(_PlotlyPlot):
                     opacity=0.7,
                     name="",
                     colorscale="viridis",
+                    hoverinfo="skip",
                 )
+            )
+        if ground_truth:
+            self._fig.add_trace(
+                go.Scatter3d(
+                    x=[ground_truth[0], ground_truth[0]],
+                    y=[ground_truth[1], ground_truth[1]],
+                    z=[0, np.nanmax(Z) * 1.1],
+                    marker=dict(
+                        size=5, color="orange", symbol=["cross", "circle"]
+                    ),
+                    opacity=1.0,
+                    mode="lines+markers+text",
+                    text=[None, "Ground Truth"],
+                    line=dict(width=5, color="orange"),
+                    showlegend=False,
+                ),
             )
         self._fig.update_layout(
             margin=dict(l=20, b=20, r=20),
@@ -386,7 +403,7 @@ class ParticlePlot3d(_PlotlyPlot):
 
 
 class DistPlot(_PlotlyPlot):
-    def __init__(self, samples, **kwargs):
+    def __init__(self, samples, ground_truth=None, **kwargs):
         super().__init__(**kwargs)
 
         bandwidth_x = estimate_bandwidth_for_kde(
@@ -415,6 +432,15 @@ class DistPlot(_PlotlyPlot):
                 showlegend=False,
             )
         )
+        if ground_truth:
+            self._fig.add_vline(
+                x=ground_truth,
+                line_width=3,
+                # line_dash="dash",
+                line_color="orange",
+                annotation_text="  Ground Truth",
+            )
+
         self._fig.add_annotation(
             text=f"Kernel: Gaussian | Optimized bandwith: {bandwidth_x:.3f}",
             align="right",
@@ -480,7 +506,7 @@ class HistogramContourPlot2D(_PlotlyPlot):
                 y=[y],
                 mode="markers",
                 name="Ground Truth",
-                marker=dict(color="orange", size=7),
+                marker=dict(color="orange", size=8),
             )
         )
         self._fig.add_annotation(
