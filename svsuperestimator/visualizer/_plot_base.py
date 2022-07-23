@@ -1,13 +1,7 @@
-"""This module holds various plotting classes."""
+"""This module holds the PlotBase class."""
 from __future__ import annotations
 from typing import Any
-
-import pandas as pd
-import os
 import plotly.graph_objects as go
-import vtk
-from vtk.util.numpy_support import vtk_to_numpy
-import numpy as np
 from dash.dcc import Graph
 
 
@@ -17,22 +11,37 @@ class PlotBase:
     Defines common methods to handle plotly plots.
     """
 
-    def __init__(self, **kwargs: str) -> None:
-        """Create a new _PlotlyPlot instance."""
+    def __init__(self, **kwargs: dict[str, Any]) -> None:
+        """Create a new PlotBase instance.
+
+        Args:
+            kwargs: Plotly layout options for the figure.
+        """
         self._fig = go.Figure()
+
+        # Common layout options
         self._layout_common: dict[str, Any] = kwargs
+
+        # Layout options specific for the light color scheme
         self._layout_light = {
             "template": "plotly_white",
             "plot_bgcolor": "white",
             "paper_bgcolor": "white",
         }
+
+        # Layout options specific for the dark color scheme
         self._layout_dark = {
             "template": "plotly_dark",
             "plot_bgcolor": "rgba(0, 0, 0, 0)",
             "paper_bgcolor": "rgba(0, 0, 0, 0)",
         }
 
-    def add_footnode(self, text):
+    def add_footnote(self, text: str):
+        """Add a footnote to the plot.
+
+        Args:
+            text: The text to display in the footnote.
+        """
         self._fig.add_annotation(
             text=text,
             align="right",
@@ -78,10 +87,16 @@ class PlotBase:
         self._fig.write_image(path)
 
     def to_dash(self, dark: bool = True, display_controls=True):
+        """Export the plot as a dash graph.
+
+        Args:
+            dark: Toggle dark mode.
+            display_controls: Display plotly controls.
+        """
         self._fig.update_layout(**self._layout_common)
         if dark:
             self._fig.update_layout(**self._layout_dark)
         else:
             self._fig.update_layout(**self._layout_light)
         config = {"displayModeBar": False} if not display_controls else {}
-        return Graph(figure=self._fig, config=config, style={"width": "100%"})
+        return Graph(figure=self._fig, config=config)
