@@ -198,12 +198,12 @@ class BivariantWindkesselSMCChopin:
             z=1.1 * np.amax(kde),
             text="Ground Truth",
         )
-        plot_posterior_3d.add_footnode(
+        plot_posterior_3d.add_footnote(
             text=f"Kernel: Gaussian | Optimized Bandwith: {bandwidth:.3f} | Method: {bw_method}"
         )
 
         histogram_plot2d = plotutils.create_2d_heatmap_with_marginals(
-            x, y, weights, ground_truth
+            x, y, weights, ground_truth, xparam_name="k0", yparam_name="k1"
         )
 
         distplot_x = plotutils.create_kde_plot(

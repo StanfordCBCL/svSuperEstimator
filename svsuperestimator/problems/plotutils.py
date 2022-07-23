@@ -51,13 +51,13 @@ def create_3d_geometry_plot_with_bcs(project):
         margin=dict(l=0, r=0, b=0, t=10),
     )
 
-    plot.add_mesh_from_vtk(
+    plot.add_mesh_trace_from_vtk(
         filename=project["3d_mesh"],
         color="darkred",
         name="3D Geometry",
         opacity=0.5,
     )
-    plot.add_points(
+    plot.add_point_trace(
         x=border_points[:, 0],
         y=border_points[:, 1],
         z=border_points[:, 2],
@@ -83,7 +83,7 @@ def create_kde_plot(
         x,
         bins=50,
         weights=weights,
-        density=True,  # ), range=[x.min(), x.max()]
+        density=True,
     )
 
     # Create kernel density estimation plot for k0
@@ -92,32 +92,36 @@ def create_kde_plot(
         + param_name,
         xaxis_title=param_name,
     )
-    plot_posterior_2d.add_bars(
-        bin_edges=bin_edges,
-        z=counts,
+    plot_posterior_2d.add_bar_trace(
+        x=bin_edges,
+        y=counts,
         name="Weighted histogram",
     )
-    plot_posterior_2d.add_line(x=lin_x, y=kde, name="Kernel density estimate")
-    plot_posterior_2d.add_vline(x=ground_truth, text="Ground Truth")
-    plot_posterior_2d.add_footnode(
+    plot_posterior_2d.add_line_trace(
+        x=lin_x, y=kde, name="Kernel density estimate"
+    )
+    plot_posterior_2d.add_vline_trace(x=ground_truth, text="Ground Truth")
+    plot_posterior_2d.add_footnote(
         text=f"Kernel: Gaussian | Optimized Bandwith: {bandwidth:.3f} | Method: {bw_method}"
     )
 
     return plot_posterior_2d
 
 
-def create_2d_heatmap_with_marginals(x, y, weights, ground_truth):
-
-    heatmap_plot = visualizer.Plot2D(
-        title="Weighted particle density heatmap",
-        xaxis_title="k0",
-        yaxis_title="k1",
-        width=750,
-        height=750,
-    )
+def create_2d_heatmap_with_marginals(
+    x, y, weights, ground_truth, xparam_name, yparam_name
+):
 
     plotrange = [[np.amin(x), np.amax(x)], [np.amin(y), np.amax(y)]]
-
+    heatmap_plot = visualizer.Plot2D(
+        title="Weighted particle density heatmap",
+        xaxis_title=xparam_name,
+        yaxis_title=yparam_name,
+        width=750,
+        height=750,
+        xaxis_range=plotrange[0],
+        yaxis_range=plotrange[1],
+    )
     counts, xedges, yedges = np.histogram2d(
         x,
         y,
@@ -127,26 +131,28 @@ def create_2d_heatmap_with_marginals(x, y, weights, ground_truth):
         range=plotrange,
     )
 
-    heatmap_plot.add_heatmap(
-        bin_edges_x=xedges, bin_edges_y=yedges, z=counts.T
+    heatmap_plot.add_heatmap_trace(
+        x=xedges, y=yedges, z=counts.T, name="Weighted particle density"
     )
-    heatmap_plot.add_points(x=x, y=y, color=weights)
+    heatmap_plot.add_point_trace(x=x, y=y, color=weights, name="Particles")
 
     counts_x, bin_edges_x = np.histogram(
-        x, bins=50, weights=weights, density=True
+        x, bins=50, weights=weights, density=True, range=plotrange[0]
     )
     counts_y, bin_edges_y = np.histogram(
-        y, bins=50, weights=weights, density=True
+        y, bins=50, weights=weights, density=True, range=plotrange[1]
     )
 
-    heatmap_plot.add_xy_bars(
-        bin_edges_x=bin_edges_x,
-        bin_edges_y=bin_edges_y,
+    heatmap_plot.add_xy_bar_trace(
+        x=bin_edges_x,
+        y=bin_edges_y,
         z_x=counts_x,
         z_y=counts_y,
+        name_x="Weighted histogram of " + xparam_name,
+        name_y="Weighted histogram of " + yparam_name,
     )
 
-    heatmap_plot.add_flag(
+    heatmap_plot.add_annotated_point_trace(
         x=ground_truth[0], y=ground_truth[1], text="Ground Truth"
     )
 

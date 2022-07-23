@@ -1,5 +1,6 @@
 """This module holds various plotting classes."""
 from __future__ import annotations
+from typing import Union
 import os
 import plotly.graph_objects as go
 import vtk
@@ -10,18 +11,39 @@ from ._plot_base import PlotBase
 
 
 class Plot3D(PlotBase):
-    def add_points(
+    """3D plot.
+
+    Contains functions to construct a 3D plot from different traces.
+    """
+
+    def add_point_trace(
         self,
         x: np.ndarray,
         y: np.ndarray,
         z: np.ndarray,
-        name: str = None,
-        color: str = None,
-        size=3,
-        opacity=1.0,
-        text=None,
-        showlegend=False,
+        name: str,
+        color: Union[str, np.ndarray] = None,
+        size: int = 3,
+        opacity: float = 1.0,
+        colorscale: str = "viridis",
+        text: str = None,
+        showlegend: bool = False,
     ):
+        """Add a point scatter trace.
+
+        Args:
+            x: X-coordinates of the points.
+            y: Y-coordinates of the points.
+            z: Z-coordinates of the points.
+            name: Name of the trace.
+            color: Color of the points as a color specifier or an array to be
+                used for color coding.
+            size: Size of the points.
+            opacity: Opacity of the points.
+            colorscale: Colorscale to be used for color cording.
+            text: Optional text to be displayed next to the points.
+            showlegend: Toggle display of trace in legend.
+        """
         mode = "markers"
         if text is not None:
             mode = "markers+text"
@@ -30,7 +52,7 @@ class Plot3D(PlotBase):
                 x=x,
                 y=y,
                 z=z,
-                marker=dict(size=size, color=color),
+                marker=dict(size=size, color=color, colorscale=colorscale),
                 opacity=opacity,
                 mode=mode,
                 showlegend=showlegend,
@@ -39,17 +61,27 @@ class Plot3D(PlotBase):
             ),
         )
 
-    def add_surface(
+    def add_surface_trace(
         self,
-        x,
-        y,
-        z,
-        name: str = None,
+        x: np.ndarray,
+        y: np.ndarray,
+        z: np.ndarray,
+        name: str,
         colorscale: str = "viridis",
-        opacity=1.0,
-        showlegend=False,
+        opacity: float = 1.0,
+        showlegend: bool = False,
     ):
+        """Add a surface trace.
 
+        Args:
+            x: X-coordinates of the points.
+            y: Y-coordinates of the points.
+            z: Z-coordinates of the points.
+            name: Name of the trace.
+            colorscale: Colorscale to be used for color cording.
+            opacity: Opacity of the points.
+            showlegend: Toggle display of trace in legend.
+        """
         self._fig.add_trace(
             go.Surface(
                 x=x,
@@ -63,21 +95,27 @@ class Plot3D(PlotBase):
             )
         )
 
-    def add_mesh_from_vtk(
-        self, filename: str, name=None, color: str = None, opacity=1.0
+    def add_mesh_trace_from_vtk(
+        self,
+        filename: str,
+        name: str,
+        color: str = None,
+        opacity: float = 1.0,
+        showlegend: bool = False,
     ):
+        """Add a mesh trace from a vtk file.
 
+        Args:
+            filename: Path to the vtk file.
+            name: Name of the trace.
+            color: Color of the trace.
+            opacity: Opacity of the trace.
+            showlegend: Toggle display of trace in legend.
+        """
         if not os.path.exists(filename):
             raise FileNotFoundError(
                 f"Error plotting {filename}. The file does not exist."
             )
-
-        # self._layout.update(
-        #     {
-        #         "hovermode": False,
-        #         # "scene_camera": dict(eye=dict(x=2, y=2, z=0.1)),
-        #     }
-        # )
 
         # Setup vtk reader
         if filename.endswith(".vtp"):
@@ -100,7 +138,7 @@ class Plot3D(PlotBase):
                 i=cells[:, 1],
                 j=cells[:, 2],
                 k=cells[:, 3],
-                showlegend=True,
+                showlegend=showlegend,
                 opacity=opacity,
                 name=name,
                 color=color,
@@ -108,28 +146,28 @@ class Plot3D(PlotBase):
             )
         )
 
-    def add_flag(
+    def add_annotated_point_trace(
         self,
         x: float,
         y: float,
         z: float,
         text=str,
-        color="orange",
-        size=5,
-        opacity=1.0,
-        showlegend=False,
+        color: str = "orange",
+        size: int = 5,
+        opacity: float = 1.0,
+        showlegend: bool = False,
     ):
-        """Add a flag to the 3D plot.
-
-        A flag is a dot at coordinate (x,y,z) connected to the z=0 plane with a
-        vertical line. The text is displayed next to the dot.
+        """Add an annotated point trace.
 
         Args:
-            x: X-coordinate of the flag.
-            y: Y-coordinate of the flag.
-            z: Z-coordinate of the flag.
-            text: Text to display next to the flag.
-            color: Color of the flag.
+            x: X-coordinate of the point.
+            y: Y-coordinate of the point.
+            z: Z-coordinate of the point.
+            text: Text to display next to the point.
+            color: Color of the point.
+            size: Size of the point.
+            opacity: Opacity of the point.
+            showlegend: Toggle display of trace in legend.
         """
         self._fig.add_trace(
             go.Scatter3d(

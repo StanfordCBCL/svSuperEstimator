@@ -1,9 +1,7 @@
 """This module holds the Plot2D class."""
 from __future__ import annotations
-from ctypes import Union
-import os
+from typing import Union
 import plotly.graph_objects as go
-import vtk
 import numpy as np
 
 from ._plot_base import PlotBase
