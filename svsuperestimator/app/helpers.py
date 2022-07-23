@@ -43,7 +43,7 @@ def create_columns(elements):
         The dash html block.
     """
     return html.Div(
-        [html.Div(ele, className="item") for ele in elements],
+        [create_box(ele) for ele in elements],
         className="container",
     )
 

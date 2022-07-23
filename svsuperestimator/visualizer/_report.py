@@ -171,14 +171,10 @@ class Report:
             if item_type == _ContentType.HEADING:
                 formatted_content.append(html.H1(item))
             elif item_type in [_ContentType.PLOT]:
-                formatted_content.append(
-                    create_box(dcc.Graph(figure=item.fig))
-                )
+                formatted_content.append(create_box(item.to_dash()))
             elif item_type in [_ContentType.PLOTS]:
                 formatted_content.append(
-                    create_columns(
-                        [dcc.Graph(figure=iitem.fig) for iitem in item]
-                    )
+                    create_columns([iitem.to_dash() for iitem in item])
                 )
             elif item_type in [_ContentType.TABLE]:
                 formatted_content.append(create_box(create_table(item)))

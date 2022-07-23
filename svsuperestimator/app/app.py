@@ -1,8 +1,8 @@
 import dash
 from dash import html, dcc
 from dash.dependencies import Input, Output
-from .. import model as mdl, visualizer, reader, problems
-from ..visualizer import utils as plotutils
+from .. import model as mdl, reader, problems
+from ..problems import plotutils
 import os
 import click
 import pandas as pd
@@ -74,12 +74,9 @@ def run(model_folder):
             os.path.join(model_folder, model_name)
         )
         try:
-            graph = dcc.Graph(
-                figure=plotutils.create_3d_model_and_centerline_plot(
-                    project
-                ).fig,
-                config={"displayModeBar": False},
-            )
+            graph = plotutils.create_3d_geometry_plot_with_bcs(
+                project
+            ).to_dash(display_controls=False)
         except FileNotFoundError:
             graph = "No 3D geometry found"
         try:

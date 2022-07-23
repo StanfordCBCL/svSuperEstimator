@@ -9,7 +9,7 @@ from .. import (
     iterators,
     visualizer,
 )
-from ..visualizer import utils as plotutils
+from . import plotutils, statutils
 import pickle
 import numpy as np
 from .. import visualizer
@@ -38,6 +38,12 @@ class BivariantWindkesselSMCChopin:
         for bc_name in mdl.ZeroDModel(project).get_outlet_bcs():
             self.options[bc_name + "_group"] = 0
 
+    @property
+    def output_folder(self):
+        return os.path.join(
+            self.project["rom_optimization_folder"], self.case_name
+        )
+
     def run(self, config):
 
         # Paramaters for saving
@@ -48,9 +54,6 @@ class BivariantWindkesselSMCChopin:
 
         # Update case name and output folder based on config
         self.case_name = config["case_name"]
-        self.output_folder = os.path.join(
-            self.project["rom_optimization_folder"], self.case_name
-        )
         os.makedirs(self.output_folder, exist_ok=True)
 
         # Setup project model and solver
@@ -150,86 +153,77 @@ class BivariantWindkesselSMCChopin:
 
         report = visualizer.Report()
 
+        # Create project information section
         if project_overview:
-            plot3d = plotutils.create_3d_model_and_centerline_plot(
-                self.project
-            )
+            plot3d = plotutils.create_3d_geometry_plot_with_bcs(self.project)
             model = mdl.ZeroDModel(self.project)
             report.add_title("Project overview")
             report.add_plots([model.get_boundary_condition_info(), plot3d])
 
         report.add_title(f"Results")
 
-        output_dir = os.path.join(
-            self.project["rom_optimization_folder"], self.case_name
+        parameters = self._read_parameters()
+        x, y, weights = self._read_results()
+
+        # Calculate 2d posterior
+        bw_method = "scott"
+        lin_x, lin_y, kde, bandwidth = statutils.kernel_density_estimation_2d(
+            x, y, weights, 1000, bw_method
         )
 
-        with open(
-            os.path.join(output_dir, "results.pickle"),
-            "rb",
-        ) as ff:
-            raw_results = pickle.load(ff)
-
-        with open(os.path.join(output_dir, "parameters.json")) as ff:
-            parameters = json.load(ff)
-
-        raw_output_data = raw_results["raw_output_data"]
-
-        particles = raw_output_data["particles"]
-        weights = raw_output_data["weights"] / np.mean(
-            raw_output_data["weights"]
-        )
-
-        x = np.exp(particles[:, 0])
-        y = np.exp(particles[:, 1])
-
-        gt = [
-            np.exp(parameters["x_obs"]["k0"]),
-            np.exp(parameters["x_obs"]["k1"]),
+        ground_truth = [
+            parameters["x_obs"]["k0"],
+            parameters["x_obs"]["k1"],
         ]
 
-        particle_plot3d = visualizer.ParticlePlot3d(
-            x,
-            y,
-            weights.ravel(),
-            xlabel="k0",
-            ylabel="k1",
-            title="Bivariate posterior",
-            width=800,
-            height=800,
-            ground_truth=gt,
+        # Create the 3d kernel density estimate plot
+        plot_posterior_3d = visualizer.Plot3D(
+            title="Bivariate kernel density estimate",
+            autosize=True,
+            # margin=dict(l=20, b=20, r=20),
+            scene=dict(
+                xaxis=dict(showbackground=False, title="k0"),
+                yaxis=dict(showbackground=False, title="k1"),
+                zaxis=dict(showbackground=False, title="KDE"),
+                # zaxis_visible=False,
+                aspectratio=dict(x=1, y=1, z=0.5),
+            ),
+            width=750,
+            height=750,
+        )
+        plot_posterior_3d.add_surface(x=lin_x, y=lin_y, z=kde, name="KDE")
+        plot_posterior_3d.add_flag(
+            x=ground_truth[0],
+            y=ground_truth[1],
+            z=1.1 * np.amax(kde),
+            text="Ground Truth",
+        )
+        plot_posterior_3d.add_footnode(
+            text=f"Kernel: Gaussian | Optimized Bandwith: {bandwidth:.3f} | Method: {bw_method}"
         )
 
-        histogram_plot2d = visualizer.HistogramContourPlot2D(
-            x,
-            y,
-            title="Particle density",
-            width=800,
-            height=800,
-            xlabel="k0",
-            ylabel="k1",
-        )
-        histogram_plot2d.add_dot(
-            np.exp(parameters["x_obs"]["k0"]),
-            np.exp(parameters["x_obs"]["k1"]),
+        histogram_plot2d = plotutils.create_2d_heatmap_with_marginals(
+            x, y, weights, ground_truth
         )
 
-        distplot_x = visualizer.DistPlot(
-            x,
-            title="Kernel density of k0",
-            xlabel="k0",
-            ylabel="PDF",
-            ground_truth=gt[0],
+        distplot_x = plotutils.create_kde_plot(
+            x=x,
+            weights=weights,
+            ground_truth=ground_truth[0],
+            param_name="k0",
+            num_points=1000,
+            bw_method="scott",
         )
-        distplot_y = visualizer.DistPlot(
-            y,
-            title="Kernel density of k1",
-            xlabel="k1",
-            ylabel="PDF",
-            ground_truth=gt[1],
+        distplot_y = plotutils.create_kde_plot(
+            x=y,
+            weights=weights,
+            ground_truth=ground_truth[1],
+            param_name="k1",
+            num_points=1000,
+            bw_method="scott",
         )
 
-        report.add_plots([histogram_plot2d, particle_plot3d])
+        report.add_plots([histogram_plot2d, plot_posterior_3d])
         report.add_plots([distplot_x, distplot_y])
 
         report.add_title(f"Parameters")
@@ -254,3 +248,27 @@ class BivariantWindkesselSMCChopin:
         )
 
         return report
+
+    def _read_parameters(self):
+        with open(os.path.join(self.output_folder, "parameters.json")) as ff:
+            parameters = json.load(ff)
+        return parameters
+
+    def _read_results(self):
+
+        with open(
+            os.path.join(self.output_folder, "results.pickle"),
+            "rb",
+        ) as ff:
+            raw_results = pickle.load(ff)
+
+        raw_output_data = raw_results["raw_output_data"]
+
+        particles = raw_output_data["particles"]
+        weights = raw_output_data["weights"]
+
+        return (
+            particles[:, 0].flatten(),
+            particles[:, 1].flatten(),
+            weights.flatten(),
+        )
