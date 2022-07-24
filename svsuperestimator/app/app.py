@@ -221,10 +221,8 @@ def run(model_folder):
 
             config = {item["Name"]: item["Value"] for item in raw_config}
 
-            case_name = f"case_smc_chopin_np{config['num_particles']}_rt{10*config['resampling_threshold']:.0f}_rs{config['num_rejuvenation_steps']}"
-
             problem_class = problems.get_problem_by_name(case_type)
-            problem = problem_class(project, case_name)
+            problem = problem_class(project, None)
             problem.run(config)
 
             return problem.generate_report().to_dash()

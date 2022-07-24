@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 import plotly.graph_objects as go
 from dash.dcc import Graph
+from dash import html
 
 
 class PlotBase:
@@ -99,4 +100,10 @@ class PlotBase:
         else:
             self._fig.update_layout(**self._layout_light)
         config = {"displayModeBar": False} if not display_controls else {}
-        return Graph(figure=self._fig, config=config)
+        return html.Div(
+            Graph(
+                figure=self._fig,
+                config=config,
+                responsive=True,
+            )
+        )

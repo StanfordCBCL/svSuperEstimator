@@ -119,6 +119,7 @@ def create_2d_heatmap_with_marginals(
         yaxis_title=yparam_name,
         width=750,
         height=750,
+        autosize=True,
         xaxis_range=plotrange[0],
         yaxis_range=plotrange[1],
     )

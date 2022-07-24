@@ -9,17 +9,20 @@ from .. import (
     iterators,
     visualizer,
 )
-from . import plotutils, statutils
+from . import plotutils
 import pickle
 import numpy as np
 from .. import visualizer
 import pandas as pd
 from datetime import datetime
+from scipy.interpolate import griddata
+
+from rich import print
 
 
-class BivariantWindkesselSMCChopin:
+class BivariantWindkesselGridLikelihood:
 
-    PROBLEM_NAME = "Bivariant-Windkessel-SMC-Chopin"
+    PROBLEM_NAME = "Bivariant-Windkessel-Grid-Likelihood"
 
     def __init__(self, project, case_name=None):
         self.project = project
@@ -28,9 +31,7 @@ class BivariantWindkesselSMCChopin:
         self.options = {
             "case_name": case_name,
             "num_procs": 1,
-            "num_particles": 100,
-            "num_rejuvenation_steps": 2,
-            "resampling_threshold": 0.5,
+            "num_grid_points": 100,
             "noise_factor": 0.05,
             "noise_type": "fixed_variance",
         }
@@ -116,14 +117,12 @@ class BivariantWindkesselSMCChopin:
         y_obs = forward_model.evaluate(k0=k0, k1=k1)
         parameters["y_obs"] = list(y_obs)
 
-        iterator = iterators.SmcIterator(
+        iterator = iterators.GridLikelihoodIterator(
             forward_model=forward_model,
             y_obs=y_obs,
+            num_grid_points=int(config.get("num_grid_points")),
             output_dir=self.output_folder,
             num_procs=int(config.get("num_procs")),
-            num_particles=int(config.get("num_particles")),
-            num_rejuvenation_steps=int(config.get("num_rejuvenation_steps")),
-            resampling_threshold=float(config.get("resampling_threshold")),
             noise_value=float(config["noise_factor"]) * np.mean(y_obs.ravel()),
             noise_type=str(config["noise_type"]),
         )
@@ -163,13 +162,7 @@ class BivariantWindkesselSMCChopin:
         report.add_title(f"Results")
 
         parameters = self._read_parameters()
-        x, y, weights = self._read_results()
-
-        # Calculate 2d posterior
-        bw_method = "scott"
-        lin_x, lin_y, kde, bandwidth = statutils.kernel_density_estimation_2d(
-            x, y, weights, 1000, bw_method
-        )
+        x, y, z = self._read_results()
 
         ground_truth = [
             parameters["x_obs"]["k0"],
@@ -177,56 +170,27 @@ class BivariantWindkesselSMCChopin:
         ]
 
         # Create the 3d kernel density estimate plot
-        plot_posterior_3d = visualizer.Plot3D(
+        plot_likelihood_3d = visualizer.Plot3D(
             title="Bivariate kernel density estimate",
-            # margin=dict(l=20, b=20, r=20),
             scene=dict(
                 xaxis=dict(showbackground=False, title="k0"),
                 yaxis=dict(showbackground=False, title="k1"),
                 zaxis=dict(showbackground=False, title="KDE"),
-                # zaxis_visible=False,
                 aspectratio=dict(x=1, y=1, z=0.5),
             ),
             width=750,
             height=750,
             autosize=True,
         )
-        plot_posterior_3d.add_surface_trace(
-            x=lin_x, y=lin_y, z=kde, name="KDE"
-        )
-        plot_posterior_3d.add_annotated_point_trace(
+        plot_likelihood_3d.add_surface_trace(x=x, y=y, z=z, name="KDE")
+        plot_likelihood_3d.add_annotated_point_trace(
             x=ground_truth[0],
             y=ground_truth[1],
-            z=1.1 * np.amax(kde),
+            z=1.1 * np.amax(z),
             text="Ground Truth",
         )
-        plot_posterior_3d.add_footnote(
-            text=f"Kernel: Gaussian | Optimized Bandwith: {bandwidth:.3f} | Method: {bw_method}"
-        )
 
-        histogram_plot2d = plotutils.create_2d_heatmap_with_marginals(
-            x, y, weights, ground_truth, xparam_name="k0", yparam_name="k1"
-        )
-
-        distplot_x = plotutils.create_kde_plot(
-            x=x,
-            weights=weights,
-            ground_truth=ground_truth[0],
-            param_name="k0",
-            num_points=1000,
-            bw_method="scott",
-        )
-        distplot_y = plotutils.create_kde_plot(
-            x=y,
-            weights=weights,
-            ground_truth=ground_truth[1],
-            param_name="k1",
-            num_points=1000,
-            bw_method="scott",
-        )
-
-        report.add_plots([histogram_plot2d, plot_posterior_3d])
-        report.add_plots([distplot_x, distplot_y])
+        report.add_plots([plot_likelihood_3d])
 
         report.add_title(f"Parameters")
         param_data = {
@@ -264,13 +228,16 @@ class BivariantWindkesselSMCChopin:
         ) as ff:
             raw_results = pickle.load(ff)
 
-        raw_output_data = raw_results["raw_output_data"]
+        print(raw_results)
 
-        particles = raw_output_data["particles"]
-        weights = raw_output_data["weights"]
-
-        return (
-            particles[:, 0].flatten(),
-            particles[:, 1].flatten(),
-            weights.flatten(),
+        input_data = raw_results["input_data"]
+        values = np.exp(raw_results["raw_output_data"])
+        x = input_data[:, 0]
+        y = input_data[:, 1]
+        xi = np.linspace(x.min(), x.max(), 100)
+        yi = np.linspace(y.min(), y.max(), 100)
+        X, Y = np.meshgrid(xi, yi)
+        Z = griddata(
+            (x, y), np.squeeze(values), (X, Y), method="linear", rescale=True
         )
+        return xi, yi, Z

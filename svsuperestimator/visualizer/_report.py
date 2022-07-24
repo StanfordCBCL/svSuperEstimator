@@ -201,7 +201,7 @@ class Report:
             elif item_type == _ContentType.PLOTS:
                 for iitem in item:
                     try:
-                        iitem.to_png(
+                        iitem.to_image(
                             os.path.join(
                                 folder,
                                 current_heading
