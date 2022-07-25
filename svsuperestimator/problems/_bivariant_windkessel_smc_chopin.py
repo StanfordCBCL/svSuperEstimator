@@ -53,7 +53,8 @@ class BivariantWindkesselSMCChopin:
         }
 
         # Update case name and output folder based on config
-        self.case_name = config["case_name"]
+        if "case_name" in config:
+            self.case_name = config["case_name"]
         os.makedirs(self.output_folder, exist_ok=True)
 
         # Setup project model and solver
@@ -164,11 +165,12 @@ class BivariantWindkesselSMCChopin:
 
         parameters = self._read_parameters()
         x, y, weights = self._read_results()
+        plotrange = [[-2.0, 4.5], [-2.0, 4.5]]
 
         # Calculate 2d posterior
         bw_method = "scott"
         lin_x, lin_y, kde, bandwidth = statutils.kernel_density_estimation_2d(
-            x, y, weights, 1000, bw_method
+            x, y, plotrange, weights, 1000, bw_method
         )
 
         ground_truth = [
@@ -178,13 +180,11 @@ class BivariantWindkesselSMCChopin:
 
         # Create the 3d kernel density estimate plot
         plot_posterior_3d = visualizer.Plot3D(
-            title="Bivariate kernel density estimate",
-            # margin=dict(l=20, b=20, r=20),
+            title="Kernel density estimate",
             scene=dict(
                 xaxis=dict(showbackground=False, title="k0"),
                 yaxis=dict(showbackground=False, title="k1"),
-                zaxis=dict(showbackground=False, title="KDE"),
-                # zaxis_visible=False,
+                zaxis=dict(showbackground=False, title="Kernel density"),
                 aspectratio=dict(x=1, y=1, z=0.5),
             ),
             width=750,
@@ -204,28 +204,64 @@ class BivariantWindkesselSMCChopin:
             text=f"Kernel: Gaussian | Optimized Bandwith: {bandwidth:.3f} | Method: {bw_method}"
         )
 
-        histogram_plot2d = plotutils.create_2d_heatmap_with_marginals(
-            x, y, weights, ground_truth, xparam_name="k0", yparam_name="k1"
+        heatmap_plot = visualizer.Plot2D(
+            title="Heatmap of kernel density estimate with marginals",
+            xaxis_title="k0",
+            yaxis_title="k1",
+            width=750,
+            height=750,
+            autosize=True,
+            xaxis_range=plotrange[0],
+            yaxis_range=plotrange[1],
+        )
+
+        heatmap_plot.add_heatmap_trace(
+            x=lin_x, y=lin_y, z=kde, name="Weighted particle density"
+        )
+        heatmap_plot.add_point_trace(x=x, y=y, color=weights, name="Particles")
+        heatmap_plot.add_footnote(
+            text=f"Kernel: Gaussian | Optimized Bandwith: {bandwidth:.3f} | Method: {bw_method}"
+        )
+
+        counts_x, bin_edges_x = np.histogram(
+            x, bins=50, weights=weights, density=True, range=plotrange[0]
+        )
+        counts_y, bin_edges_y = np.histogram(
+            y, bins=50, weights=weights, density=True, range=plotrange[1]
+        )
+
+        heatmap_plot.add_xy_bar_trace(
+            x=bin_edges_x,
+            y=bin_edges_y,
+            z_x=counts_x,
+            z_y=counts_y,
+            name_x="Weighted histogram of k0",
+            name_y="Weighted histogram of k1",
+        )
+
+        heatmap_plot.add_annotated_point_trace(
+            x=ground_truth[0],
+            y=ground_truth[1],
+            text="Ground Truth",
+            textcolor="white",
         )
 
         distplot_x = plotutils.create_kde_plot(
             x=x,
             weights=weights,
+            plotrange=plotrange[0],
             ground_truth=ground_truth[0],
             param_name="k0",
-            num_points=1000,
-            bw_method="scott",
         )
         distplot_y = plotutils.create_kde_plot(
             x=y,
             weights=weights,
+            plotrange=plotrange[1],
             ground_truth=ground_truth[1],
             param_name="k1",
-            num_points=1000,
-            bw_method="scott",
         )
 
-        report.add_plots([histogram_plot2d, plot_posterior_3d])
+        report.add_plots([heatmap_plot, plot_posterior_3d])
         report.add_plots([distplot_x, distplot_y])
 
         report.add_title(f"Parameters")

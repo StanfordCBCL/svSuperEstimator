@@ -50,7 +50,7 @@ class PlotBase:
             xref="paper",
             yref="paper",
             x=1.0,
-            y=-0.2,
+            y=-0.3,
         )
 
     def to_html(self, dark: bool = True) -> str:

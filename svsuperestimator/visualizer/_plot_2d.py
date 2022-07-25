@@ -141,6 +141,7 @@ class Plot2D(PlotBase):
         y: float,
         text: float,
         color: str = "orange",
+        textcolor: str = None,
         size: int = 8,
     ):
         """Add an annotated point trace.
@@ -150,6 +151,7 @@ class Plot2D(PlotBase):
             y: Y-coordinate of the point.
             text: Text to display next to the point.
             color: Color of the point.
+            textcolor: Color of the text.
             size: Size of the point.
         """
         self._fig.add_trace(
@@ -162,7 +164,12 @@ class Plot2D(PlotBase):
             )
         )
         self._fig.add_annotation(
-            x=x, y=y, text=text, showarrow=True, arrowhead=1
+            x=x,
+            y=y,
+            text=text,
+            showarrow=True,
+            arrowhead=1,
+            font=dict(color=textcolor),
         )
 
     def add_heatmap_trace(

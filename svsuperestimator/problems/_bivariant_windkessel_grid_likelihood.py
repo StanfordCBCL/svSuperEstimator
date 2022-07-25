@@ -54,7 +54,8 @@ class BivariantWindkesselGridLikelihood:
         }
 
         # Update case name and output folder based on config
-        self.case_name = config["case_name"]
+        if "case_name" in config:
+            self.case_name = config["case_name"]
         os.makedirs(self.output_folder, exist_ok=True)
 
         # Setup project model and solver
@@ -175,7 +176,7 @@ class BivariantWindkesselGridLikelihood:
             scene=dict(
                 xaxis=dict(showbackground=False, title="k0"),
                 yaxis=dict(showbackground=False, title="k1"),
-                zaxis=dict(showbackground=False, title="KDE"),
+                zaxis=dict(showbackground=False, title="Kernel density"),
                 aspectratio=dict(x=1, y=1, z=0.5),
             ),
             width=750,
@@ -190,7 +191,23 @@ class BivariantWindkesselGridLikelihood:
             text="Ground Truth",
         )
 
-        report.add_plots([plot_likelihood_3d])
+        plotrange = [[np.amin(x), np.amax(x)], [np.amin(y), np.amax(y)]]
+        heatmap_plot = visualizer.Plot2D(
+            title="Heatmap of likelihood",
+            xaxis_title="k0",
+            yaxis_title="k1",
+            width=750,
+            height=750,
+            autosize=True,
+            xaxis_range=plotrange[0],
+            yaxis_range=plotrange[1],
+        )
+
+        heatmap_plot.add_heatmap_trace(
+            x=x, y=y, z=z, name="Weighted particle density"
+        )
+
+        report.add_plots([heatmap_plot, plot_likelihood_3d])
 
         report.add_title(f"Parameters")
         param_data = {

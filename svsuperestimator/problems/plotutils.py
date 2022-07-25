@@ -72,18 +72,19 @@ def create_3d_geometry_plot_with_bcs(project):
 
 
 def create_kde_plot(
-    x, weights, ground_truth, param_name, num_points=1000, bw_method="scott"
+    x,
+    weights,
+    plotrange,
+    ground_truth,
+    param_name,
 ):
 
     lin_x, kde, bandwidth = statutils.kernel_density_estimation_1d(
-        x=x, weights=weights, num_points=num_points, bw_method=bw_method
+        x=x, weights=weights, bounds=plotrange
     )
 
     counts, bin_edges = np.histogram(
-        x,
-        bins=50,
-        weights=weights,
-        density=True,
+        x, bins=50, weights=weights, density=True, range=plotrange
     )
 
     # Create kernel density estimation plot for k0
@@ -91,6 +92,8 @@ def create_kde_plot(
         title="Weighted histogram and kernel density estimation of "
         + param_name,
         xaxis_title=param_name,
+        yaxis_title="Kernel density",
+        xaxis_range=plotrange,
     )
     plot_posterior_2d.add_bar_trace(
         x=bin_edges,
@@ -102,59 +105,7 @@ def create_kde_plot(
     )
     plot_posterior_2d.add_vline_trace(x=ground_truth, text="Ground Truth")
     plot_posterior_2d.add_footnote(
-        text=f"Kernel: Gaussian | Optimized Bandwith: {bandwidth:.3f} | Method: {bw_method}"
+        text=f"Kernel: Gaussian | Optimized Bandwith: {bandwidth:.3f} | Method: 30-fold cross-validation"
     )
 
     return plot_posterior_2d
-
-
-def create_2d_heatmap_with_marginals(
-    x, y, weights, ground_truth, xparam_name, yparam_name
-):
-
-    plotrange = [[np.amin(x), np.amax(x)], [np.amin(y), np.amax(y)]]
-    heatmap_plot = visualizer.Plot2D(
-        title="Weighted particle density heatmap",
-        xaxis_title=xparam_name,
-        yaxis_title=yparam_name,
-        width=750,
-        height=750,
-        autosize=True,
-        xaxis_range=plotrange[0],
-        yaxis_range=plotrange[1],
-    )
-    counts, xedges, yedges = np.histogram2d(
-        x,
-        y,
-        weights=weights,
-        density=True,
-        bins=50,
-        range=plotrange,
-    )
-
-    heatmap_plot.add_heatmap_trace(
-        x=xedges, y=yedges, z=counts.T, name="Weighted particle density"
-    )
-    heatmap_plot.add_point_trace(x=x, y=y, color=weights, name="Particles")
-
-    counts_x, bin_edges_x = np.histogram(
-        x, bins=50, weights=weights, density=True, range=plotrange[0]
-    )
-    counts_y, bin_edges_y = np.histogram(
-        y, bins=50, weights=weights, density=True, range=plotrange[1]
-    )
-
-    heatmap_plot.add_xy_bar_trace(
-        x=bin_edges_x,
-        y=bin_edges_y,
-        z_x=counts_x,
-        z_y=counts_y,
-        name_x="Weighted histogram of " + xparam_name,
-        name_y="Weighted histogram of " + yparam_name,
-    )
-
-    heatmap_plot.add_annotated_point_trace(
-        x=ground_truth[0], y=ground_truth[1], text="Ground Truth"
-    )
-
-    return heatmap_plot
