@@ -123,7 +123,7 @@ class ZeroDModel:
         if target is not None:
             config_file = os.path.join(target, "solver_0d.in")
             with open(config_file, "w") as ff:
-                json.dump(config, ff)
+                json.dump(config, ff, indent=4)
         return config
 
     def get_outlet_bcs(self):

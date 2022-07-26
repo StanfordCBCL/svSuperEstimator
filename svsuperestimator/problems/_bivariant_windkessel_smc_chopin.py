@@ -137,6 +137,11 @@ class BivariantWindkesselSMCChopin:
         # Run the iterator
         iterator.run()
 
+        x, y, weights = self._read_results()
+        map = np.array([x[np.argmax(weights)], y[np.argmax(weights)]])
+        forward_model.evaluate(k0=map[0], k1=map[1])
+        model.make_configuration(self.output_folder)
+
         # Save parameters to file
         parameters["timestamp"] = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         with open(
@@ -177,6 +182,19 @@ class BivariantWindkesselSMCChopin:
             parameters["x_obs"]["k0"],
             parameters["x_obs"]["k1"],
         ]
+        map = np.array([x[np.argmax(weights)], y[np.argmax(weights)]])
+        max_kde_index = np.unravel_index(np.argmax(kde, axis=None), kde.shape)
+        max_kde = np.array([lin_x[max_kde_index[0]], lin_y[max_kde_index[1]]])
+        mean = np.array(
+            [np.average(x, weights=weights), np.average(y, weights=weights)]
+        )
+        variance = np.array(
+            [
+                np.average((x - mean[0]) ** 2, weights=weights),
+                np.average((y - mean[1]) ** 2, weights=weights),
+            ]
+        )
+        covariance = np.average((x - mean[0]) * (y - mean[1]), weights=weights)
 
         # Create the 3d kernel density estimate plot
         plot_posterior_3d = visualizer.Plot3D(
@@ -240,9 +258,9 @@ class BivariantWindkesselSMCChopin:
         )
 
         heatmap_plot.add_annotated_point_trace(
-            x=ground_truth[0],
-            y=ground_truth[1],
-            text="Ground Truth",
+            x=[ground_truth[0], map[0], mean[0]],
+            y=[ground_truth[1], map[1], mean[1]],
+            text=["Ground Truth", "MAP", "Mean"],
             textcolor="white",
         )
 
@@ -265,6 +283,21 @@ class BivariantWindkesselSMCChopin:
         report.add_plots([distplot_x, distplot_y])
 
         report.add_title(f"Parameters")
+        parameters["ground_truth"] = ground_truth
+        parameters["map"] = map
+        parameters["map_error_rel"] = np.linalg.norm(
+            map - ground_truth
+        ) / np.linalg.norm(ground_truth)
+        parameters["mean"] = mean
+        parameters["mean_error_rel"] = np.linalg.norm(
+            mean - ground_truth
+        ) / np.linalg.norm(ground_truth)
+        parameters["variance"] = variance
+        parameters["max_kde"] = max_kde
+        parameters["max_kde_error_rel"] = np.linalg.norm(
+            max_kde - ground_truth
+        ) / np.linalg.norm(ground_truth)
+        parameters["covariance"] = covariance
         param_data = {
             key: str(value)
             for key, value in parameters.items()

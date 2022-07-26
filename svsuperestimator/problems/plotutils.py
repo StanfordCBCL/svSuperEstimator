@@ -84,7 +84,11 @@ def create_kde_plot(
     )
 
     counts, bin_edges = np.histogram(
-        x, bins=50, weights=weights, density=True, range=plotrange
+        x,
+        bins=int((plotrange[1] - plotrange[0]) / bandwidth),
+        weights=weights,
+        density=True,
+        range=plotrange,
     )
 
     # Create kernel density estimation plot for k0

@@ -245,8 +245,6 @@ class BivariantWindkesselGridLikelihood:
         ) as ff:
             raw_results = pickle.load(ff)
 
-        print(raw_results)
-
         input_data = raw_results["input_data"]
         values = np.exp(raw_results["raw_output_data"])
         x = input_data[:, 0]

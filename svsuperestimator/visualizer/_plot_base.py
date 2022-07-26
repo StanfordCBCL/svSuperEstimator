@@ -104,6 +104,5 @@ class PlotBase:
             Graph(
                 figure=self._fig,
                 config=config,
-                responsive=True,
             )
         )
