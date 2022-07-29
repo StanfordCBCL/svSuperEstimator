@@ -162,7 +162,7 @@ class Plot2D(PlotBase):
                     y=[y[i]],
                     mode="markers",
                     name=name[i],
-                    marker=dict(color=color[i], size=size, symbol=symbol),
+                    marker=dict(color=color[i], size=size, symbol=symbol[i]),
                     showlegend=True,
                 )
             )

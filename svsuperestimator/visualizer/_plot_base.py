@@ -23,7 +23,6 @@ class PlotBase:
         # Common layout options
         self._layout_common: dict[str, Any] = {
             "font_family": "Arial",
-            "font_size": 18,
             "plot_bgcolor": "rgba(0, 0, 0, 0)",
             "paper_bgcolor": "rgba(0, 0, 0, 0)",
         }

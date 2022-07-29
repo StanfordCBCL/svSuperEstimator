@@ -1,41 +1,27 @@
+"""This module holds the Report class."""
 from __future__ import annotations
-from enum import Enum
-from typing import Sequence
 import os
 from datetime import datetime
 from typing import Any
 
-from dash import html, dcc
+from dash import html
 import pandas as pd
 
-from ..app.helpers import create_columns, create_box, create_table
-
-
-class _ContentType(Enum):
-    HEADING = 1
-    PLOT = 2
-    PLOTS = 3
-    TABLE = 4
+from ..app.helpers import create_columns
 
 
 class Report:
-    def __init__(self) -> None:
+    """Class for formatting results."""
 
+    def __init__(self) -> None:
+        """Create a new report."""
         self._content = []
 
-    def add_title(self, title):
-        self._content.append((_ContentType.HEADING, title))
+    def add(self, content: Any):
+        """Add new content to the report."""
+        self._content.append(content)
 
-    def add_plots(self, plots):
-        if isinstance(plots, Sequence):
-            self._content.append((_ContentType.PLOTS, plots))
-        else:
-            self._content.append((_ContentType.PLOT, plots))
-
-    def add_table(self, dataframe):
-        self._content.append((_ContentType.TABLE, dataframe))
-
-    def to_html(self, folder):
+    def to_html(self, folder: str) -> None:
         """Convert the report to a static html website in the folder.
 
         The main page can be accessed by opening the `index.html` file in the
@@ -47,15 +33,11 @@ class Report:
 
         formatted_content = []
 
-        for item_type, item in self._content:
-            if item_type == _ContentType.HEADING:
+        for item in self._content:
+            if isinstance(item, str):
                 formatted_content.append(_HtmlHeading(item))
-            elif item_type in [_ContentType.PLOTS, _ContentType.PLOT]:
-                formatted_content.append(_HtmlFlexbox(item))
-            elif item_type == _ContentType.TABLE:
-                formatted_content.append(_HtmlFlexbox(item))
             else:
-                raise RuntimeError("Unknown content type.")
+                formatted_content.append(_HtmlFlexbox(item))
 
         sceleton = """<!DOCTYPE html>
 <html lang="en">
@@ -165,50 +147,36 @@ class Report:
                 )
             )
 
-    def to_dash(self):
+    def to_dash(self) -> list:
+        """Convert the report to dash content."""
         formatted_content = []
-        for item_type, item in self._content:
-            if item_type == _ContentType.HEADING:
+        for item in self._content:
+            if isinstance(item, str):
                 formatted_content.append(html.H1(item))
-            elif item_type in [_ContentType.PLOT]:
-                formatted_content.append(create_box(item.to_dash()))
-            elif item_type in [_ContentType.PLOTS]:
+            else:
                 formatted_content.append(
                     create_columns([iitem.to_dash() for iitem in item])
                 )
-            elif item_type in [_ContentType.TABLE]:
-                formatted_content.append(create_box(create_table(item)))
-            else:
-                raise RuntimeError("Unknown content type.")
 
         return formatted_content
 
-    def to_files(self, folder):
+    def to_files(self, folder: str) -> None:
+        """Convert to report to seperate files.
 
+        Image will be saved as png files and tables as csv file.
+
+        Args:
+            folder: Folder to save the files in.
+        """
         current_heading = ""
         item_in_section_counter = 0
-        for item_type, item in self._content:
-            if item_type == _ContentType.HEADING:
+        for item in self._content:
+            if isinstance(item, str):
                 current_heading = item
                 item_in_section_counter = 0
-            elif item_type == _ContentType.PLOT:
-                item.to_png(
-                    os.path.join(
-                        folder, current_heading + f"_{item_in_section_counter}"
-                    )
-                )
-                item_in_section_counter += 1
-            elif item_type == _ContentType.PLOTS:
+            else:
                 for iitem in item:
-                    try:
-                        iitem.to_image(
-                            os.path.join(
-                                folder,
-                                current_heading
-                                + f"_{item_in_section_counter}.png",
-                            )
-                        )
-                    except AttributeError:
+                    if isinstance(iitem, pd.DataFrame):
                         iitem.to_csv(
                             os.path.join(
                                 folder,
@@ -216,17 +184,15 @@ class Report:
                                 + f"_{item_in_section_counter}.csv",
                             )
                         )
+                    else:
+                        iitem.to_image(
+                            os.path.join(
+                                folder,
+                                current_heading
+                                + f"_{item_in_section_counter}.png",
+                            )
+                        )
                     item_in_section_counter += 1
-            elif item_type in [_ContentType.TABLE]:
-                item.to_csv(
-                    os.path.join(
-                        folder,
-                        current_heading + f"_{item_in_section_counter}.csv",
-                    )
-                )
-                item_in_section_counter += 1
-            else:
-                raise RuntimeError("Unknown content type.")
 
 
 class _HtmlHeading:
@@ -256,10 +222,7 @@ class _HtmlFlexbox:
         Args:
             items: Items for the flexbox.
         """
-        if not isinstance(items, list) and not isinstance(items, tuple):
-            self._items = [items]
-        else:
-            self._items = items
+        self._items = items
 
     def to_html(self) -> str:
         """Get html string respresentation of content."""
