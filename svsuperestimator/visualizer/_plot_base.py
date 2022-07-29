@@ -21,20 +21,22 @@ class PlotBase:
         self._fig = go.Figure()
 
         # Common layout options
-        self._layout_common: dict[str, Any] = kwargs
+        self._layout_common: dict[str, Any] = {
+            "font_family": "Arial",
+            "font_size": 18,
+            "plot_bgcolor": "rgba(0, 0, 0, 0)",
+            "paper_bgcolor": "rgba(0, 0, 0, 0)",
+        }
+        self._layout_common.update(kwargs)
 
         # Layout options specific for the light color scheme
         self._layout_light = {
             "template": "plotly_white",
-            "plot_bgcolor": "white",
-            "paper_bgcolor": "white",
         }
 
         # Layout options specific for the dark color scheme
         self._layout_dark = {
             "template": "plotly_dark",
-            "plot_bgcolor": "rgba(0, 0, 0, 0)",
-            "paper_bgcolor": "rgba(0, 0, 0, 0)",
         }
 
     def add_footnote(self, text: str):

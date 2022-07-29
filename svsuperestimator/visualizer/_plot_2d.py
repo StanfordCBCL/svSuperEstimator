@@ -114,6 +114,7 @@ class Plot2D(PlotBase):
                 showlegend=showlegend,
                 opacity=opacity,
                 marker_color=color,
+                marker_line=dict(width=1, color=color),
             )
         )
 
@@ -137,11 +138,11 @@ class Plot2D(PlotBase):
 
     def add_annotated_point_trace(
         self,
-        x: float,
-        y: float,
-        text: float,
+        x: np.ndarray,
+        y: np.ndarray,
+        name: list[str],
+        symbol: list[str],
         color: str = "orange",
-        textcolor: str = None,
         size: int = 8,
     ):
         """Add an annotated point trace.
@@ -149,28 +150,22 @@ class Plot2D(PlotBase):
         Args:
             x: X-coordinate of the point.
             y: Y-coordinate of the point.
-            text: Text to display next to the point.
-            color: Color of the point.
-            textcolor: Color of the text.
+            Name: Names of points to display in legend.
+            color: Colors of the points.
+            symbol: Symbol of the points.
             size: Size of the point.
         """
-        self._fig.add_trace(
-            go.Scatter(
-                x=[x],
-                y=[y],
-                mode="markers",
-                name=text,
-                marker=dict(color=color, size=size),
+        for i, t in enumerate(name):
+            self._fig.add_trace(
+                go.Scatter(
+                    x=[x[i]],
+                    y=[y[i]],
+                    mode="markers",
+                    name=name[i],
+                    marker=dict(color=color[i], size=size, symbol=symbol),
+                    showlegend=True,
+                )
             )
-        )
-        self._fig.add_annotation(
-            x=x,
-            y=y,
-            text=text,
-            showarrow=True,
-            arrowhead=1,
-            font=dict(color=textcolor),
-        )
 
     def add_heatmap_trace(
         self,
@@ -194,6 +189,7 @@ class Plot2D(PlotBase):
                 z=z,
                 name=name,
                 colorscale=colorscale,
+                showscale=False,
             )
         )
 
@@ -225,7 +221,9 @@ class Plot2D(PlotBase):
                 name=name_y,
                 xaxis="x2",
                 marker=dict(color=color),
+                marker_line=dict(width=1, color="black"),
                 orientation="h",
+                showlegend=False,
             )
         )
         self._fig.add_trace(
@@ -235,6 +233,8 @@ class Plot2D(PlotBase):
                 name=name_x,
                 yaxis="y2",
                 marker=dict(color=color),
+                marker_line=dict(width=1, color="black"),
+                showlegend=False,
             )
         )
         self._layout_common.update(
@@ -249,11 +249,20 @@ class Plot2D(PlotBase):
                     domain=[0, 0.85],
                     showgrid=False,
                 ),
-                xaxis2=dict(zeroline=False, domain=[0.85, 1], showgrid=False),
-                yaxis2=dict(zeroline=False, domain=[0.85, 1], showgrid=False),
-                bargap=0.0,
+                xaxis2=dict(
+                    visible=False,
+                    zeroline=False,
+                    domain=[0.85, 1],
+                    showgrid=False,
+                ),
+                yaxis2=dict(
+                    visible=False,
+                    zeroline=False,
+                    domain=[0.85, 1],
+                    showgrid=False,
+                ),
+                bargap=0,
                 hovermode="closest",
-                showlegend=False,
             )
         )
 
