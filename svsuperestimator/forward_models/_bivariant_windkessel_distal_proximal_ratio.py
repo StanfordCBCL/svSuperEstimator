@@ -92,18 +92,9 @@ class BivariantWindkesselDistalToProximalResistance0D(ForwardModel):
         except RuntimeError:
             return np.array([np.nan] * len(self.outlet_bcs) * 2)
 
-        # p_inflow = result.loc[result.name == self.inflow_name][
-        #     self.inflow_pressure
-        # ].iloc[0]
-
-        # p_eval = [
-        #     p_inflow - result.loc[result.name == name][pressure_id].iloc[0]
-        #     for name, pressure_id in zip(self.bc_names, self.bc_pressure)
-        # ]
-
         flow_amplitude = [
             result.loc[result.name == name][flow_id].max()
             - result.loc[result.name == name][flow_id].min()
             for name, flow_id in zip(self.bc_names, self.bc_flow)
         ]
-        return np.array(flow_amplitude)  # np.array(p_eval + q_eval)
+        return np.array(flow_amplitude)

@@ -17,10 +17,10 @@ import pandas as pd
 from datetime import datetime
 from scipy.interpolate import griddata
 
-from rich import print
+from ._problem import Problem
 
 
-class BivariantWindkesselGridLikelihood:
+class BivariantWindkesselGridLikelihood(Problem):
 
     PROBLEM_NAME = "Bivariant-Windkessel-Grid-Likelihood"
 
@@ -143,11 +143,8 @@ class BivariantWindkesselGridLikelihood:
         ) as ff:
             json.dump(parameters, ff, indent=4)
 
-        # Generate static report
-        report = self.generate_report(project_overview=True)
-        report_folder = os.path.join(self.output_folder, "report")
-        report.to_html(report_folder)
-        report.to_files(report_folder)
+    def postprocess(self):
+        pass
 
     def generate_report(self, project_overview=False):
 
@@ -157,10 +154,10 @@ class BivariantWindkesselGridLikelihood:
         if project_overview:
             plot3d = plotutils.create_3d_geometry_plot_with_bcs(self.project)
             model = mdl.ZeroDModel(self.project)
-            report.add_title("Project overview")
-            report.add_plots([model.get_boundary_condition_info(), plot3d])
+            report.add("Project overview")
+            report.add([model.get_boundary_condition_info(), plot3d])
 
-        report.add_title(f"Results")
+        report.add(f"Results")
 
         parameters = self._read_parameters()
         x, y, z = self._read_results()
@@ -207,9 +204,9 @@ class BivariantWindkesselGridLikelihood:
             x=x, y=y, z=z, name="Weighted particle density"
         )
 
-        report.add_plots([heatmap_plot, plot_likelihood_3d])
+        report.add([heatmap_plot, plot_likelihood_3d])
 
-        report.add_title(f"Parameters")
+        report.add(f"Parameters")
         param_data = {
             key: str(value)
             for key, value in parameters.items()
@@ -221,13 +218,15 @@ class BivariantWindkesselGridLikelihood:
                 for key, value in parameters["configuration"].items()
             }
         )
-        report.add_table(
-            pd.DataFrame(
-                {
-                    "Name": list(param_data.keys()),
-                    "Value": list(param_data.values()),
-                }
-            )
+        report.add(
+            [
+                pd.DataFrame(
+                    {
+                        "Name": list(param_data.keys()),
+                        "Value": list(param_data.values()),
+                    }
+                )
+            ]
         )
 
         return report

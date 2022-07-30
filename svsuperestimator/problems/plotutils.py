@@ -1,13 +1,9 @@
-from arviz import kde
-from plotly import graph_objects as go
-
+from __future__ import annotations
 from svsuperestimator.model import ZeroDModel
 import vtk
 from vtk.util.numpy_support import vtk_to_numpy
 import numpy as np
 from svsuperestimator import visualizer
-
-from . import statutils
 
 
 def create_3d_geometry_plot_with_bcs(project):
@@ -69,47 +65,3 @@ def create_3d_geometry_plot_with_bcs(project):
     )
 
     return plot
-
-
-def create_kde_plot(
-    x,
-    weights,
-    plotrange,
-    ground_truth,
-    param_name,
-):
-
-    lin_x, kde, bandwidth = statutils.kernel_density_estimation_1d(
-        x=x, weights=weights, bounds=plotrange
-    )
-
-    counts, bin_edges = np.histogram(
-        x,
-        bins=int((plotrange[1] - plotrange[0]) / bandwidth),
-        weights=weights,
-        density=True,
-        range=plotrange,
-    )
-
-    # Create kernel density estimation plot for k0
-    plot_posterior_2d = visualizer.Plot2D(
-        title="Weighted histogram and kernel density estimation of "
-        + param_name,
-        xaxis_title=param_name,
-        yaxis_title="Kernel density",
-        xaxis_range=plotrange,
-    )
-    plot_posterior_2d.add_bar_trace(
-        x=bin_edges,
-        y=counts,
-        name="Weighted histogram",
-    )
-    plot_posterior_2d.add_line_trace(
-        x=lin_x, y=kde, name="Kernel density estimate"
-    )
-    plot_posterior_2d.add_vline_trace(x=ground_truth, text="Ground Truth")
-    plot_posterior_2d.add_footnote(
-        text=f"Kernel: Gaussian | Optimized Bandwith: {bandwidth:.3f} | Method: 30-fold cross-validation"
-    )
-
-    return plot_posterior_2d

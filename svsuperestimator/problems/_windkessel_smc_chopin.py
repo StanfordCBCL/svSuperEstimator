@@ -11,8 +11,10 @@ from .. import (
 import pickle
 import numpy as np
 
+from ._problem import Problem
 
-class WindkesselSMCChopin:
+
+class WindkesselSMCChopin(Problem):
 
     PROBLEM_NAME = "Windkessel-SMC-Chopin"
 
@@ -79,6 +81,9 @@ class WindkesselSMCChopin:
 
         # Run the iterator
         iterator.run()
+
+    def postprocess(self):
+        pass
 
     def generate_report(self):
 

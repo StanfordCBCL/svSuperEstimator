@@ -21,13 +21,13 @@ def run_file(path, post_proc_only=False):
 
     problem_class = problems.get_problem_by_name(config["problem_type"])
     problem = problem_class(project, os.path.basename(path).split(".")[0])
-    if post_proc_only:
-        report = problem.generate_report(project_overview=True)
-        report_folder = os.path.join(problem.output_folder, "report")
-        report.to_html(report_folder)
-        report.to_files(report_folder)
-    else:
+    if not post_proc_only:
         problem.run(config)
+    problem.postprocess()
+    report = problem.generate_report(project_overview=True)
+    report_folder = os.path.join(problem.output_folder, "report")
+    report.to_html(report_folder)
+    report.to_files(report_folder)
 
     os.chdir(cwd)
 
