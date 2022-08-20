@@ -23,8 +23,8 @@ with open(zerod_file) as ff:
 with open(zerod_file_opt) as ff:
     zerod_opt_config = json.load(ff)
 
-zerod_result = result = runner.run_from_config(zerod_config)
-zerod_opt_result = result = runner.run_from_config(zerod_opt_config)
+zerod_result = result = runnercpp.run_from_config(zerod_config)
+zerod_opt_result = result = runnercpp.run_from_config(zerod_opt_config)
 
 # Extract polydata from centerline file
 reader = vtk.vtkXMLPolyDataReader()
@@ -123,13 +123,21 @@ for branch_id, branch in branch_data.items():
 times = (
     np.array([float(k.split("_")[1]) for k in pressure_names]) * 0.000339
 )  # TODO: Assumption about time step size not always correct
-
-print(zerod_opt_result)
+cycle_period = (
+    zerod_config["boundary_conditions"][0]["bc_values"]["t"][-1]
+    - zerod_config["boundary_conditions"][0]["bc_values"]["t"][0]
+)
 
 end_3d = times[-1]
 
 zerod_result = zerod_result[zerod_result["time"] < end_3d]
+zerod_result = zerod_result[zerod_result["time"] > end_3d - cycle_period]
 zerod_opt_result = zerod_opt_result[zerod_opt_result["time"] < end_3d]
+zerod_opt_result = zerod_opt_result[
+    zerod_opt_result["time"] > end_3d - cycle_period
+]
+
+result_idx_3d = times > end_3d - cycle_period
 
 report = visualizer.Report()
 for branch_id, branch in branch_data.items():
@@ -141,7 +149,10 @@ for branch_id, branch in branch_data.items():
 
         inpres_plot = visualizer.Plot2D(title="Inlet pressure")
         inpres_plot.add_line_trace(
-            x=times, y=segment["pressure_0"], name="3D", showlegend=True
+            x=times[result_idx_3d],
+            y=segment["pressure_0"][result_idx_3d],
+            name="3D",
+            showlegend=True,
         )
         inpres_plot.add_line_trace(
             x=zerod_result[zerod_result.name == f"V{vessel_id}"]["time"],
@@ -163,7 +174,10 @@ for branch_id, branch in branch_data.items():
         )
         inflow_plot = visualizer.Plot2D(title="Inlet flow")
         inflow_plot.add_line_trace(
-            x=times, y=segment["flow_0"], name="3D", showlegend=True
+            x=times[result_idx_3d],
+            y=segment["flow_0"][result_idx_3d],
+            name="3D",
+            showlegend=True,
         )
         inflow_plot.add_line_trace(
             x=zerod_result[zerod_result.name == f"V{vessel_id}"]["time"],

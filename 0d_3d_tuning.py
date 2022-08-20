@@ -34,10 +34,6 @@ def fit_zerod_to_threed(zerod_file, centerline_file, output_file):
     with open(zerod_file) as ff:
         zerod_config = json.load(ff)
 
-    if len(zerod_config["vessels"]) > 10:
-        print("Skipping:", zerod_file)
-        return
-
     def get_branch_polydata(branch_id):
 
         thresh = vtk.vtkThreshold()
@@ -125,8 +121,13 @@ def fit_zerod_to_threed(zerod_file, centerline_file, output_file):
             seg_start_index = seg_end_index
 
     times = (
-        np.array([float(k.split("_")[1]) for k in pressure_names]) * 0.001
+        np.array([float(k.split("_")[1]) for k in pressure_names]) * 0.000339
     )  # TODO: Assumption about time step size not always correct
+    cycle_period = (
+        zerod_config["boundary_conditions"][0]["bc_values"]["t"][-1]
+        - zerod_config["boundary_conditions"][0]["bc_values"]["t"][0]
+    )
+    start_last_cycle = (np.abs(times - (times[-1] - cycle_period))).argmin()
 
     def interpolate_values_to_times(values, sim_times, target_times):
 
@@ -217,8 +218,15 @@ def fit_zerod_to_threed(zerod_file, centerline_file, output_file):
                 )
 
                 mse = np.linalg.norm(
-                    (inpres_sim - inpres) / pres_norm_factor
-                ) + np.linalg.norm((outflow_sim - outflow) / flow_norm_factor)
+                    (inpres_sim[start_last_cycle:] - inpres[start_last_cycle:])
+                    / pres_norm_factor
+                ) + np.linalg.norm(
+                    (
+                        outflow_sim[start_last_cycle:]
+                        - outflow[start_last_cycle:]
+                    )
+                    / flow_norm_factor
+                )
 
                 return mse
 
