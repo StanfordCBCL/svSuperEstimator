@@ -62,6 +62,7 @@ class Plot2D(PlotBase):
         width: int = 2,
         opacity: float = 1.0,
         showlegend: bool = False,
+        dash: str = None,
     ):
         """Add a line scatter trace.
 
@@ -81,7 +82,7 @@ class Plot2D(PlotBase):
                 name=name,
                 mode="lines",
                 opacity=opacity,
-                line=dict(width=width, color=color),
+                line=dict(width=width, color=color, dash=dash),
                 showlegend=showlegend,
             )
         )

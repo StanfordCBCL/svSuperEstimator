@@ -47,3 +47,7 @@ rom_optimization_folder:
 centerline:
   type: path
   path: ROMSimulations/$CASE_NAME$/centerlines.vtp
+
+rom_simulation_config_optimized:
+  type: json
+  path: ROMSimulations/$CASE_NAME$/solver_0d_optimized.in

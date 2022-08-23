@@ -85,13 +85,14 @@ class SimVascularProject:
         if key not in self._file_registry:
             raise KeyError(f"Unknown key: {key}")
         elif self._file_registry[key]["type"] == "json":
-            target = os.path.join(self._folder, key)
+            target = os.path.join(
+                self._folder, self._file_registry[key]["path"]
+            )
             if "$" in target:
                 for regex, repl in self._regex.items():
                     target = target.replace(regex, repl)
             with open(target, "w") as ff:
                 json.dump(data, ff, indent=4)
-            return data
         elif self._file_registry[key]["type"] == "plain":
             target = os.path.join(
                 self._folder, self._file_registry[key]["path"]
