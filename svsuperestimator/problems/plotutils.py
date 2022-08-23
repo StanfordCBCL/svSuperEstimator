@@ -84,7 +84,6 @@ def create_3d_geometry_plot_with_vessels(project, mapped_result):
     border_point_indices = np.where(
         np.unique(cells[:, [1, 2]].flatten(), return_counts=True)[1] == 1
     )
-    border_points = points[border_point_indices]
     border_branch_ids = branch_ids[border_point_indices]
 
     branch_id_to_bc = {}
@@ -94,16 +93,24 @@ def create_3d_geometry_plot_with_vessels(project, mapped_result):
             for loc in vessel["boundary_conditions"]:
                 branch_id_to_bc[branch_id] = vessel["boundary_conditions"][loc]
 
-    hover_text = [
-        branch_id_to_bc[branch_id] for branch_id in border_branch_ids
-    ]
+    points = points[border_point_indices]
+    text = [branch_id_to_bc[branch_id] for branch_id in border_branch_ids]
+    marker = ["circle"] * len(text)
+
+    edge_points = []
 
     for branch_id, branch in mapped_result["branchdata"].items():
 
         for seg_id, segment in branch.items():
+            edge_points.append(segment["x0"])
+            edge_points.append(segment["x1"])
+            edge_points.append([None] * 3)
             middle = (segment["x0"] + segment["x1"]) / 2.0
-            border_points = np.append(border_points, [middle], axis=0)
-            hover_text.append(f"branch{branch_id}_seg{seg_id}")
+            points = np.append(points, [middle], axis=0)
+            text.append(f"branch{branch_id}_seg{seg_id}")
+            marker.append("circle-open")
+
+    edge_points = np.array(edge_points)
 
     plot = visualizer.Plot3D(
         scene=dict(
@@ -112,24 +119,37 @@ def create_3d_geometry_plot_with_vessels(project, mapped_result):
             zaxis_visible=False,
             aspectmode="data",
         ),
-        margin=dict(l=0, r=0, b=0, t=10),
+        margin=dict(l=0, r=0, b=0, t=0),
+        width=750,
+        height=750,
     )
 
     plot.add_mesh_trace_from_vtk(
         filename=project["3d_mesh"],
-        color="darkred",
+        color="#FF2014",
         name="3D Geometry",
-        opacity=0.5,
+        opacity=0.2,
     )
     plot.add_point_trace(
-        x=border_points[:, 0],
-        y=border_points[:, 1],
-        z=border_points[:, 2],
+        x=points[:, 0],
+        y=points[:, 1],
+        z=points[:, 2],
         color="white",
-        size=2,
-        name="Boundary conditions",
-        text=hover_text,
-        showlegend=True,
+        name="",
+        text=text,
+        textposition="middle left",
+        marker_size=0.1,
+        textfont_size=8,
+        textfont_color="cyan",
+    )
+    plot.add_line_trace(
+        x=edge_points[:, 0],
+        y=edge_points[:, 1],
+        z=edge_points[:, 2],
+        color="cyan",
+        name="Elements",
+        width=5,
+        marker_size=5,
     )
 
     return plot

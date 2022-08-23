@@ -28,6 +28,7 @@ class Plot3D(PlotBase):
         colorscale: str = "viridis",
         text: str = None,
         showlegend: bool = False,
+        **kwargs,
     ):
         """Add a point scatter trace.
 
@@ -52,12 +53,63 @@ class Plot3D(PlotBase):
                 x=x,
                 y=y,
                 z=z,
-                marker=dict(size=size, color=color, colorscale=colorscale),
+                marker=dict(
+                    size=size,
+                    color=color,
+                    colorscale=colorscale,
+                ),
                 opacity=opacity,
                 mode=mode,
                 showlegend=showlegend,
                 name=name,
                 text=text,
+                **kwargs,
+            ),
+        )
+
+    def add_line_trace(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        z: np.ndarray,
+        name: str,
+        color: Union[str, np.ndarray] = None,
+        width: int = 3,
+        opacity: float = 1.0,
+        colorscale: str = "viridis",
+        showlegend: bool = False,
+        **kwargs,
+    ):
+        """Add a line scatter trace.
+
+        Args:
+            x: X-coordinates of the points.
+            y: Y-coordinates of the points.
+            z: Z-coordinates of the points.
+            name: Name of the trace.
+            color: Color of the lines as a color specifier or an array to be
+                used for color coding.
+            size: Size of the points.
+            opacity: Opacity of the points.
+            colorscale: Colorscale to be used for color cording.
+            text: Optional text to be displayed next to the points.
+            showlegend: Toggle display of trace in legend.
+        """
+        self._fig.add_trace(
+            go.Scatter3d(
+                x=x,
+                y=y,
+                z=z,
+                line=dict(
+                    width=width,
+                    color=color,
+                    colorscale=colorscale,
+                ),
+                opacity=opacity,
+                mode="markers+lines",
+                showlegend=showlegend,
+                name=name,
+                **kwargs,
             ),
         )
 
