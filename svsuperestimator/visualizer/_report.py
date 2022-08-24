@@ -21,7 +21,7 @@ class Report:
         """Add new content to the report."""
         self._content.append(content)
 
-    def to_html(self, folder: str) -> None:
+    def to_html(self, filename: str, title: str = None) -> None:
         """Convert the report to a static html website in the folder.
 
         The main page can be accessed by opening the `index.html` file in the
@@ -48,7 +48,7 @@ class Report:
 <style>{style}</style>
 <script src=""></script>
 <body>
-<div class="topbar"><h1>{title} Dashboard</h1></div>
+<div class="topbar"><h1>svSuperEstimator Dashboard</h1></div>
 {body}
 </body>
 </html>
@@ -132,15 +132,11 @@ class Report:
   }
 """
 
-        # Create the folder if it doesn't exist
-        if not os.path.isdir(folder):
-            os.mkdir(folder)
-
         # Build and write html page
-        with open(os.path.join(folder, "index.html"), "w") as ff:
+        with open(filename, "w") as ff:
             ff.write(
                 sceleton.format(
-                    title="svSuperEstimator",
+                    title=title,
                     style=stylesheet,
                     timestamp=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
                     body="\n".join([c.to_html() for c in formatted_content]),

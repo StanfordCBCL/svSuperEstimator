@@ -154,6 +154,7 @@ class Plot3D(PlotBase):
         color: str = None,
         opacity: float = 1.0,
         showlegend: bool = False,
+        decimate: float = None,
     ):
         """Add a mesh trace from a vtk file.
 
@@ -163,6 +164,7 @@ class Plot3D(PlotBase):
             color: Color of the trace.
             opacity: Opacity of the trace.
             showlegend: Toggle display of trace in legend.
+            decimate: Complexity reduction factor for mesh.
         """
         if not os.path.exists(filename):
             raise FileNotFoundError(
@@ -177,6 +179,14 @@ class Plot3D(PlotBase):
             polydata = reader.GetOutput()
         else:
             raise NotImplementedError("Filetype not supported.")
+
+        # Simplify mesh
+        if decimate:
+            decpro = vtk.vtkDecimatePro()
+            decpro.SetInputData(polydata)
+            decpro.SetTargetReduction(0.9)
+            decpro.Update()
+            polydata = decpro.GetOutput()
 
         # Extract mesh
         points = vtk_to_numpy(polydata.GetPoints().GetData())

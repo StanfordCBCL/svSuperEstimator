@@ -4,6 +4,7 @@ from typing import Any
 import plotly.graph_objects as go
 from dash.dcc import Graph
 from dash import html
+from base64 import b64encode
 
 
 class PlotBase:
@@ -12,13 +13,14 @@ class PlotBase:
     Defines common methods to handle plotly plots.
     """
 
-    def __init__(self, **kwargs: dict[str, Any]) -> None:
+    def __init__(self, static=False, **kwargs: dict[str, Any]) -> None:
         """Create a new PlotBase instance.
 
         Args:
             kwargs: Plotly layout options for the figure.
         """
         self._fig = go.Figure()
+        self._static = static
 
         # Common layout options
         self._layout_common: dict[str, Any] = {
@@ -68,9 +70,19 @@ class PlotBase:
             self._fig.update_layout(**self._layout_dark)
         else:
             self._fig.update_layout(**self._layout_light)
-        return self._fig.to_html(
-            include_plotlyjs="cdn", include_mathjax="cdn", full_html=False
-        )
+
+        if self._static:
+            img_bytes = self._fig.to_image(format="svg")
+            encoding = b64encode(img_bytes).decode()
+            img_b64 = "data:image/svg+xml;base64," + encoding
+            html_str = f'<img src="{img_b64}">'
+        else:
+            html_str = self._fig.to_html(
+                include_plotlyjs="cdn",
+                include_mathjax="cdn",
+                full_html=False,
+            )
+        return html_str
 
     def to_image(self, path: str, dark: bool = False) -> None:
         """Export plot as image file.
