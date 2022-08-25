@@ -86,17 +86,12 @@ class Task(ABC):
 
         # Run the task and postprocessing of the data
         self.core_run()
+        self.log("Postprocessing results")
         self.post_run()
 
         # Generate task report and export data
         self.log("Generate task report")
         report = self.generate_report()
-        html_report_target = os.path.join(self.output_folder, "report.html")
-        self.log(f"Export report webpage to {html_report_target}")
-        report.to_html(
-            html_report_target,
-            title=self.project.name + " - svSuperEstimator",
-        )
         self.log(f"Export report files to {self.output_folder}")
         report.to_files(self.output_folder)
 
@@ -106,7 +101,15 @@ class Task(ABC):
         self.console.save_html(html_log_target, clear=False)
         svg_log_target = os.path.join(self.output_folder, "log.svg")
         self.log(f"Save task output to {svg_log_target}", style="default")
-        self.console.save_svg(svg_log_target, clear=False)
+        self.console.save_svg(svg_log_target, clear=False, title="Output")
+
+        # Export html report
+        html_report_target = os.path.join(self.output_folder, "report.html")
+        self.log(f"Export report webpage to {html_report_target}")
+        report.to_html(
+            html_report_target,
+            title=self.project.name + " - svSuperEstimator",
+        )
 
         self.log(
             f"Task {self.TASKNAME} [bold green]completed[/bold green] in "

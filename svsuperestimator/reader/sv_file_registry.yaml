@@ -18,10 +18,10 @@ rom_centerline:
 
 rom_optimization_folder:
   type: path
-  path: ROMSimulations/$CASE_NAME$/optim
+  path: ROMSimulations/$CASE_NAME$
 
 3d_simulation_input:
-  type: path
+  type: plain
   path: Simulations/$CASE_NAME$/solver.inp
 
 3d_simulation_geombc:

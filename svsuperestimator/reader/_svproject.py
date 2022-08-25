@@ -4,6 +4,7 @@ import os
 from typing import Any
 
 import yaml
+import re
 
 
 class SimVascularProject:
@@ -20,6 +21,8 @@ class SimVascularProject:
             "$CASE_NAME$": os.path.basename(self._folder)
         }
         self.name = os.path.basename(folder)
+
+        self._cache = {}
 
         # Read file registry
         with open(
@@ -106,3 +109,15 @@ class SimVascularProject:
             raise IndexError(
                 f"Specified element {key} doesn't support setting."
             )
+
+    @property
+    def time_step_size_3d(self):
+        """Time step size in 3d simulation."""
+        if not "time_step_size_3d" in self._cache:
+            self._cache["time_step_size_3d"] = float(
+                re.findall(
+                    r"Time Step Size: -?\d+\.?\d*",
+                    self["3d_simulation_input"],
+                )[0].split()[-1]
+            )
+        return self._cache["time_step_size_3d"]

@@ -9,7 +9,6 @@ import pandas as pd
 from rich import box
 from rich.table import Table
 from scipy import optimize
-from scipy.interpolate import CubicSpline
 from svzerodsolver import runnercpp
 
 from svsuperestimator.problems._plotutils import (
@@ -20,9 +19,10 @@ from svsuperestimator.problems._plotutils import (
 from .. import visualizer
 from ..problems import plotutils
 from ..reader.centerline import map_centerline_result_to_0d
+from . import utils
 from .task import Task
 
-from . import utils
+from plotly import graph_objects as go
 
 
 class BloodVesselTuning(Task):
@@ -34,28 +34,25 @@ class BloodVesselTuning(Task):
         "maxfev": 2000,
     }
 
+    # The sequence that the blood vessel parameters are saved in arrays
+    _PARAMETER_SEQUENCE = ["R_poiseuille", "C", "L", "stenosis_coefficient"]
+
+    # Number of cycles to simulate blood vessels during optimization
+    _OPT_NUM_CYCLES = 5
+
     def core_run(self):
         """Core routine of the task."""
 
         # Loading data from project
         self.log("Loading 0D simulation input file")
         zerod_config = self.project["rom_simulation_config"]
-        self.log("Reading 3D simualtion input file")
-        threed_input = self.project["3d_simulation_input"]
 
         # Get 3D simulation time step size from 3d simulation input file
-        threed_time_step_size = float(
-            re.findall(r"Time Step Size: -?\d+\.?\d*", threed_input)[
-                0
-            ].split()[-1]
-        )
-        self.log(
-            "Extracted 3D simulation time step size:", threed_time_step_size
-        )
+        threed_time_step_size = self.project.time_step_size_3d
+        self.log("Found 3D simulation time step size:", threed_time_step_size)
 
         # Map centerline result to 3D simulation
         self.log("Map 3D centerline result to 0D elements")
-        parameters = ["R_poiseuille", "C", "L", "stenosis_coefficient"]
         branch_data, times = map_centerline_result_to_0d(
             self.config["threed_solution_file"],
             zerod_config,
@@ -67,13 +64,12 @@ class BloodVesselTuning(Task):
             branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
             start_values = vessel["zero_d_element_values"]
             branch_data[branch_id][seg_id]["theta_start"] = [
-                start_values[n] for n in parameters
+                start_values[n] for n in self._PARAMETER_SEQUENCE
             ]
 
         # Start optimizing the branches
         pool = Pool(processes=self.config["num_procs"])
         results = []
-        num_cycles = 5
         num_pts = zerod_config["simulation_parameters"][
             "number_of_time_pts_per_cardiac_cycle"
         ]
@@ -85,21 +81,20 @@ class BloodVesselTuning(Task):
                     "seg_id": seg_id,
                     "times": np.linspace(times[0], times[-1], num_pts),
                     "inflow": utils.refine_with_cubic_spline(
-                        times, segment["flow_0"], num_pts
+                        segment["flow_0"], num_pts
                     ),
                     "outpres": utils.refine_with_cubic_spline(
-                        times, segment["pressure_1"], num_pts
+                        segment["pressure_1"], num_pts
                     ),
                     "inpres": utils.refine_with_cubic_spline(
-                        times, segment["pressure_0"], num_pts
+                        segment["pressure_0"], num_pts
                     ),
                     "outflow": utils.refine_with_cubic_spline(
-                        times, segment["flow_1"], num_pts
+                        segment["flow_1"], num_pts
                     ),
                     "maxfev": self.config["maxfev"],
-                    "num_cycles": num_cycles,
                     "num_pts_per_cycle": num_pts,
-                    "theta_start": segment["theta_start"],
+                    "theta_start": np.array(segment["theta_start"]),
                 }
                 self.log(
                     f"Optimization for branch {branch_id} segment "
@@ -111,22 +106,25 @@ class BloodVesselTuning(Task):
                     callback=self._optimize_blood_vessel_callback,
                 )
                 results.append(r)
+
+        # Collect results when processes are complete
         for r in results:
             r.wait()
         results = [r.get() for r in results]
 
+        # Write results to respective branch in branch data
         for result in results:
             branch_data[result["branch_id"]][result["seg_id"]]["theta_opt"] = {
-                n: result["theta_opt"][j] for j, n in enumerate(parameters)
+                n: result["theta_opt"][j]
+                for j, n in enumerate(self._PARAMETER_SEQUENCE)
             }
 
+        # Update 0D simulation config with optimized parameters
         for i, vessel_config in enumerate(zerod_config["vessels"]):
-
             name = vessel_config["vessel_name"]
             branch_id, seg_id = name.split("_")
             branch_id = int(branch_id[6:])
             seg_id = int(seg_id[3:])
-
             zerod_config["vessels"][i]["zero_d_element_values"] = branch_data[
                 branch_id
             ][seg_id]["theta_opt"]
@@ -142,15 +140,8 @@ class BloodVesselTuning(Task):
 
         centerline_file = self.config["threed_solution_file"]
 
-        threed_input = self.project["3d_simulation_input"]
-        threed_time_step_size = float(
-            re.findall(r"Time Step Size: -?\d+\.?\d*", threed_input)[
-                0
-            ].split()[-1]
-        )
-
         branch_data, times = map_centerline_result_to_0d(
-            centerline_file, zerod_config, threed_time_step_size
+            centerline_file, zerod_config, self.project.time_step_size_3d
         )
 
         zerod_result = runnercpp.run_from_config(zerod_config)
@@ -262,15 +253,8 @@ class BloodVesselTuning(Task):
 
         centerline_file = self.config["threed_solution_file"]
 
-        threed_input = self.project["3d_simulation_input"]
-        threed_time_step_size = float(
-            re.findall(r"Time Step Size: -?\d+\.?\d*", threed_input)[
-                0
-            ].split()[-1]
-        )
-
         branch_data, _ = map_centerline_result_to_0d(
-            centerline_file, zerod_config, threed_time_step_size
+            centerline_file, zerod_config, self.project.time_step_size_3d
         )
 
         bc_plot = plotutils.create_3d_geometry_plot_with_vessels(
@@ -289,6 +273,8 @@ class BloodVesselTuning(Task):
             for seg_id, segment in branch.items():
 
                 vessel_name = f"branch{branch_id}_seg{seg_id}"
+
+                report.add(vessel_name)
 
                 inpres_plot = visualizer.Plot2D(
                     title=f"Inlet pressure branch {branch_id} segment {seg_id}",
@@ -452,35 +438,96 @@ class BloodVesselTuning(Task):
             segment_data["outflow"]
         )
 
+        def run_simulation(theta, last_cycle=True):
+            return BloodVesselTuning._simulate_blood_vessel(
+                *theta,
+                bc_times=segment_data["times"],
+                bc_inflow=segment_data["inflow"],
+                bc_outpres=segment_data["outpres"],
+                num_pts_per_cycle=segment_data["num_pts_per_cycle"],
+                last_cycle=last_cycle,
+            )
+
         def objective_function(theta):
             (
                 _,
                 inpres_sim,
                 outflow_sim,
-            ) = BloodVesselTuning._simulate_blood_vessel(
-                *theta,
-                bc_times=segment_data["times"],
-                bc_inflow=segment_data["inflow"],
-                bc_outpres=segment_data["outpres"],
-                num_cycles=segment_data["num_cycles"],
-                num_pts_per_cycle=segment_data["num_pts_per_cycle"],
-            )
+            ) = run_simulation(theta)
 
-            mse = np.linalg.norm(
+            return np.linalg.norm(
                 (inpres_sim - segment_data["inpres"]) / pres_norm_factor
             ) + np.linalg.norm(
                 (outflow_sim - segment_data["outflow"]) / flow_norm_factor
             )
 
-            return mse
-
+        x0 = segment_data["theta_start"].copy()
+        x0[1] = 1e-8  # Only good when 3d wall is stiff
         result = optimize.minimize(
             fun=objective_function,
-            x0=segment_data["theta_start"],
+            x0=x0,
             method="Nelder-Mead",
             options={"maxfev": segment_data["maxfev"], "adaptive": True},
-            bounds=[(None, None), (1e-12, None), (1e-12, None), (None, None)],
+            bounds=[(None, None), (1.0e-8, None), (1e-12, None), (None, None)],
         )
+
+        # sim_times, inpres_opt, outflow_opt = run_simulation(
+        #     result.x, last_cycle=False
+        # )
+        # _, inpres_bef, outflow_bef = run_simulation(x0, last_cycle=False)
+
+        # plot = go.Figure()
+        # plot.add_trace(
+        #     go.Scatter(x=sim_times[:100], y=inpres_opt[:100], name="Optimized")
+        # )
+        # plot.add_trace(
+        #     go.Scatter(x=sim_times[:100], y=inpres_bef[:100], name="Before")
+        # )
+        # plot.add_trace(
+        #     go.Scatter(
+        #         x=sim_times[:100],
+        #         y=segment_data["inpres"][:100],
+        #         name="Target",
+        #     )
+        # )
+        # plot.add_trace(
+        #     go.Scatter(
+        #         x=sim_times[:100],
+        #         y=segment_data["outpres"][:100],
+        #         name="Boundary condition",
+        #     )
+        # )
+        # plot.write_image(
+        #     f"results/images/pressure_branch{segment_data['branch_id']}_seg_{segment_data['seg_id']}.png"
+        # )
+
+        # plot = go.Figure()
+        # plot.add_trace(
+        #     go.Scatter(
+        #         x=sim_times[:100], y=outflow_opt[:100], name="Optimized"
+        #     )
+        # )
+        # plot.add_trace(
+        #     go.Scatter(x=sim_times[:100], y=outflow_bef[:100], name="Before")
+        # )
+        # plot.add_trace(
+        #     go.Scatter(
+        #         x=sim_times[:100],
+        #         y=segment_data["outflow"][:100],
+        #         name="Target",
+        #     )
+        # )
+        # plot.add_trace(
+        #     go.Scatter(
+        #         x=sim_times[:100],
+        #         y=segment_data["inflow"][:100],
+        #         name="Boundary condition",
+        #     )
+        # )
+        # plot.write_image(
+        #     f"results/images/flow_branch{segment_data['branch_id']}_seg_{segment_data['seg_id']}.png"
+        # )
+
         return {
             "theta_opt": result.x,
             "nfev": result.nfev,
@@ -521,7 +568,6 @@ class BloodVesselTuning(Task):
                 "stenosis coefficient",
                 f"{output['theta_start'][3]:.1e} -> {output['theta_opt'][3]:.1e}",
             )
-
             self.log(table)
         else:
             self.log(
@@ -530,8 +576,9 @@ class BloodVesselTuning(Task):
                 f"message: {output['message']}"
             )
 
-    @staticmethod
+    @classmethod
     def _simulate_blood_vessel(
+        cls,
         R,
         C,
         L,
@@ -539,8 +586,8 @@ class BloodVesselTuning(Task):
         bc_times,
         bc_inflow,
         bc_outpres,
-        num_cycles,
         num_pts_per_cycle,
+        last_cycle=True,
     ):
 
         config = {
@@ -564,9 +611,9 @@ class BloodVesselTuning(Task):
             ],
             "junctions": [],
             "simulation_parameters": {
-                "number_of_cardiac_cycles": num_cycles,
+                "number_of_cardiac_cycles": cls._OPT_NUM_CYCLES,
                 "number_of_time_pts_per_cardiac_cycle": num_pts_per_cycle,
-                "steady_initial": True,
+                "steady_initial": False,
             },
             "vessels": [
                 {
@@ -590,9 +637,14 @@ class BloodVesselTuning(Task):
 
         result = runnercpp.run_from_config(config)
 
-        sim_times = np.array(result["time"])[-num_pts_per_cycle:]
-        sim_times = sim_times - np.amin(sim_times)
-        sim_inpres = np.array(result["pressure_in"])[-num_pts_per_cycle:]
-        sim_outflow = np.array(result["flow_out"])[-num_pts_per_cycle:]
+        sim_times = np.array(result["time"])
+        sim_inpres = np.array(result["pressure_in"])
+        sim_outflow = np.array(result["flow_out"])
+
+        if last_cycle:
+            sim_times = sim_times[-num_pts_per_cycle:]
+            sim_times = sim_times - np.amin(sim_times)
+            sim_inpres = sim_inpres[-num_pts_per_cycle:]
+            sim_outflow = sim_outflow[-num_pts_per_cycle:]
 
         return sim_times, sim_inpres, sim_outflow

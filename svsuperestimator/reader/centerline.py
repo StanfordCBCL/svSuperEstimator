@@ -8,8 +8,6 @@ from . import utils
 
 def map_centerline_result_to_0d(centerline, zerod_config, dt3d):
 
-    output = {}
-
     # Read centerline vtk file
     polydata = utils.vtk_read_polydata(centerline)
 
@@ -106,9 +104,6 @@ def map_centerline_result_to_0d(centerline, zerod_config, dt3d):
             seg_start = seg_end
             seg_start_index = seg_end_index
 
-    output["branchdata"] = branchdata
-    output["timesteps"] = times[start_last_cycle:-1] - np.amin(
-        times[start_last_cycle]
-    )
+    times = times[start_last_cycle:-1] - [np.amin(times[start_last_cycle])]
 
-    return output
+    return branchdata, times

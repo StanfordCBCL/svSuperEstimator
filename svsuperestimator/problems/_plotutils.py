@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def cgs_pressure_to_mmgh(cgs_pressure):
     """Convert pressure from g/(cm s^2) to mmHg.
 
@@ -7,7 +10,7 @@ def cgs_pressure_to_mmgh(cgs_pressure):
     Returns:
         Pressure in mmHg.
     """
-    return cgs_pressure * 0.00075006156130264
+    return np.array(cgs_pressure * 0.00075006156130264)
 
 
 def cgs_flow_to_lh(cgs_flow):
@@ -19,4 +22,4 @@ def cgs_flow_to_lh(cgs_flow):
     Returns:
         Flow in l/h.
     """
-    return cgs_flow * 3.6
+    return np.array(cgs_flow * 3.6)

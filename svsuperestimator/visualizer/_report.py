@@ -8,6 +8,7 @@ from dash import html
 import pandas as pd
 
 from ..app.helpers import create_columns
+from base64 import b64encode
 
 
 class Report:
@@ -37,7 +38,19 @@ class Report:
             if isinstance(item, str):
                 formatted_content.append(_HtmlHeading(item))
             else:
-                formatted_content.append(_HtmlFlexbox(item))
+                if len(item) == 1:
+                    formatted_content.append(_HtmlItem(item[0]))
+                else:
+                    formatted_content.append(_HtmlFlexbox(item))
+
+        # Attach logging output if existend
+        log_file = os.path.join(os.path.dirname(filename), "log.svg")
+        if os.path.exists(log_file):
+            formatted_content.append(_HtmlHeading("Log output"))
+            with open(log_file, "rb") as ff:
+                encoding = b64encode(ff.read()).decode()
+                img_b64 = "data:image/svg+xml;base64," + encoding
+                formatted_content.append(_HtmlItem(f'<img src="{img_b64}">'))
 
         sceleton = """<!DOCTYPE html>
 <html lang="en">
@@ -224,11 +237,32 @@ class _HtmlFlexbox:
         """Get html string respresentation of content."""
         html = "<div class='container'>\n"
         for item in self._items:
-            if isinstance(item, pd.DataFrame):
-                html += (
-                    f"<div class='item'>{item.to_html(index=False)}</div>\n"
-                )
-            else:
-                html += f"<div class='item'>{item.to_html()}</div>\n"
+            try:
+                if isinstance(item, pd.DataFrame):
+                    html += f"<div class='item'>{item.to_html(index=False)}</div>\n"
+                else:
+                    html += f"<div class='item'>{item.to_html()}</div>\n"
+            except AttributeError:
+                html += f"<div class='item'>{item}</div>\n"
         html += "</div>"
         return html
+
+
+class _HtmlItem:
+    """Auxiliary class for generating html item."""
+
+    def __init__(self, item: str) -> None:
+        """Create a new instance of _HtmlItem.
+
+        Args:
+            item: The item.
+        """
+        self._item = item
+
+    def to_html(self) -> str:
+        """Get html string respresentation of content."""
+        try:
+            content = self._item.to_html()
+        except AttributeError:
+            content = self._item
+        return f"<div class='item' style='margin-left:20px;margin-right:20px'>{content}</div>\n"

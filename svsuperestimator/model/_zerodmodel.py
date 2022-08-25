@@ -51,10 +51,6 @@ class ZeroDModel:
                     resistance_distal=bc["bc_values"]["Rd"],
                     resistance_proximal=bc["bc_values"]["Rp"],
                 )
-            else:
-                raise ValueError(
-                    f"Unknown boundary condition type {bc['bc_type']}."
-                )
 
     def make_configuration(
         self,

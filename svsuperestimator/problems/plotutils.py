@@ -67,7 +67,7 @@ def create_3d_geometry_plot_with_bcs(project):
     return plot
 
 
-def create_3d_geometry_plot_with_vessels(project, mapped_result):
+def create_3d_geometry_plot_with_vessels(project, branchdata):
 
     model = ZeroDModel(project)
 
@@ -99,7 +99,7 @@ def create_3d_geometry_plot_with_vessels(project, mapped_result):
 
     edge_points = []
 
-    for branch_id, branch in mapped_result["branchdata"].items():
+    for branch_id, branch in branchdata.items():
 
         for seg_id, segment in branch.items():
             edge_points.append(segment["x0"])
@@ -129,6 +129,7 @@ def create_3d_geometry_plot_with_vessels(project, mapped_result):
         color="#FF2014",
         name="3D Geometry",
         opacity=0.2,
+        decimate=0.9,  # Reduce number of polygons by 90%
     )
     plot.add_point_trace(
         x=points[:, 0],
