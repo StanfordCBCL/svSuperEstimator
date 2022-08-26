@@ -265,4 +265,4 @@ class _HtmlItem:
             content = self._item.to_html()
         except AttributeError:
             content = self._item
-        return f"<div class='item' style='margin-left:20px;margin-right:20px'>{content}</div>\n"
+        return f"<div class='item' style='margin-left:20px;margin-right:20px;margin-bottom:30px'>{content}</div>\n"

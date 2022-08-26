@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import re
 from multiprocessing import Pool
 
 import numpy as np
@@ -11,21 +10,17 @@ from rich.table import Table
 from scipy import optimize
 from svzerodsolver import runnercpp
 
-from svsuperestimator.problems._plotutils import (
-    cgs_flow_to_lh,
-    cgs_pressure_to_mmgh,
-)
-
 from .. import visualizer
-from ..problems import plotutils
-from ..reader.centerline import map_centerline_result_to_0d
+from . import plotutils
 from . import utils
 from .task import Task
 
-from plotly import graph_objects as go
-
 
 class BloodVesselTuning(Task):
+    """Blood vessel tuning task.
+
+    Tunes all blood vessels in a 0D simulation file to a 3D simualtion result.
+    """
 
     TASKNAME = "BloodVesselTuning"
     DEFAULTS = {
@@ -40,6 +35,12 @@ class BloodVesselTuning(Task):
     # Number of cycles to simulate blood vessels during optimization
     _OPT_NUM_CYCLES = 5
 
+    # Parameter bounds for optimization
+    _OPT_BOUNDS = [(None, None), (1.0e-8, None), (1e-12, None), (None, None)]
+
+    # Optimization method used by scipy.optimize.minimize
+    _OPT_METHOD = "Nelder-Mead"
+
     def core_run(self):
         """Core routine of the task."""
 
@@ -53,7 +54,7 @@ class BloodVesselTuning(Task):
 
         # Map centerline result to 3D simulation
         self.log("Map 3D centerline result to 0D elements")
-        branch_data, times = map_centerline_result_to_0d(
+        branch_data, times = utils.map_centerline_result_to_0d(
             self.config["threed_solution_file"],
             zerod_config,
             threed_time_step_size,
@@ -73,6 +74,7 @@ class BloodVesselTuning(Task):
         num_pts = zerod_config["simulation_parameters"][
             "number_of_time_pts_per_cardiac_cycle"
         ]
+        result_labels = ["pressure_in", "pressure_out", "flow_in", "flow_out"]
         for branch_id, branch in branch_data.items():
             for seg_id, segment in branch.items():
 
@@ -80,21 +82,13 @@ class BloodVesselTuning(Task):
                     "branch_id": branch_id,
                     "seg_id": seg_id,
                     "times": np.linspace(times[0], times[-1], num_pts),
-                    "inflow": utils.refine_with_cubic_spline(
-                        segment["flow_0"], num_pts
-                    ),
-                    "outpres": utils.refine_with_cubic_spline(
-                        segment["pressure_1"], num_pts
-                    ),
-                    "inpres": utils.refine_with_cubic_spline(
-                        segment["pressure_0"], num_pts
-                    ),
-                    "outflow": utils.refine_with_cubic_spline(
-                        segment["flow_1"], num_pts
-                    ),
                     "maxfev": self.config["maxfev"],
                     "num_pts_per_cycle": num_pts,
                     "theta_start": np.array(segment["theta_start"]),
+                    **{
+                        n: utils.refine_with_cubic_spline(segment[n], num_pts)
+                        for n in result_labels
+                    },
                 }
                 self.log(
                     f"Optimization for branch {branch_id} segment "
@@ -140,7 +134,7 @@ class BloodVesselTuning(Task):
 
         centerline_file = self.config["threed_solution_file"]
 
-        branch_data, times = map_centerline_result_to_0d(
+        branch_data, times = utils.map_centerline_result_to_0d(
             centerline_file, zerod_config, self.project.time_step_size_3d
         )
 
@@ -166,80 +160,58 @@ class BloodVesselTuning(Task):
         )
         sim_times -= np.amin(sim_times)
 
+        filter = {
+            "pressure_in": utils.cgs_pressure_to_mmgh,
+            "pressure_out": utils.cgs_pressure_to_mmgh,
+            "flow_in": utils.cgs_flow_to_lh,
+            "flow_out": utils.cgs_flow_to_lh,
+        }
+
         for branch_id, branch in branch_data.items():
 
             for seg_id, segment in branch.items():
                 vessel_id = segment["vessel_id"]
+                vessel_name = f"branch{branch_id}_seg{seg_id}"
 
                 # Append 3d result
-                results_new = pd.DataFrame()
-                results_new["name"] = [
-                    f"branch{branch_id}_seg{seg_id}_3d"
-                ] * len(times)
-                results_new["time"] = times
-                results_new["pressure_in"] = cgs_pressure_to_mmgh(
-                    segment["pressure_0"]
+                results_new = pd.DataFrame(
+                    dict(
+                        name=[vessel_name + "_3d"] * len(times),
+                        time=times,
+                        **{n: f(segment[n]) for n, f in filter.items()},
+                    )
                 )
-                results_new["pressure_out"] = cgs_pressure_to_mmgh(
-                    segment["pressure_1"]
-                )
-                results_new["flow_in"] = cgs_flow_to_lh(segment["flow_0"])
-                results_new["flow_out"] = cgs_flow_to_lh(segment["flow_1"])
                 results = results.append(results_new)
 
                 # Append 0d result
-                results_new = pd.DataFrame()
-                results_new["name"] = [
-                    f"branch{branch_id}_seg{seg_id}_0d"
-                ] * len(sim_times)
-                results_new["time"] = sim_times
-                results_new["pressure_in"] = cgs_pressure_to_mmgh(
-                    zerod_result[zerod_result.name == f"V{vessel_id}"][
-                        "pressure_in"
-                    ][-pts_per_cycle:]
-                )
-                results_new["pressure_out"] = cgs_pressure_to_mmgh(
-                    zerod_result[zerod_result.name == f"V{vessel_id}"][
-                        "pressure_out"
-                    ][-pts_per_cycle:]
-                )
-                results_new["flow_in"] = cgs_flow_to_lh(
-                    zerod_result[zerod_result.name == f"V{vessel_id}"][
-                        "flow_in"
-                    ][-pts_per_cycle:]
-                )
-                results_new["flow_out"] = cgs_flow_to_lh(
-                    zerod_result[zerod_result.name == f"V{vessel_id}"][
-                        "flow_out"
-                    ][-pts_per_cycle:]
+                vessel_result = zerod_result[
+                    zerod_result.name == f"V{vessel_id}"
+                ]
+                results_new = pd.DataFrame(
+                    dict(
+                        name=[vessel_name + "_0d"] * len(sim_times),
+                        time=sim_times,
+                        **{
+                            n: f(vessel_result[n][-pts_per_cycle:])
+                            for n, f in filter.items()
+                        },
+                    )
                 )
                 results = results.append(results_new)
 
                 # Append 0d optimized result
-                results_new = pd.DataFrame()
-                results_new["name"] = [
-                    f"branch{branch_id}_seg{seg_id}_0d_opt"
-                ] * len(sim_times)
-                results_new["time"] = sim_times
-                results_new["pressure_in"] = cgs_pressure_to_mmgh(
-                    zerod_opt_result[zerod_opt_result.name == f"V{vessel_id}"][
-                        "pressure_in"
-                    ][-pts_per_cycle:]
-                )
-                results_new["pressure_out"] = cgs_pressure_to_mmgh(
-                    zerod_opt_result[zerod_opt_result.name == f"V{vessel_id}"][
-                        "pressure_out"
-                    ][-pts_per_cycle:]
-                )
-                results_new["flow_in"] = cgs_flow_to_lh(
-                    zerod_opt_result[zerod_opt_result.name == f"V{vessel_id}"][
-                        "flow_in"
-                    ][-pts_per_cycle:]
-                )
-                results_new["flow_out"] = cgs_flow_to_lh(
-                    zerod_opt_result[zerod_opt_result.name == f"V{vessel_id}"][
-                        "flow_out"
-                    ][-pts_per_cycle:]
+                vessel_result = zerod_opt_result[
+                    zerod_opt_result.name == f"V{vessel_id}"
+                ]
+                results_new = pd.DataFrame(
+                    dict(
+                        name=[vessel_name + "_0d_opt"] * len(sim_times),
+                        time=sim_times,
+                        **{
+                            n: f(vessel_result[n][-pts_per_cycle:])
+                            for n, f in filter.items()
+                        },
+                    )
                 )
                 results = results.append(results_new)
 
@@ -249,284 +221,146 @@ class BloodVesselTuning(Task):
 
         results = pd.read_csv(os.path.join(self.output_folder, "results.csv"))
 
-        zerod_config = self.project["rom_simulation_config"]
-
-        centerline_file = self.config["threed_solution_file"]
-
-        branch_data, _ = map_centerline_result_to_0d(
-            centerline_file, zerod_config, self.project.time_step_size_3d
+        branch_data, _ = utils.map_centerline_result_to_0d(
+            self.config["threed_solution_file"],
+            self.project["rom_simulation_config"],
+            self.project.time_step_size_3d,
         )
 
-        bc_plot = plotutils.create_3d_geometry_plot_with_vessels(
+        model_plot = plotutils.create_3d_geometry_plot_with_vessels(
             self.project, branch_data
         )
 
         report = visualizer.Report()
-        report.add([bc_plot])
-        plot_opts = {
+        report.add([model_plot])
+
+        common_plot_opts = {
             "static": True,
             "width": 750,
             "height": 400,
         }
+        pres_plot_opts = {
+            "xaxis_title": r"$s$",
+            "yaxis_title": r"$mmHg$",
+            **common_plot_opts,
+        }
+
+        flow_plot_opts = {
+            "xaxis_title": r"$s$",
+            "yaxis_title": r"$\frac{l}{h}$",
+            **common_plot_opts,
+        }
+
+        plot_title_sequence = [
+            "Inlet pressure branch {} segment {}",
+            "Outlet pressure branch {} segment {}",
+            "Inlet flow branch {} segment {}",
+            "Outlet flow branch {} segment {}",
+        ]
+        plot_opts_sequence = [pres_plot_opts] * 2 + [flow_plot_opts] * 2
+        plot_label_sequence = [
+            "pressure_in",
+            "pressure_out",
+            "flow_in",
+            "flow_out",
+        ]
+
+        threed_opts = {
+            "name": "3D",
+            "showlegend": True,
+            "color": "white",
+            "dash": "dot",
+            "width": 4,
+        }
+        zerod_opts = {
+            "name": "0D",
+            "showlegend": True,
+            "color": "red",
+            "width": 2,
+        }
+        zerod_opt_opts = {
+            "name": "0D optimized",
+            "showlegend": True,
+            "color": "blue",
+            "width": 2,
+        }
+        result_fiter = lambda name, label: results[results["name"] == name][
+            label
+        ]
+        trace_suffix = ["_3d", "_0d", "_0d_opt"]
+        trace_opts = [threed_opts, zerod_opts, zerod_opt_opts]
+
         for branch_id, branch in branch_data.items():
 
             for seg_id, segment in branch.items():
 
-                vessel_name = f"branch{branch_id}_seg{seg_id}"
+                name = f"branch{branch_id}_seg{seg_id}"
 
-                report.add(vessel_name)
+                report.add("Results for " + name)
+                plots = []
+                for plot_title, plot_opts, plot_label in zip(
+                    plot_title_sequence,
+                    plot_opts_sequence,
+                    plot_label_sequence,
+                ):
 
-                inpres_plot = visualizer.Plot2D(
-                    title=f"Inlet pressure branch {branch_id} segment {seg_id}",
-                    xaxis_title=r"$s$",
-                    yaxis_title=r"$mmHg$",
-                    **plot_opts,
-                )
-                inpres_plot.add_line_trace(
-                    x=results[results["name"] == vessel_name + "_3d"]["time"],
-                    y=results[results["name"] == vessel_name + "_3d"][
-                        "pressure_in"
-                    ],
-                    name="3D",
-                    showlegend=True,
-                    dash="dot",
-                    width=3,
-                )
-                inpres_plot.add_line_trace(
-                    x=results[results["name"] == vessel_name + "_0d"]["time"],
-                    y=results[results["name"] == vessel_name + "_0d"][
-                        "pressure_in"
-                    ],
-                    name="0D",
-                    showlegend=True,
-                    width=2,
-                )
-                inpres_plot.add_line_trace(
-                    x=results[results["name"] == vessel_name + "_0d_opt"][
-                        "time"
-                    ],
-                    y=results[results["name"] == vessel_name + "_0d_opt"][
-                        "pressure_in"
-                    ],
-                    name="0D optimized",
-                    showlegend=True,
-                    width=2,
-                )
-
-                outpres_plot = visualizer.Plot2D(
-                    title=f"Outlet pressure branch {branch_id} segment {seg_id}",
-                    xaxis_title=r"$s$",
-                    yaxis_title=r"$mmHg$",
-                    **plot_opts,
-                )
-                outpres_plot.add_line_trace(
-                    x=results[results["name"] == vessel_name + "_3d"]["time"],
-                    y=results[results["name"] == vessel_name + "_3d"][
-                        "pressure_out"
-                    ],
-                    name="3D",
-                    showlegend=True,
-                    dash="dot",
-                    width=3,
-                )
-                outpres_plot.add_line_trace(
-                    x=results[results["name"] == vessel_name + "_0d"]["time"],
-                    y=results[results["name"] == vessel_name + "_0d"][
-                        "pressure_out"
-                    ],
-                    name="0D",
-                    showlegend=True,
-                    width=2,
-                )
-                outpres_plot.add_line_trace(
-                    x=results[results["name"] == vessel_name + "_0d_opt"][
-                        "time"
-                    ],
-                    y=results[results["name"] == vessel_name + "_0d_opt"][
-                        "pressure_out"
-                    ],
-                    name="0D optimized",
-                    showlegend=True,
-                    width=2,
-                )
-
-                inflow_plot = visualizer.Plot2D(
-                    title=f"Inlet flow branch {branch_id} segment {seg_id}",
-                    xaxis_title=r"$s$",
-                    yaxis_title=r"$\frac{l}{h}$",
-                    **plot_opts,
-                )
-                inflow_plot.add_line_trace(
-                    x=results[results["name"] == vessel_name + "_3d"]["time"],
-                    y=results[results["name"] == vessel_name + "_3d"][
-                        "flow_in"
-                    ],
-                    name="3D",
-                    showlegend=True,
-                    dash="dot",
-                    width=3,
-                )
-                inflow_plot.add_line_trace(
-                    x=results[results["name"] == vessel_name + "_0d"]["time"],
-                    y=results[results["name"] == vessel_name + "_0d"][
-                        "flow_in"
-                    ],
-                    name="0D",
-                    showlegend=True,
-                    width=2,
-                )
-                inflow_plot.add_line_trace(
-                    x=results[results["name"] == vessel_name + "_0d_opt"][
-                        "time"
-                    ],
-                    y=results[results["name"] == vessel_name + "_0d_opt"][
-                        "flow_in"
-                    ],
-                    name="0D optimized",
-                    showlegend=True,
-                    width=2,
-                )
-
-                outflow_plot = visualizer.Plot2D(
-                    title=f"Outlet flow branch {branch_id} segment {seg_id}",
-                    xaxis_title=r"$s$",
-                    yaxis_title=r"$\frac{l}{h}$",
-                    **plot_opts,
-                )
-                outflow_plot.add_line_trace(
-                    x=results[results["name"] == vessel_name + "_3d"]["time"],
-                    y=results[results["name"] == vessel_name + "_3d"][
-                        "flow_out"
-                    ],
-                    name="3D",
-                    showlegend=True,
-                    dash="dot",
-                    width=3,
-                )
-                outflow_plot.add_line_trace(
-                    x=results[results["name"] == vessel_name + "_0d"]["time"],
-                    y=results[results["name"] == vessel_name + "_0d"][
-                        "flow_out"
-                    ],
-                    name="0D",
-                    showlegend=True,
-                    width=2,
-                )
-                outflow_plot.add_line_trace(
-                    x=results[results["name"] == vessel_name + "_0d_opt"][
-                        "time"
-                    ],
-                    y=results[results["name"] == vessel_name + "_0d_opt"][
-                        "flow_out"
-                    ],
-                    name="0D optimized",
-                    showlegend=True,
-                    width=2,
-                )
-                report.add([inpres_plot, inflow_plot])
-                report.add([outpres_plot, outflow_plot])
+                    plots.append(
+                        visualizer.Plot2D(
+                            title=plot_title.format(branch_id, seg_id),
+                            **plot_opts,
+                        )
+                    )
+                    for sfx, opt in zip(trace_suffix, trace_opts):
+                        plots[-1].add_line_trace(
+                            x=result_fiter(name + sfx, "time"),
+                            y=result_fiter(name + sfx, plot_label),
+                            **opt,
+                        )
+                report.add(plots)
 
         return report
 
-    @staticmethod
-    def _optimize_blood_vessel(segment_data):
+    @classmethod
+    def _optimize_blood_vessel(cls, segment_data):
 
-        pres_norm_factor = np.amax(segment_data["inpres"]) - np.amin(
-            segment_data["inpres"]
+        pres_norm_factor = np.mean(segment_data["pressure_in"])
+        flow_norm_factor = np.amax(segment_data["flow_out"]) - np.amin(
+            segment_data["flow_out"]
         )
-        flow_norm_factor = np.amax(segment_data["outflow"]) - np.amin(
-            segment_data["outflow"]
-        )
-
-        def run_simulation(theta, last_cycle=True):
-            return BloodVesselTuning._simulate_blood_vessel(
-                *theta,
-                bc_times=segment_data["times"],
-                bc_inflow=segment_data["inflow"],
-                bc_outpres=segment_data["outpres"],
-                num_pts_per_cycle=segment_data["num_pts_per_cycle"],
-                last_cycle=last_cycle,
-            )
 
         def objective_function(theta):
             (
                 _,
                 inpres_sim,
                 outflow_sim,
-            ) = run_simulation(theta)
-
-            return np.linalg.norm(
-                (inpres_sim - segment_data["inpres"]) / pres_norm_factor
-            ) + np.linalg.norm(
-                (outflow_sim - segment_data["outflow"]) / flow_norm_factor
+            ) = BloodVesselTuning._simulate_blood_vessel(
+                *theta,
+                bc_times=segment_data["times"],
+                bc_inflow=segment_data["flow_in"],
+                bc_outpres=segment_data["pressure_out"],
+                num_pts_per_cycle=segment_data["num_pts_per_cycle"],
             )
+
+            offset_pres = (
+                np.abs(inpres_sim - segment_data["pressure_in"])
+                / pres_norm_factor
+            )
+            offset_flow = (
+                np.abs(outflow_sim - segment_data["flow_out"])
+                / flow_norm_factor
+            )
+
+            return np.mean(np.concatenate([offset_pres, offset_flow]))
 
         x0 = segment_data["theta_start"].copy()
         x0[1] = 1e-8  # Only good when 3d wall is stiff
         result = optimize.minimize(
             fun=objective_function,
             x0=x0,
-            method="Nelder-Mead",
+            method=cls._OPT_METHOD,
             options={"maxfev": segment_data["maxfev"], "adaptive": True},
-            bounds=[(None, None), (1.0e-8, None), (1e-12, None), (None, None)],
+            bounds=cls._OPT_BOUNDS,
         )
-
-        # sim_times, inpres_opt, outflow_opt = run_simulation(
-        #     result.x, last_cycle=False
-        # )
-        # _, inpres_bef, outflow_bef = run_simulation(x0, last_cycle=False)
-
-        # plot = go.Figure()
-        # plot.add_trace(
-        #     go.Scatter(x=sim_times[:100], y=inpres_opt[:100], name="Optimized")
-        # )
-        # plot.add_trace(
-        #     go.Scatter(x=sim_times[:100], y=inpres_bef[:100], name="Before")
-        # )
-        # plot.add_trace(
-        #     go.Scatter(
-        #         x=sim_times[:100],
-        #         y=segment_data["inpres"][:100],
-        #         name="Target",
-        #     )
-        # )
-        # plot.add_trace(
-        #     go.Scatter(
-        #         x=sim_times[:100],
-        #         y=segment_data["outpres"][:100],
-        #         name="Boundary condition",
-        #     )
-        # )
-        # plot.write_image(
-        #     f"results/images/pressure_branch{segment_data['branch_id']}_seg_{segment_data['seg_id']}.png"
-        # )
-
-        # plot = go.Figure()
-        # plot.add_trace(
-        #     go.Scatter(
-        #         x=sim_times[:100], y=outflow_opt[:100], name="Optimized"
-        #     )
-        # )
-        # plot.add_trace(
-        #     go.Scatter(x=sim_times[:100], y=outflow_bef[:100], name="Before")
-        # )
-        # plot.add_trace(
-        #     go.Scatter(
-        #         x=sim_times[:100],
-        #         y=segment_data["outflow"][:100],
-        #         name="Target",
-        #     )
-        # )
-        # plot.add_trace(
-        #     go.Scatter(
-        #         x=sim_times[:100],
-        #         y=segment_data["inflow"][:100],
-        #         name="Boundary condition",
-        #     )
-        # )
-        # plot.write_image(
-        #     f"results/images/flow_branch{segment_data['branch_id']}_seg_{segment_data['seg_id']}.png"
-        # )
 
         return {
             "theta_opt": result.x,
@@ -587,7 +421,6 @@ class BloodVesselTuning(Task):
         bc_inflow,
         bc_outpres,
         num_pts_per_cycle,
-        last_cycle=True,
     ):
 
         config = {
@@ -641,10 +474,10 @@ class BloodVesselTuning(Task):
         sim_inpres = np.array(result["pressure_in"])
         sim_outflow = np.array(result["flow_out"])
 
-        if last_cycle:
-            sim_times = sim_times[-num_pts_per_cycle:]
-            sim_times = sim_times - np.amin(sim_times)
-            sim_inpres = sim_inpres[-num_pts_per_cycle:]
-            sim_outflow = sim_outflow[-num_pts_per_cycle:]
+        # Extract last cardiac cycle
+        sim_times = sim_times[-num_pts_per_cycle:]
+        sim_times = sim_times - np.amin(sim_times)
+        sim_inpres = sim_inpres[-num_pts_per_cycle:]
+        sim_outflow = sim_outflow[-num_pts_per_cycle:]
 
         return sim_times, sim_inpres, sim_outflow
