@@ -9,39 +9,34 @@ from pqueens.utils.pdf_estimation import (
 )
 
 
-def particle_wmean(x: np.ndarray, y: np.ndarray, weights: np.ndarray):
+def particle_wmean(particles: np.ndarray, weights: np.ndarray):
     """Calculate weighted mean of particles.
 
     Args:
-        x: X-coordinates of particles.
-        y: Y-coordinates of particles.
+        particles: Coordinates of particles.
         weights: Weights of particles.
     """
-    return np.array(
-        [np.average(x, weights=weights), np.average(y, weights=weights)]
-    )
+    return np.average(particles, weights=weights, axis=0)
 
 
-def particle_map(x: np.ndarray, y: np.ndarray, weights: np.ndarray):
+def particle_map(particles: np.ndarray, weights: np.ndarray):
     """Calculate maximum a posteriori (MAP) of particles.
 
     Args:
-        x: X-coordinates of particles.
-        y: Y-coordinates of particles.
+        particles: Coordinates of particles.
         weights: Weights of particles.
     """
-    return np.array([x[np.argmax(weights)], y[np.argmax(weights)]])
+    return np.array(particles[np.argmax(weights)])
 
 
-def particle_covmat(x: np.ndarray, y: np.ndarray, weights: np.ndarray):
+def particle_covmat(particles: np.ndarray, weights: np.ndarray):
     """Calculate covariance matrix of particles.
 
     Args:
-        x: X-coordinates of particles.
-        y: Y-coordinates of particles.
+        particles: Coordinates of particles.
         weights: Weights of particles.
     """
-    return np.cov([x, y], aweights=weights)
+    return np.cov(particles.T, aweights=weights)
 
 
 def gaussian_kde_1d(

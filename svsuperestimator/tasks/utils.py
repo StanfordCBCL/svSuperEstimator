@@ -57,6 +57,11 @@ def map_centerline_result_to_0d(centerline, zerod_config, dt3d):
         np.abs(times - (times[-1] - cycle_period))
     ).argmin() - 1
 
+    def filter_last_cycle(data, seg_end_index):
+        if start_last_cycle == -1:
+            return data[:, seg_end_index]
+        return data[start_last_cycle:-1, seg_end_index]
+
     # Extract branch information of 0D config
     branchdata = {}
     for vessel_config in zerod_config["vessels"]:
@@ -93,18 +98,18 @@ def map_centerline_result_to_0d(centerline, zerod_config, dt3d):
 
             segment.update(
                 {
-                    "flow_in": branch_data["flow"][
-                        start_last_cycle:-1, seg_start_index
-                    ],
-                    "flow_out": branch_data["flow"][
-                        start_last_cycle:-1, seg_end_index
-                    ],
-                    "pressure_in": branch_data["pressure"][
-                        start_last_cycle:-1, seg_start_index
-                    ],
-                    "pressure_out": branch_data["pressure"][
-                        start_last_cycle:-1, seg_end_index
-                    ],
+                    "flow_in": filter_last_cycle(
+                        branch_data["flow"], seg_end_index
+                    ),
+                    "flow_out": filter_last_cycle(
+                        branch_data["flow"], seg_end_index
+                    ),
+                    "pressure_in": filter_last_cycle(
+                        branch_data["pressure"], seg_end_index
+                    ),
+                    "pressure_out": filter_last_cycle(
+                        branch_data["pressure"], seg_end_index
+                    ),
                     "x0": branch_data["points"][seg_start_index],
                     "x1": branch_data["points"][seg_end_index],
                 }
@@ -113,6 +118,68 @@ def map_centerline_result_to_0d(centerline, zerod_config, dt3d):
             seg_start = seg_end
             seg_start_index = seg_end_index
 
-    times = times[start_last_cycle:-1] - [np.amin(times[start_last_cycle])]
+    times = times[start_last_cycle:-1] - np.amin(times[start_last_cycle])
 
     return branchdata, times
+
+
+def extract_0d_element_coordinates(zerod_config, centerline):
+
+    cl_handler = CenterlineHandler.from_file(centerline)
+
+    elements = {}
+
+    # Extract branch information of 0D config
+    branchdata = {}
+    for vessel_config in zerod_config["vessels"]:
+
+        # Extract branch and segment id from name
+        name = vessel_config["vessel_name"]
+        branch_id, seg_id = name.split("_")
+        branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
+
+        if not branch_id in branchdata:
+            branchdata[branch_id] = {}
+
+        branchdata[branch_id][seg_id] = {}
+        branchdata[branch_id][seg_id]["length"] = vessel_config[
+            "vessel_length"
+        ]
+        branchdata[branch_id][seg_id][
+            "boundary_conditions"
+        ] = vessel_config.get("boundary_conditions", {})
+
+    for branch_id, branch in branchdata.items():
+
+        branch_data = cl_handler.get_branch_data(branch_id)
+
+        seg_start = 0.0
+        seg_start_index = 0
+
+        for seg_id in range(len(branch)):
+            segment = branch[seg_id]
+            length = segment["length"]
+
+            seg_end_index = (
+                np.abs(branch_data["path"] - length - seg_start)
+            ).argmin()
+            seg_end = branch_data["path"][seg_end_index]
+
+            elements[f"branch{branch_id}_seg{seg_id}"] = {
+                "x0": branch_data["points"][seg_start_index],
+                "x1": branch_data["points"][seg_end_index],
+            }
+
+            if "inlet" in segment["boundary_conditions"]:
+                elements[
+                    segment["boundary_conditions"]["inlet"]
+                ] = branch_data["points"][seg_start_index]
+            if "outlet" in segment["boundary_conditions"]:
+                elements[
+                    segment["boundary_conditions"]["outlet"]
+                ] = branch_data["points"][seg_end_index]
+
+            seg_start = seg_end
+            seg_start_index = seg_end_index
+
+    return elements

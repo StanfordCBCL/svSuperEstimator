@@ -24,6 +24,10 @@ rom_optimization_folder:
   type: plain
   path: Simulations/$CASE_NAME$/solver.inp
 
+3d_simulation_input_path:
+  type: path
+  path: Simulations/$CASE_NAME$/solver.inp
+
 3d_simulation_geombc:
   type: path
   path: Simulations/$CASE_NAME$/geombc.dat.1

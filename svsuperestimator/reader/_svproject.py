@@ -113,6 +113,11 @@ class SimVascularProject:
     @property
     def time_step_size_3d(self):
         """Time step size in 3d simulation."""
+        from warnings import warn
+
+        warn(
+            "time_step_size_3d is deprecated", DeprecationWarning, stacklevel=2
+        )
         if not "time_step_size_3d" in self._cache:
             self._cache["time_step_size_3d"] = float(
                 re.findall(

@@ -128,6 +128,7 @@ class BloodVesselTuning(Task):
         self.project["rom_simulation_config_optimized"] = zerod_config
 
     def post_run(self):
+        """Postprocessing routine of the task."""
 
         zerod_config = self.project["rom_simulation_config"]
         zerod_opt_config = self.project["rom_simulation_config_optimized"]
@@ -218,6 +219,7 @@ class BloodVesselTuning(Task):
         results.to_csv(os.path.join(self.output_folder, "results.csv"))
 
     def generate_report(self):
+        """Generate the task report."""
 
         results = pd.read_csv(os.path.join(self.output_folder, "results.csv"))
 
@@ -384,7 +386,7 @@ class BloodVesselTuning(Task):
             table.add_row("number of evaluations", str(output["nfev"]))
             table.add_row(
                 "relative error",
-                f"{output['error_before']*100:.1f} -> {output['error']*100:.1f} %",
+                f"{output['error_before']*100:.3f} -> {output['error']*100:.3f} %",
             )
             table.add_row(
                 "resistance",

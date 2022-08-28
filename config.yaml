@@ -1,0 +1,14 @@
+project: /Users/stanford/data/projects/0069_0001
+global: 
+  num_procs: 4
+tasks:
+  # BloodVesselTuning:
+  #   threed_solution_file: /Users/stanford/data/3d_centerline/0069_0001.vtp
+  #   maxfev: 2000
+  WindkesselTuning:
+    num_particles: 100
+    num_rejuvenation_steps: 2
+    resampling_threshold: 0.5
+    noise_factor: 0.05
+    noise_type: fixed_variance
+
