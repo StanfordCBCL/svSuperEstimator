@@ -3,24 +3,17 @@ from __future__ import annotations
 import os
 import pickle
 from datetime import datetime
-from time import time
 
 import numpy as np
 import orjson
-import pandas as pd
 from rich.console import Console
 
-from . import plotutils
-
-from .. import forward_models, iterators
-from .. import model as mdl
-
-from .. import solver as slv
-from .. import visualizer
-from . import statutils
-from ..reader import SimVascularProject
+from .. import solver as slv, visualizer, iterators, model as mdl
+from ..reader import utils as readutils
+from . import statutils, utils, plotutils
 from .task import Task
 from rich import print
+from svzerodsolver import runnercpp
 
 CONSOLE = Console()
 
@@ -38,16 +31,18 @@ class WindkesselTuning(Task):
         "noise_type": "fixed_variance",
     }
 
+    _THETA_RANGE = [5.0, 13.0]
+
     def core_run(self):
 
         # Create the forward model
-        model = mdl.ZeroDModel(self.project)
+        model = self.project["0d_simulation_input"]
         forward_model = _Forward_Model(model)
 
         # Get ground truth distal to proximal ratio
         theta_obs = np.log(
             [
-                bc.resistance_distal + bc.resistance_proximal
+                bc["bc_values"]["Rd"] + bc["bc_values"]["Rp"]
                 for bc in forward_model.outlet_bcs.values()
             ]
         )
@@ -65,22 +60,20 @@ class WindkesselTuning(Task):
             forward_model=forward_model,
             y_obs=y_obs,
             output_dir=self.output_folder,
-            num_procs=int(self.config.get("num_procs")),
-            num_particles=int(self.config.get("num_particles")),
-            num_rejuvenation_steps=int(
-                self.config.get("num_rejuvenation_steps")
-            ),
-            resampling_threshold=float(
-                self.config.get("resampling_threshold")
-            ),
-            noise_value=float(self.config["noise_factor"])
-            * np.mean(y_obs.ravel()),
-            noise_type=str(self.config["noise_type"]),
+            num_procs=self.config["num_procs"],
+            num_particles=self.config["num_particles"],
+            num_rejuvenation_steps=self.config["num_rejuvenation_steps"],
+            resampling_threshold=self.config["resampling_threshold"],
+            noise_value=self.config["noise_factor"] * np.mean(y_obs.ravel()),
+            noise_type=self.config["noise_type"],
         )
 
         for i in range(len(theta_obs)):
             iterator.add_random_variable(
-                f"k{i}", "uniform", lower_bound=5.5, upper_bound=11.5
+                f"k{i}",
+                "uniform",
+                lower_bound=self._THETA_RANGE[0],
+                upper_bound=self._THETA_RANGE[1],
             )
 
         # Run the iterator
@@ -100,7 +93,6 @@ class WindkesselTuning(Task):
         self.log("Read raw result")
         parameters = self.get_parameters()
         particles, weights = self.get_raw_results()
-        plotrange = [5.5, 11.5]
 
         # Calculate metrics
         self.log("Calculate metrics")
@@ -116,6 +108,7 @@ class WindkesselTuning(Task):
                 particles=particles, weights=weights
             ),
         }
+        self.log("ground_truth", parameters["theta_obs"])
 
         # Calculate 1D marginal kernel density estimate
         results_pp["kernel_density"] = []
@@ -124,7 +117,7 @@ class WindkesselTuning(Task):
             x, kde, bandwidth = statutils.gaussian_kde_1d(
                 x=particles[:, i],
                 weights=weights,
-                bounds=plotrange,
+                bounds=self._THETA_RANGE,
                 num=100,
             )
             results_pp["kernel_density"].append(
@@ -143,13 +136,17 @@ class WindkesselTuning(Task):
 
         report = visualizer.Report()
 
+        branch_data = readutils.get_0d_element_coordinates(self.project)
+        model_plot = plotutils.create_3d_geometry_plot_with_vessels(
+            self.project, branch_data
+        )
+        report.add([model_plot])
+
         # Read results
-        parameters = self.get_parameters()
         particles, weights = self.get_raw_results()
         results = self.get_results()
         metrics = results["metrics"]
         kernel_density = results["kernel_density"]
-        plotrange = [5.5, 11.5]
 
         # Create project information section
         if project_overview:
@@ -165,14 +162,15 @@ class WindkesselTuning(Task):
 
             # Calculate histogram data
             bins = int(
-                (plotrange[1] - plotrange[0]) / kernel_density[i]["bandwidth"]
+                (self._THETA_RANGE[1] - self._THETA_RANGE[0])
+                / kernel_density[i]["bandwidth"]
             )
             counts, bin_edges = np.histogram(
                 particles[:, i],
                 bins=bins,
                 weights=weights,
                 density=True,
-                range=plotrange,
+                range=self._THETA_RANGE,
             )
 
             # Create kernel density estimation plot for k0
@@ -180,7 +178,7 @@ class WindkesselTuning(Task):
                 title="Weighted histogram and kernel density estimation of k0",
                 xaxis_title="k0",
                 yaxis_title="Kernel density",
-                xaxis_range=plotrange,
+                xaxis_range=self._THETA_RANGE,
             )
             distplot.add_bar_trace(
                 x=bin_edges,
@@ -278,34 +276,29 @@ class WindkesselTuning(Task):
 
 
 class _Forward_Model:
-    def __init__(self, model: mdl.ZeroDModel) -> None:
-        self.model = model
+    def __init__(self, zerod_config) -> None:
+
+        self.base_config = zerod_config
         self.solver = slv.ZeroDSolver(cpp=True)
 
-        self.outlet_bcs = {
-            name: bc
-            for name, bc in model.boundary_conditions.items()
-            if name != "INFLOW"
-        }
+        self.outlet_bcs = self.base_config.outlet_boundary_conditions
 
-        self.num_pts_per_cyle = model._config["simulation_parameters"][
-            "number_of_time_pts_per_cardiac_cycle"
-        ]
+        self.num_pts_per_cyle = self.base_config.num_pts_per_cyle
 
         # Distal to proximal resistance ratio at each outlet
         self._distal_to_proximal = [
-            bc.resistance_distal / bc.resistance_proximal
+            bc["bc_values"]["Rd"] / bc["bc_values"]["Rp"]
             for bc in self.outlet_bcs.values()
         ]
 
         # Time constants for each outlet
         self._time_constants = [
-            bc.resistance_distal * bc.capacity
+            bc["bc_values"]["Rd"] * bc["bc_values"]["C"]
             for bc in self.outlet_bcs.values()
         ]
 
         self.bc_map = {}
-        for branch_id, vessel_data in enumerate(model._config["vessels"]):
+        for branch_id, vessel_data in enumerate(zerod_config.vessels):
             if "boundary_conditions" in vessel_data:
                 for bc_type, bc_name in vessel_data[
                     "boundary_conditions"
@@ -332,18 +325,16 @@ class _Forward_Model:
         Evaluates the sum of the offsets for the input output pressure relation
         for each outlet.
         """
+        config = self.base_config.copy()
         # Set new total resistance at each outlet
-        for i, bc in enumerate(self.outlet_bcs.values()):
+        for i, bc in enumerate(config.outlet_boundary_conditions.values()):
             ki = np.exp(kwargs[f"k{i}"])
-            bc.resistance_proximal = (1.0 + self._distal_to_proximal[i]) / ki
-            bc.resistance_distal = ki - bc.resistance_proximal
-
+            bc["bc_values"]["Rp"] = (1.0 + self._distal_to_proximal[i]) / ki
+            bc["bc_values"]["Rd"] = ki - bc["bc_values"]["Rp"]
         try:
-            result = self.solver.run_simulation(self.model)
+            result = runnercpp.run_from_config(config.data)
         except RuntimeError:
-            print(kwargs)
-            raise SystemExit
-            return np.array([np.nan] * (len(self.outlet_bcs) + 2))
+            return np.array([9e99] * (len(self.bc_names) + 2))
 
         p_inlet = result[result.name == self.inflow_name][
             self.inflow_pressure

@@ -1,10 +1,17 @@
-from ._vtk_handler import VtkHandler
-import vtk
+"""This module holds the MeshHandler class."""
+from __future__ import annotations
+
 import numpy as np
+
+from ._vtk_handler import VtkHandler
 
 
 class MeshHandler(VtkHandler):
-    def get_boundary_centers(self):
+    """Handler for SimVascular 3D mesh data."""
+
+    @property
+    def boundary_centers(self) -> dict[int, np.ndarray]:
+        """Center coordinates of the different boundaries in the mesh."""
         boundary_data = self.threshold("ModelFaceID", lower=2, cell=True)
         max_bc_id = np.max(boundary_data.get_cell_data_array("ModelFaceID"))
         middle_points = {}

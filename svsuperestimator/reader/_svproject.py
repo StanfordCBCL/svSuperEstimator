@@ -1,10 +1,26 @@
 """This module holds the SimVascularProject class."""
-import json
 import os
 from typing import Any
 
 import yaml
-import re
+
+from ._centerline_handler import CenterlineHandler
+from ._mesh_handler import MeshHandler
+from ._svsolver_inflow_handler import SvSolverInflowHandler
+from ._svsolver_input_handler import SvSolverInputHandler
+from ._svsolver_rcr_handler import SvSolverRcrHandler
+from ._svzerodsolver_input_handler import SvZeroDSolverInputHandler
+from ._vtk_handler import VtkHandler
+
+_HANDLERS = {
+    "VtkHandler": VtkHandler,
+    "CenterlineHandler": CenterlineHandler,
+    "MeshHandler": MeshHandler,
+    "SvSolverInputHandler": SvSolverInputHandler,
+    "SvSolverRcrHandler": SvSolverRcrHandler,
+    "SvSolverInflowHandler": SvSolverInflowHandler,
+    "SvZeroDSolverInputHandler": SvZeroDSolverInputHandler,
+}
 
 
 class SimVascularProject:
@@ -43,24 +59,16 @@ class SimVascularProject:
         """
         if key not in self._file_registry:
             raise KeyError(f"Unknown key: {key}")
-        elif self._file_registry[key]["type"] == "json":
+        elif self._file_registry[key]["type"] == "data":
             target = os.path.join(
                 self._folder, self._file_registry[key]["path"]
             )
             if "$" in target:
                 for regex, repl in self._regex.items():
                     target = target.replace(regex, repl)
-            with open(target) as ff:
-                data = json.load(ff)
-        elif self._file_registry[key]["type"] == "plain":
-            target = os.path.join(
-                self._folder, self._file_registry[key]["path"]
+            data = _HANDLERS[self._file_registry[key]["handler"]].from_file(
+                target
             )
-            if "$" in target:
-                for regex, repl in self._regex.items():
-                    target = target.replace(regex, repl)
-            with open(target) as ff:
-                data = ff.read()
         elif self._file_registry[key]["type"] == "path":
             target = self._file_registry[key]["path"]
             if "$" in target:
@@ -87,42 +95,15 @@ class SimVascularProject:
         """
         if key not in self._file_registry:
             raise KeyError(f"Unknown key: {key}")
-        elif self._file_registry[key]["type"] == "json":
+        elif self._file_registry[key]["type"] == "data":
             target = os.path.join(
                 self._folder, self._file_registry[key]["path"]
             )
             if "$" in target:
                 for regex, repl in self._regex.items():
                     target = target.replace(regex, repl)
-            with open(target, "w") as ff:
-                json.dump(data, ff, indent=4)
-        elif self._file_registry[key]["type"] == "plain":
-            target = os.path.join(
-                self._folder, self._file_registry[key]["path"]
-            )
-            if "$" in target:
-                for regex, repl in self._regex.items():
-                    target = target.replace(regex, repl)
-            with open(target, "w") as ff:
-                ff.write(data)
+            data.to_file(target)
         else:
             raise IndexError(
                 f"Specified element {key} doesn't support setting."
             )
-
-    @property
-    def time_step_size_3d(self):
-        """Time step size in 3d simulation."""
-        from warnings import warn
-
-        warn(
-            "time_step_size_3d is deprecated", DeprecationWarning, stacklevel=2
-        )
-        if not "time_step_size_3d" in self._cache:
-            self._cache["time_step_size_3d"] = float(
-                re.findall(
-                    r"Time Step Size: -?\d+\.?\d*",
-                    self["3d_simulation_input"],
-                )[0].split()[-1]
-            )
-        return self._cache["time_step_size_3d"]

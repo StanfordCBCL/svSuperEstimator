@@ -8,50 +8,50 @@
 #   type: type_of_file
 #   path: path/to/my/file
 
-rom_simulation_config:
-  type: json
+0d_simulation_input:
+  type: data
+  handler: SvZeroDSolverInputHandler
   path: ROMSimulations/$CASE_NAME$/solver_0d.in
 
-rom_centerline:
+parameter_estimation_folder:
   type: path
-  path: ROMSimulations/$CASE_NAME$/$CASE_NAME$.vtp
-
-rom_optimization_folder:
-  type: path
-  path: ROMSimulations/$CASE_NAME$
+  path: ParameterEstimation
 
 3d_simulation_input:
-  type: plain
+  type: data
+  handler: SvSolverInputHandler
   path: Simulations/$CASE_NAME$/solver.inp
 
-3d_simulation_input_path:
-  type: path
-  path: Simulations/$CASE_NAME$/solver.inp
+# 3d_simulation_input_path:
+#   type: path
+#   path: Simulations/$CASE_NAME$/solver.inp
 
-3d_simulation_geombc:
-  type: path
-  path: Simulations/$CASE_NAME$/geombc.dat.1
+# 3d_simulation_geombc:
+#   type: path
+#   path: Simulations/$CASE_NAME$/geombc.dat.1
 
-3d_simulation_restart:
-  type: path
-  path: Simulations/$CASE_NAME$/restart.0.1
+# 3d_simulation_restart:
+#   type: path
+#   path: Simulations/$CASE_NAME$/restart.0.1
 
-3d_simulation_numstart:
-  type: path
-  path: Simulations/$CASE_NAME$/numstart.dat
+# 3d_simulation_numstart:
+#   type: path
+#   path: Simulations/$CASE_NAME$/numstart.dat
 
-3d_simulation_bct:
-  type: path
-  path: Simulations/$CASE_NAME$/bct.dat
+# 3d_simulation_bct:
+#   type: path
+#   path: Simulations/$CASE_NAME$/bct.dat
 
-3d_mesh:
-  type: path
+mesh:
+  type: data
+  handler: MeshHandler
   path: Meshes/$CASE_NAME$.vtp
 
 centerline:
-  type: path
-  path: ROMSimulations/$CASE_NAME$/centerlines.vtp
+  type: data
+  handler: CenterlineHandler
+  path: ROMSimulations/$CASE_NAME$/$CASE_NAME$.vtp
 
-rom_simulation_config_optimized:
-  type: json
-  path: ROMSimulations/$CASE_NAME$/solver_0d_optimized.in
+# rom_simulation_config_optimized:
+#   type: json
+#   path: ROMSimulations/$CASE_NAME$/solver_0d_optimized.in

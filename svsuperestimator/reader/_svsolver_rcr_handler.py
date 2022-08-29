@@ -1,9 +1,17 @@
-class SvSolverRcrHandler:
-    def __init__(self, filename):
-        with open(filename) as ff:
-            self.data = ff.read()
+"""This module holds the SvSolverRcrHandler class."""
+from ._plain_handler import PlainHandler
 
-    def get_boundary_conditions(self):
+
+class SvSolverRcrHandler(PlainHandler):
+    """Handler for svSolver RCR BC data."""
+
+    def get_rcr_data(self) -> dict:
+        """Get the RCR data.
+
+        Returns:
+            rcr_data: Dict with Rp, C, Rd, Pd and t for all RCR boundary
+                conditions.
+        """
         bc_data = []
         i = 0
         ele_data = {}
