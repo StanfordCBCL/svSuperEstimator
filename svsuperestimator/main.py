@@ -1,14 +1,14 @@
-import yaml
 import os
-
-from .reader import SimVascularProject
-from . import tasks
-
-from rich.console import Console
-import click
-from time import time
 import platform
 import sys
+from time import time
+
+import click
+import yaml
+from rich.console import Console
+
+from . import tasks
+from .reader import SimVascularProject
 
 MAIN_CONSOLE = Console()
 

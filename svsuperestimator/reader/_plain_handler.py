@@ -29,3 +29,12 @@ class PlainHandler(DataHandler):
         with open(filename) as ff:
             data = ff.read()
         return cls(data)
+
+    def to_file(self, filename: str) -> None:
+        """Write data to file.
+
+        Args:
+            filename: Path to the file to save data at.
+        """
+        with open(filename, "w") as ff:
+            ff.write(self.data)

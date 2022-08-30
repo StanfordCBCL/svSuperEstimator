@@ -1,6 +1,7 @@
 """This module holds the SmcIterator class."""
-from ._queens_iterator import QueensIterator
 import numpy as np
+
+from ._queens_iterator import QueensIterator
 
 
 class SmcIterator(QueensIterator):
@@ -34,14 +35,14 @@ class SmcIterator(QueensIterator):
             "method_name": "smc_chopin",
             "method_options": {
                 "seed": 42,
-                "num_particles": kwargs.get("num_particles"),
-                "resampling_threshold": kwargs.get("resampling_threshold"),
+                "num_particles": kwargs["num_particles"],
+                "resampling_threshold": kwargs["resampling_threshold"],
                 "resampling_method": "systematic",
                 "feynman_kac_model": "adaptive_tempering",
                 "waste_free": True,
-                "num_rejuvenation_steps": kwargs.get("num_rejuvenation_steps"),
+                "num_rejuvenation_steps": kwargs["num_rejuvenation_steps"],
                 "model": "model",
-                "max_feval": 10000,
+                "max_feval": 9e99,
                 "result_description": {
                     "write_results": True,
                     "plot_results": False,
@@ -54,13 +55,9 @@ class SmcIterator(QueensIterator):
             "forward_model": "forward_model",
             "output_label": "y_obs",
             "coordinate_labels": [],
-            "noise_type": kwargs.get("noise_type"),
-            "noise_value": kwargs.get("noise_value"),
+            "noise_type": kwargs["noise_type"],
+            "noise_value": kwargs["noise_value"],
             "experimental_file_name_identifier": "*.csv",
             "experimental_csv_data_base_dir": None,
             "parameters": "parameters",
-            # "noise_var_iterative_averaging": {
-            #     "averaging_type": "moving_average",
-            #     "num_iter_for_avg": 10,
-            # },
         }

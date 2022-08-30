@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from multiprocessing import Pool
 
@@ -11,8 +12,9 @@ from scipy import optimize
 from svzerodsolver import runnercpp
 
 from .. import visualizer
-from . import plotutils
-from . import utils
+from ..reader import CenterlineHandler
+from ..reader import utils as readutils
+from . import plotutils, taskutils
 from .task import Task
 
 
@@ -46,20 +48,24 @@ class BloodVesselTuning(Task):
 
         # Loading data from project
         self.log("Loading 0D simulation input file")
-        zerod_config = self.project["rom_simulation_config"]
+        zerod_config_handler = self.project["0d_simulation_input"]
 
         # Get 3D simulation time step size from 3d simulation input file
-        threed_time_step_size = self.project.time_step_size_3d
+        threed_config_handler = self.project["3d_simulation_input"]
+        threed_time_step_size = threed_config_handler.time_step_size
+        threed_result_handler = CenterlineHandler.from_file(
+            self.config["threed_solution_file"]
+        )
         self.log("Found 3D simulation time step size:", threed_time_step_size)
 
         # Map centerline result to 3D simulation
         self.log("Map 3D centerline result to 0D elements")
-        branch_data, times = utils.map_centerline_result_to_0d(
-            self.config["threed_solution_file"],
-            zerod_config,
+        branch_data, times = taskutils.map_centerline_result_to_0d(
+            zerod_config_handler,
+            threed_result_handler,
             threed_time_step_size,
         )
-        for vessel in zerod_config["vessels"]:
+        for vessel in zerod_config_handler.vessels:
             name = vessel["vessel_name"]
             branch_id, seg_id = name.split("_")
             branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
@@ -71,9 +77,7 @@ class BloodVesselTuning(Task):
         # Start optimizing the branches
         pool = Pool(processes=self.config["num_procs"])
         results = []
-        num_pts = zerod_config["simulation_parameters"][
-            "number_of_time_pts_per_cardiac_cycle"
-        ]
+        num_pts = zerod_config_handler.num_pts_per_cycle
         result_labels = ["pressure_in", "pressure_out", "flow_in", "flow_out"]
         for branch_id, branch in branch_data.items():
             for seg_id, segment in branch.items():
@@ -86,7 +90,9 @@ class BloodVesselTuning(Task):
                     "num_pts_per_cycle": num_pts,
                     "theta_start": np.array(segment["theta_start"]),
                     **{
-                        n: utils.refine_with_cubic_spline(segment[n], num_pts)
+                        n: taskutils.refine_with_cubic_spline(
+                            segment[n], num_pts
+                        )
                         for n in result_labels
                     },
                 }
@@ -114,60 +120,63 @@ class BloodVesselTuning(Task):
             }
 
         # Update 0D simulation config with optimized parameters
-        for i, vessel_config in enumerate(zerod_config["vessels"]):
+        for vessel_config in zerod_config_handler.vessels:
             name = vessel_config["vessel_name"]
             branch_id, seg_id = name.split("_")
             branch_id = int(branch_id[6:])
             seg_id = int(seg_id[3:])
-            zerod_config["vessels"][i]["zero_d_element_values"] = branch_data[
-                branch_id
-            ][seg_id]["theta_opt"]
+            vessel_config["zero_d_element_values"] = branch_data[branch_id][
+                seg_id
+            ]["theta_opt"]
 
         # Writing data to project
         self.log("Save optimized 0D simulation file")
-        self.project["rom_simulation_config_optimized"] = zerod_config
+        zerod_config_handler.to_file(
+            os.path.join(self.output_folder, "solver_0d.in")
+        )
 
     def post_run(self):
         """Postprocessing routine of the task."""
 
-        zerod_config = self.project["rom_simulation_config"]
-        zerod_opt_config = self.project["rom_simulation_config_optimized"]
-
-        centerline_file = self.config["threed_solution_file"]
-
-        branch_data, times = utils.map_centerline_result_to_0d(
-            centerline_file, zerod_config, self.project.time_step_size_3d
+        # Read data
+        zerod_config_handler = self.project["0d_simulation_input"]
+        zerod_opt_config_handler = zerod_config_handler.from_file(
+            os.path.join(self.output_folder, "solver_0d.in")
+        )
+        threed_config_handler = self.project["3d_simulation_input"]
+        threed_time_step_size = threed_config_handler.time_step_size
+        threed_result_handler = CenterlineHandler.from_file(
+            self.config["threed_solution_file"]
         )
 
-        zerod_result = runnercpp.run_from_config(zerod_config)
-        zerod_opt_result = runnercpp.run_from_config(zerod_opt_config)
+        # Map centerline data to 0D elements
+        branch_data, times = taskutils.map_centerline_result_to_0d(
+            zerod_config_handler,
+            threed_result_handler,
+            threed_time_step_size,
+        )
 
-        pts_per_cycle = zerod_config["simulation_parameters"][
-            "number_of_time_pts_per_cardiac_cycle"
-        ]
-        columns = [
-            "name",
-            "time",
-            "pressure_in",
-            "pressure_out",
-            "flow_in",
-            "flow_out",
-        ]
+        # Run simulation for both configurations
+        zerod_result = runnercpp.run_from_config(zerod_config_handler.data)
+        zerod_opt_result = runnercpp.run_from_config(
+            zerod_opt_config_handler.data
+        )
 
-        results = pd.DataFrame(columns=columns)
-
+        # Extract time steps of last cardiac cycle
+        pts_per_cycle = zerod_config_handler.num_pts_per_cycle
         sim_times = np.array(
             zerod_result[zerod_result.name == f"V0"]["time"][-pts_per_cycle:]
         )
         sim_times -= np.amin(sim_times)
 
+        # Extract results for each branch
         filter = {
-            "pressure_in": utils.cgs_pressure_to_mmgh,
-            "pressure_out": utils.cgs_pressure_to_mmgh,
-            "flow_in": utils.cgs_flow_to_lh,
-            "flow_out": utils.cgs_flow_to_lh,
+            "pressure_in": taskutils.cgs_pressure_to_mmgh,
+            "pressure_out": taskutils.cgs_pressure_to_mmgh,
+            "flow_in": taskutils.cgs_flow_to_lh,
+            "flow_out": taskutils.cgs_flow_to_lh,
         }
-
+        results = pd.DataFrame()
         for branch_id, branch in branch_data.items():
 
             for seg_id, segment in branch.items():
@@ -190,7 +199,7 @@ class BloodVesselTuning(Task):
                 ]
                 results_new = pd.DataFrame(
                     dict(
-                        name=[vessel_name + "_0d"] * len(sim_times),
+                        name=[vessel_name + "_0d"] * pts_per_cycle,
                         time=sim_times,
                         **{
                             n: f(vessel_result[n][-pts_per_cycle:])
@@ -206,7 +215,7 @@ class BloodVesselTuning(Task):
                 ]
                 results_new = pd.DataFrame(
                     dict(
-                        name=[vessel_name + "_0d_opt"] * len(sim_times),
+                        name=[vessel_name + "_0d_opt"] * pts_per_cycle,
                         time=sim_times,
                         **{
                             n: f(vessel_result[n][-pts_per_cycle:])
@@ -223,41 +232,45 @@ class BloodVesselTuning(Task):
 
         results = pd.read_csv(os.path.join(self.output_folder, "results.csv"))
 
-        branch_data, _ = utils.map_centerline_result_to_0d(
-            self.config["threed_solution_file"],
-            self.project["rom_simulation_config"],
-            self.project.time_step_size_3d,
-        )
-
+        # Add 3D plot of mesh with 0D elements
+        report = visualizer.Report()
+        report.add("Overview")
+        branch_data = readutils.get_0d_element_coordinates(self.project)
         model_plot = plotutils.create_3d_geometry_plot_with_vessels(
             self.project, branch_data
         )
+        report.add([model_plot])
 
         report = visualizer.Report()
         report.add([model_plot])
 
+        # Options for all plots
         common_plot_opts = {
             "static": True,
             "width": 750,
             "height": 400,
         }
+
+        # Options for pressure plots
         pres_plot_opts = {
             "xaxis_title": r"$s$",
             "yaxis_title": r"$mmHg$",
             **common_plot_opts,
         }
 
+        # Options for flow plots
         flow_plot_opts = {
             "xaxis_title": r"$s$",
             "yaxis_title": r"$\frac{l}{h}$",
             **common_plot_opts,
         }
 
+        # Sequence of plot titles options and labels
         plot_title_sequence = [
-            "Inlet pressure branch {} segment {}",
-            "Outlet pressure branch {} segment {}",
-            "Inlet flow branch {} segment {}",
-            "Outlet flow branch {} segment {}",
+            "Inlet pressure ",
+            "Outlet pressure ",
+            "Inlet flow ",
+            "Outlet flow ",
         ]
         plot_opts_sequence = [pres_plot_opts] * 2 + [flow_plot_opts] * 2
         plot_label_sequence = [
@@ -267,6 +280,7 @@ class BloodVesselTuning(Task):
             "flow_out",
         ]
 
+        # Options for 3d, 0d and 0d optimized
         threed_opts = {
             "name": "3D",
             "showlegend": True,
@@ -286,50 +300,57 @@ class BloodVesselTuning(Task):
             "color": "blue",
             "width": 2,
         }
+
+        # Filter for results
         result_fiter = lambda name, label: results[results["name"] == name][
             label
         ]
+
+        # Trace sequence
         trace_suffix = ["_3d", "_0d", "_0d_opt"]
         trace_opts = [threed_opts, zerod_opts, zerod_opt_opts]
 
-        for branch_id, branch in branch_data.items():
+        for name in branch_data.keys():
 
-            for seg_id, segment in branch.items():
+            if not name.startswith("branch"):
+                continue
 
-                name = f"branch{branch_id}_seg{seg_id}"
+            report.add("Results for " + name)
+            plots = []
+            for plot_title, plot_opts, plot_label in zip(
+                plot_title_sequence,
+                plot_opts_sequence,
+                plot_label_sequence,
+            ):
 
-                report.add("Results for " + name)
-                plots = []
-                for plot_title, plot_opts, plot_label in zip(
-                    plot_title_sequence,
-                    plot_opts_sequence,
-                    plot_label_sequence,
-                ):
-
-                    plots.append(
-                        visualizer.Plot2D(
-                            title=plot_title.format(branch_id, seg_id),
-                            **plot_opts,
-                        )
+                # Create and append plot
+                plots.append(
+                    visualizer.Plot2D(
+                        title=plot_title + name,
+                        **plot_opts,
                     )
-                    for sfx, opt in zip(trace_suffix, trace_opts):
-                        plots[-1].add_line_trace(
-                            x=result_fiter(name + sfx, "time"),
-                            y=result_fiter(name + sfx, plot_label),
-                            **opt,
-                        )
-                report.add(plots)
+                )
+                for sfx, opt in zip(trace_suffix, trace_opts):
+                    plots[-1].add_line_trace(
+                        x=result_fiter(name + sfx, "time"),
+                        y=result_fiter(name + sfx, plot_label),
+                        **opt,
+                    )
+            report.add(plots)
 
         return report
 
     @classmethod
     def _optimize_blood_vessel(cls, segment_data):
+        """Optimization routine for one blood vessel."""
 
+        # Determine normalization factor for pressure and flow
         pres_norm_factor = np.mean(segment_data["pressure_in"])
         flow_norm_factor = np.amax(segment_data["flow_out"]) - np.amin(
             segment_data["flow_out"]
         )
 
+        # Define objective function
         def objective_function(theta):
             (
                 _,
@@ -354,6 +375,7 @@ class BloodVesselTuning(Task):
 
             return np.mean(np.concatenate([offset_pres, offset_flow]))
 
+        # Start optimization
         x0 = segment_data["theta_start"].copy()
         x0[1] = 1e-8  # Only good when 3d wall is stiff
         result = optimize.minimize(
@@ -375,6 +397,7 @@ class BloodVesselTuning(Task):
         }
 
     def _optimize_blood_vessel_callback(self, output):
+        """Callback after optimization to log results."""
         if output["success"]:
             self.log(
                 f"Optimization for branch {output['branch_id']} segment "
@@ -424,6 +447,7 @@ class BloodVesselTuning(Task):
         bc_outpres,
         num_pts_per_cycle,
     ):
+        """Run a single-vessel simulation."""
 
         config = {
             "boundary_conditions": [
@@ -472,11 +496,12 @@ class BloodVesselTuning(Task):
 
         result = runnercpp.run_from_config(config)
 
+        # Extract quantities of interest
         sim_times = np.array(result["time"])
         sim_inpres = np.array(result["pressure_in"])
         sim_outflow = np.array(result["flow_out"])
 
-        # Extract last cardiac cycle
+        # Clip to last cardiac cycle
         sim_times = sim_times[-num_pts_per_cycle:]
         sim_times = sim_times - np.amin(sim_times)
         sim_inpres = sim_inpres[-num_pts_per_cycle:]

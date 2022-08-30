@@ -1,10 +1,12 @@
 """This module holds the PlotBase class."""
 from __future__ import annotations
-from typing import Any
-import plotly.graph_objects as go
-from dash.dcc import Graph
-from dash import html
+
 from base64 import b64encode
+from typing import Any
+
+import plotly.graph_objects as go
+from dash import html
+from dash.dcc import Graph
 
 
 class PlotBase:
@@ -27,6 +29,7 @@ class PlotBase:
             "font_family": "Arial",
             "plot_bgcolor": "rgba(0, 0, 0, 0)",
             "paper_bgcolor": "rgba(0, 0, 0, 0)",
+            "bargap": 0,
         }
         self._layout_common.update(kwargs)
 

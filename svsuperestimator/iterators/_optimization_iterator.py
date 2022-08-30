@@ -1,9 +1,11 @@
 """This module holds the NelderMeadIterator class."""
 from __future__ import annotations
-from ._iterator import Iterator
+
 import numpy as np
 from scipy.optimize import minimize
+
 from ..forward_models import ForwardModel
+from ._iterator import Iterator
 
 
 class OptimizationIterator(Iterator):

@@ -2,6 +2,7 @@ import os
 from abc import ABC, abstractmethod
 from time import time
 
+import orjson
 from rich import box
 from rich.console import Console
 from rich.table import Table
@@ -44,7 +45,7 @@ class Task(ABC):
                 raise AttributeError(f"Unknown configuration option {key}")
         self.config.update(config)
         self.output_folder = os.path.join(
-            self.project["rom_optimization_folder"], self.TASKNAME
+            self.project["parameter_estimation_folder"], self.TASKNAME
         )
 
     @abstractmethod
@@ -86,11 +87,15 @@ class Task(ABC):
 
         # Run the task and postprocessing of the data
         self.core_run()
+        self.save_database()
         self.log("Postprocessing results")
+        self.load_database()
         self.post_run()
+        self.save_database()
 
         # Generate task report and export data
         self.log("Generate task report")
+        self.load_database()
         report = self.generate_report()
         self.log(f"Export report files to {self.output_folder}")
         report.to_files(self.output_folder)
@@ -124,3 +129,32 @@ class Task(ABC):
         for key, value in self.config.items():
             table.add_row(key, str(value))
         self.log(table)
+
+    def save_database(self):
+        """Set problem parameters.
+
+        Args:
+            parameters: Parameters of the problem.
+        """
+
+        with open(
+            os.path.join(self.output_folder, "taskdata.json"), "wb"
+        ) as ff:
+            ff.write(
+                orjson.dumps(
+                    self.database,
+                    option=orjson.OPT_NAIVE_UTC | orjson.OPT_SERIALIZE_NUMPY,
+                )
+            )
+        self.database = {}
+
+    def load_database(self) -> dict:
+        """Return problem parameters.
+
+        Returns:
+            parameters: Parameters of the problem.
+        """
+        with open(
+            os.path.join(self.output_folder, "taskdata.json"), "rb"
+        ) as ff:
+            self.database = orjson.loads(ff.read())

@@ -1,9 +1,7 @@
 import numpy as np
 from scipy.interpolate import CubicSpline
 
-from ..reader import CenterlineHandler
-
-import numpy as np
+from ..reader.utils import get_0d_element_coordinates
 
 
 def cgs_pressure_to_mmgh(cgs_pressure):
@@ -30,7 +28,13 @@ def cgs_flow_to_lh(cgs_flow):
     return np.array(cgs_flow * 3.6)
 
 
-def refine_with_cubic_spline(y, num):
+def refine_with_cubic_spline(y: np.ndarray, num: np.ndarray):
+    """Refine a curve using cubic spline interpolation.
+
+    Args:
+        y: The data to refine.
+        num: New number of points of the refined data.
+    """
     y = y.copy()
     y[-1] = y[0]
     x_old = np.linspace(0.0, 100.0, len(y))
@@ -39,18 +43,19 @@ def refine_with_cubic_spline(y, num):
     return y_new
 
 
-def map_centerline_result_to_0d(centerline, zerod_config, dt3d):
+def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
+    """Map centerine result onto 0d elements."""
 
-    cl_handler = CenterlineHandler.from_file(centerline)
+    cl_handler = centerline_handler
 
     # calculate cycle period
     cycle_period = (
-        zerod_config["boundary_conditions"][0]["bc_values"]["t"][-1]
-        - zerod_config["boundary_conditions"][0]["bc_values"]["t"][0]
+        zerod_handler.boundary_conditions["INFLOW"]["bc_values"]["t"][-1]
+        - zerod_handler.boundary_conditions["INFLOW"]["bc_values"]["t"][0]
     )
 
     # Extract time steps
-    times = cl_handler.time_steps * dt3d
+    times = centerline_handler.time_steps * dt3d
 
     # Calculate start of last cycle
     start_last_cycle = (
@@ -64,7 +69,7 @@ def map_centerline_result_to_0d(centerline, zerod_config, dt3d):
 
     # Extract branch information of 0D config
     branchdata = {}
-    for vessel_config in zerod_config["vessels"]:
+    for vessel_config in zerod_handler.vessels:
 
         # Extract branch and segment id from name
         name = vessel_config["vessel_name"]

@@ -52,7 +52,7 @@ class SvZeroDSolverInputHandler(DataHandler):
         }
 
     @property
-    def num_pts_per_cyle(self) -> int:
+    def num_pts_per_cycle(self) -> int:
         """Number of time steps per cardiac cycle."""
         return self.data["simulation_parameters"][
             "number_of_time_pts_per_cardiac_cycle"

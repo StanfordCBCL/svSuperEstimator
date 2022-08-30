@@ -1,5 +1,6 @@
-from ._queens_iterator import QueensIterator
 import numpy as np
+
+from ._queens_iterator import QueensIterator
 
 
 class GridIterator(QueensIterator):

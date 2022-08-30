@@ -1,12 +1,15 @@
 """This module holds various plotting classes."""
 from __future__ import annotations
-from typing import Union
+
 import os
+from typing import Union
+
+import numpy as np
 import plotly.graph_objects as go
 import vtk
 from vtk.util.numpy_support import vtk_to_numpy
-import numpy as np
 
+from ..reader import MeshHandler
 from ._plot_base import PlotBase
 
 
@@ -149,7 +152,7 @@ class Plot3D(PlotBase):
 
     def add_mesh_trace_from_vtk(
         self,
-        filename: str,
+        mesh_handler: MeshHandler,
         name: str,
         color: str = None,
         opacity: float = 1.0,
@@ -159,38 +162,21 @@ class Plot3D(PlotBase):
         """Add a mesh trace from a vtk file.
 
         Args:
-            filename: Path to the vtk file.
+            mesh_handler: Mesh hanlder.
             name: Name of the trace.
             color: Color of the trace.
             opacity: Opacity of the trace.
             showlegend: Toggle display of trace in legend.
             decimate: Complexity reduction factor for mesh.
         """
-        if not os.path.exists(filename):
-            raise FileNotFoundError(
-                f"Error plotting {filename}. The file does not exist."
-            )
-
-        # Setup vtk reader
-        if filename.endswith(".vtp"):
-            reader = vtk.vtkXMLPolyDataReader()
-            reader.SetFileName(filename)
-            reader.Update()
-            polydata = reader.GetOutput()
-        else:
-            raise NotImplementedError("Filetype not supported.")
 
         # Simplify mesh
         if decimate:
-            decpro = vtk.vtkDecimatePro()
-            decpro.SetInputData(polydata)
-            decpro.SetTargetReduction(0.9)
-            decpro.Update()
-            polydata = decpro.GetOutput()
+            mesh_handler = mesh_handler.decimate(0.9)
 
         # Extract mesh
-        points = vtk_to_numpy(polydata.GetPoints().GetData())
-        cells = vtk_to_numpy(polydata.GetPolys().GetData()).reshape(-1, 4)
+        points = mesh_handler.points
+        cells = mesh_handler.polys
 
         self._fig.add_trace(
             go.Mesh3d(

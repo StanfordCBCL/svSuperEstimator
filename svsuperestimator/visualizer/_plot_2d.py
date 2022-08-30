@@ -1,8 +1,10 @@
 """This module holds the Plot2D class."""
 from __future__ import annotations
+
 from typing import Union
-import plotly.graph_objects as go
+
 import numpy as np
+import plotly.graph_objects as go
 
 from ._plot_base import PlotBase
 
@@ -170,11 +172,12 @@ class Plot2D(PlotBase):
 
     def add_heatmap_trace(
         self,
-        x: np.ndarray,
-        y: np.ndarray,
         z: np.ndarray,
         name: str,
+        x: np.ndarray = None,
+        y: np.ndarray = None,
         colorscale: str = "viridis",
+        showscale=False,
     ):
         """Add a heatmap trace.
 
@@ -190,7 +193,7 @@ class Plot2D(PlotBase):
                 z=z,
                 name=name,
                 colorscale=colorscale,
-                showscale=False,
+                showscale=showscale,
             )
         )
 
@@ -316,3 +319,33 @@ class Plot2D(PlotBase):
             )
         )
         self._layout_common.update(dict(hovermode="x"))
+
+    def add_parallel_coordinates_plots(
+        self,
+        values: list[np.ndarray],
+        names: list[str] = None,
+        color_by: np.ndarray = None,
+        plotrange: tuple[float, float] = None,
+    ):
+        """Add a parallel coordinates trace to the plot.
+
+        Args:
+            values: List of arrays of values for each dimension.
+            names: The names of the dimensions.
+            color_by: An array to color the lines by.
+            plotrange: Fixed range for each dimension.
+        """
+
+        self._fig.add_trace(
+            go.Parcoords(
+                line=dict(
+                    color=color_by,
+                ),
+                dimensions=list(
+                    [
+                        dict(label=name, values=value, range=plotrange)
+                        for value, name in zip(values, names)
+                    ]
+                ),
+            )
+        )

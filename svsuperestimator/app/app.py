@@ -1,12 +1,14 @@
-import dash
-from dash import html, dcc
-from dash.dependencies import Input, Output
-from .. import model as mdl, reader, problems
-from ..problems import plotutils
 import os
-import click
-import pandas as pd
 
+import click
+import dash
+import pandas as pd
+from dash import dcc, html
+from dash.dependencies import Input, Output
+
+from .. import model as mdl
+from .. import problems, reader
+from ..problems import plotutils
 from . import helpers
 
 

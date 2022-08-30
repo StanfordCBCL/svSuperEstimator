@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import numpy as np
+
 from svsuperestimator import visualizer
 
 
@@ -15,6 +17,9 @@ def create_3d_geometry_plot_with_vessels(project, branch_data):
             label_points.append((ele_config["x0"] + ele_config["x1"]) * 0.5)
             label_texts.append(ele_name)
             line_points += [ele_config["x0"], ele_config["x1"], [None] * 3]
+        else:
+            label_points.append(ele_config)
+            label_texts.append(ele_name)
 
     label_points = np.array(label_points)
     line_points = np.array(line_points)

@@ -1,12 +1,11 @@
 from __future__ import annotations
+
 import numpy as np
-
-from scipy.stats import gaussian_kde
-
 from pqueens.utils.pdf_estimation import (
     estimate_bandwidth_for_kde,
     estimate_pdf,
 )
+from scipy.stats import gaussian_kde
 
 
 def particle_wmean(particles: np.ndarray, weights: np.ndarray):
@@ -62,8 +61,6 @@ def gaussian_kde_1d(
     bandwidth = estimate_bandwidth_for_kde(
         x,
         weights=weights,
-        min_samples=bounds[0],
-        max_samples=bounds[1],
         kernel="gaussian",
     )
     kde, kde_x = estimate_pdf(

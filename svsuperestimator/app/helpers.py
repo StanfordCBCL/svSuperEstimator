@@ -1,4 +1,4 @@
-from dash import html, dash_table
+from dash import dash_table, html
 
 
 def create_top_bar(title):

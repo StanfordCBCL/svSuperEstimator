@@ -1,9 +1,11 @@
 """This module holds the QueensIterator class."""
 import json
-from tempfile import TemporaryDirectory
 import os
-from pqueens.main import main as run_queens
+from tempfile import TemporaryDirectory
+
 import numpy as np
+from pqueens.main import main as run_queens
+
 from ._iterator import Iterator
 
 

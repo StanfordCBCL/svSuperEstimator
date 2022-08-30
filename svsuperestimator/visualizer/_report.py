@@ -1,14 +1,15 @@
 """This module holds the Report class."""
 from __future__ import annotations
+
 import os
+from base64 import b64encode
 from datetime import datetime
 from typing import Any
 
-from dash import html
 import pandas as pd
+from dash import html
 
 from ..app.helpers import create_columns
-from base64 import b64encode
 
 
 class Report:
