@@ -291,14 +291,14 @@ class BloodVesselTuning(Task):
         zerod_opts = {
             "name": "0D",
             "showlegend": True,
-            "color": "red",
-            "width": 2,
+            "color": "#EF553B",
+            "width": 3,
         }
         zerod_opt_opts = {
             "name": "0D optimized",
             "showlegend": True,
-            "color": "blue",
-            "width": 2,
+            "color": "#636efa",
+            "width": 3,
         }
 
         # Filter for results

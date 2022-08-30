@@ -10,5 +10,3 @@ tasks:
     num_rejuvenation_steps: 2
     resampling_threshold: 0.5
     noise_factor: 0.05
-    noise_type: fixed_variance
-

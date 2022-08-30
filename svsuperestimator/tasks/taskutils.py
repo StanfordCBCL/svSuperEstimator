@@ -1,8 +1,6 @@
 import numpy as np
 from scipy.interpolate import CubicSpline
 
-from ..reader.utils import get_0d_element_coordinates
-
 
 def cgs_pressure_to_mmgh(cgs_pressure):
     """Convert pressure from g/(cm s^2) to mmHg.
