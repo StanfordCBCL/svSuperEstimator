@@ -104,13 +104,13 @@ def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
             segment.update(
                 {
                     "flow_in": filter_last_cycle(
-                        branch_data["flow"], seg_end_index
+                        branch_data["flow"], seg_start_index
                     ),
                     "flow_out": filter_last_cycle(
                         branch_data["flow"], seg_end_index
                     ),
                     "pressure_in": filter_last_cycle(
-                        branch_data["pressure"], seg_end_index
+                        branch_data["pressure"], seg_start_index
                     ),
                     "pressure_out": filter_last_cycle(
                         branch_data["pressure"], seg_end_index

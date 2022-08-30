@@ -30,7 +30,7 @@ class SvZeroDSolverInputHandler(DataHandler):
             filename: Path to the file to read data from.
         """
         with open(filename, "w") as ff:
-            json.dump(self.data, ff)
+            json.dump(self.data, ff, indent=4)
 
     @property
     def boundary_conditions(self) -> dict[str, dict]:

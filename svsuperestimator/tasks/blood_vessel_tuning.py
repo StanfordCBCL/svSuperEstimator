@@ -11,7 +11,7 @@ from rich.table import Table
 from scipy import optimize
 from svzerodsolver import runnercpp
 
-from .. import visualizer
+from .. import reader, visualizer
 from ..reader import CenterlineHandler
 from ..reader import utils as readutils
 from . import plotutils, taskutils
@@ -140,7 +140,7 @@ class BloodVesselTuning(Task):
 
         # Read data
         zerod_config_handler = self.project["0d_simulation_input"]
-        zerod_opt_config_handler = zerod_config_handler.from_file(
+        zerod_opt_config_handler = reader.SvZeroDSolverInputHandler.from_file(
             os.path.join(self.output_folder, "solver_0d.in")
         )
         threed_config_handler = self.project["3d_simulation_input"]
@@ -267,10 +267,10 @@ class BloodVesselTuning(Task):
 
         # Sequence of plot titles options and labels
         plot_title_sequence = [
-            "Inlet pressure ",
-            "Outlet pressure ",
-            "Inlet flow ",
-            "Outlet flow ",
+            "Inlet pressure",
+            "Outlet pressure",
+            "Inlet flow",
+            "Outlet flow",
         ]
         plot_opts_sequence = [pres_plot_opts] * 2 + [flow_plot_opts] * 2
         plot_label_sequence = [
@@ -326,7 +326,7 @@ class BloodVesselTuning(Task):
                 # Create and append plot
                 plots.append(
                     visualizer.Plot2D(
-                        title=plot_title + name,
+                        title=plot_title,
                         **plot_opts,
                     )
                 )
