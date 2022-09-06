@@ -97,7 +97,7 @@ class VtkHandler(DataHandler):
             thresh.SetLowerThreshold(lower)
         if upper is not None:
             thresh.SetUpperThreshold(upper)
-        if self.data.GetPointData().GetArray(label) is None:
+        if self.data.GetCellData().HasArray(label):
             thresh.SetInputArrayToProcess(
                 0, 0, 0, "vtkDataObject::FIELD_ASSOCIATION_CELLS", label
             )

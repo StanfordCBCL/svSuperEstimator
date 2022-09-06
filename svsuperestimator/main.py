@@ -38,6 +38,22 @@ def run_file(path):
         task.run()
 
 
+def run_from_config(config):
+    # Loading the SimVascular project
+    project_folder = config["project"]
+    MAIN_CONSOLE.log(
+        f"Loading project [bold magenta]{project_folder}[/bold magenta]"
+    )
+    project = SimVascularProject(project_folder)
+
+    global_setting = config.get("global", {})
+
+    for task_name, task_config in config["tasks"].items():
+        task_class = tasks.get_task_by_name(task_name)
+        task = task_class(project, {**global_setting, **task_config})
+        task.run()
+
+
 def run_folder(path):
     """Run all configuration files in a folder."""
 

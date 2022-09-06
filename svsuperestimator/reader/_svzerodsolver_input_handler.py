@@ -52,6 +52,23 @@ class SvZeroDSolverInputHandler(DataHandler):
         }
 
     @property
+    def vessel_to_bc_map(self):
+        bc_map = {}
+        for vessel_data in self.vessels:
+            if "boundary_conditions" in vessel_data:
+                for bc_type, bc_name in vessel_data[
+                    "boundary_conditions"
+                ].items():
+                    bc_map[bc_name] = {"name": vessel_data["vessel_name"]}
+                    if bc_type == "inlet":
+                        bc_map[bc_name]["flow"] = "flow_in"
+                        bc_map[bc_name]["pressure"] = "pressure_in"
+                    else:
+                        bc_map[bc_name]["flow"] = "flow_out"
+                        bc_map[bc_name]["pressure"] = "pressure_out"
+        return bc_map
+
+    @property
     def num_pts_per_cycle(self) -> int:
         """Number of time steps per cardiac cycle."""
         return self.data["simulation_parameters"][
@@ -72,7 +89,8 @@ class SvZeroDSolverInputHandler(DataHandler):
         max_nliter: int = None,
         steady_initial: bool = None,
         mean_only: bool = None,
-        output_interval=None,
+        output_interval: bool = None,
+        last_cycle_only: bool = None,
     ) -> None:
         """Update the simulation parameters.
 
@@ -96,3 +114,5 @@ class SvZeroDSolverInputHandler(DataHandler):
             simparams["output_mean_only"] = mean_only
         if output_interval is not None:
             simparams["output_interval"] = output_interval
+        if last_cycle_only is not None:
+            simparams["output_last_cycle_only"] = last_cycle_only

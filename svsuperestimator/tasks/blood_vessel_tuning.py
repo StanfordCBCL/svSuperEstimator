@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import json
 import os
 from multiprocessing import Pool
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -10,6 +10,7 @@ from rich import box
 from rich.table import Table
 from scipy import optimize
 from svzerodsolver import runnercpp
+import orjson
 
 from .. import reader, visualizer
 from ..reader import CenterlineHandler
@@ -85,14 +86,16 @@ class BloodVesselTuning(Task):
                 segment_data = {
                     "branch_id": branch_id,
                     "seg_id": seg_id,
-                    "times": np.linspace(times[0], times[-1], num_pts),
+                    "times": np.linspace(
+                        times[0], times[-1], num_pts
+                    ).tolist(),
                     "maxfev": self.config["maxfev"],
                     "num_pts_per_cycle": num_pts,
                     "theta_start": np.array(segment["theta_start"]),
                     **{
                         n: taskutils.refine_with_cubic_spline(
                             segment[n], num_pts
-                        )
+                        ).tolist()
                         for n in result_labels
                     },
                 }
@@ -157,6 +160,8 @@ class BloodVesselTuning(Task):
         )
 
         # Run simulation for both configurations
+        zerod_config_handler.update_simparams(last_cycle_only=True)
+        zerod_opt_config_handler.update_simparams(last_cycle_only=True)
         zerod_result = runnercpp.run_from_config(zerod_config_handler.data)
         zerod_opt_result = runnercpp.run_from_config(
             zerod_opt_config_handler.data
@@ -165,7 +170,9 @@ class BloodVesselTuning(Task):
         # Extract time steps of last cardiac cycle
         pts_per_cycle = zerod_config_handler.num_pts_per_cycle
         sim_times = np.array(
-            zerod_result[zerod_result.name == f"V0"]["time"][-pts_per_cycle:]
+            zerod_result[zerod_result.name == f"branch0_seg0"]["time"][
+                -pts_per_cycle:
+            ]
         )
         sim_times -= np.amin(sim_times)
 
@@ -194,36 +201,33 @@ class BloodVesselTuning(Task):
                 results = results.append(results_new)
 
                 # Append 0d result
-                vessel_result = zerod_result[
-                    zerod_result.name == f"V{vessel_id}"
-                ]
+                vessel_result = zerod_result[zerod_result.name == vessel_name]
                 results_new = pd.DataFrame(
                     dict(
                         name=[vessel_name + "_0d"] * pts_per_cycle,
                         time=sim_times,
-                        **{
-                            n: f(vessel_result[n][-pts_per_cycle:])
-                            for n, f in filter.items()
-                        },
+                        **{n: f(vessel_result[n]) for n, f in filter.items()},
                     )
                 )
                 results = results.append(results_new)
 
                 # Append 0d optimized result
                 vessel_result = zerod_opt_result[
-                    zerod_opt_result.name == f"V{vessel_id}"
+                    zerod_opt_result.name == vessel_name
                 ]
                 results_new = pd.DataFrame(
                     dict(
                         name=[vessel_name + "_0d_opt"] * pts_per_cycle,
                         time=sim_times,
-                        **{
-                            n: f(vessel_result[n][-pts_per_cycle:])
-                            for n, f in filter.items()
-                        },
+                        **{n: f(vessel_result[n]) for n, f in filter.items()},
                     )
                 )
                 results = results.append(results_new)
+
+        # Save parameters to file
+        self.database["timestamp"] = datetime.now().strftime(
+            "%m/%d/%Y, %H:%M:%S"
+        )
 
         results.to_csv(os.path.join(self.output_folder, "results.csv"))
 
@@ -350,29 +354,78 @@ class BloodVesselTuning(Task):
             segment_data["flow_out"]
         )
 
+        bc_inflow = np.array(segment_data["flow_in"])
+        outflow = np.array(segment_data["flow_out"])
+        inpres = np.array(segment_data["pressure_in"])
+        bc_outpres = np.array(segment_data["pressure_out"])
+
         # Define objective function
         def objective_function(theta):
+            num_pts_per_cycle = segment_data["num_pts_per_cycle"]
             (
-                _,
                 inpres_sim,
                 outflow_sim,
+                # inflow_sim_d,
+                # outflow_sim_d,
+                # inpres_sim_d,
+                # outpres_sim_d,
             ) = BloodVesselTuning._simulate_blood_vessel(
                 *theta,
                 bc_times=segment_data["times"],
-                bc_inflow=segment_data["flow_in"],
-                bc_outpres=segment_data["pressure_out"],
-                num_pts_per_cycle=segment_data["num_pts_per_cycle"],
+                bc_inflow=bc_inflow,
+                bc_outpres=bc_outpres,
+                num_pts_per_cycle=num_pts_per_cycle,
             )
 
-            offset_pres = (
-                np.abs(inpres_sim - segment_data["pressure_in"])
-                / pres_norm_factor
-            )
-            offset_flow = (
-                np.abs(outflow_sim - segment_data["flow_out"])
-                / flow_norm_factor
-            )
+            offset_pres = np.abs(inpres_sim - inpres) / pres_norm_factor
+            offset_flow = np.abs(outflow_sim - outflow) / flow_norm_factor
 
+            # d_offset_pres = 2 * (inpres_sim - inpres) / pres_norm_factor
+            # dPin_dR = d_offset_pres * bc_inflow
+            # dPin_dC = np.zeros(num_pts_per_cycle)
+            # dPin_dL = d_offset_pres * outflow_sim_d
+            # dPin_dk = d_offset_pres * np.abs(bc_inflow) * bc_inflow
+
+            # d_offset_flow = 2 * (outflow_sim - outflow) / flow_norm_factor
+            # # dQout_dR = np.zeros(num_pts_per_cycle)
+            # dQout_dR = d_offset_flow * inflow_sim_d * theta[1]
+            # # dQout_dC = np.zeros(num_pts_per_cycle)
+            # # (
+            # #     d_offset_flow * 0.5 * (inflow_sim_d + outflow_sim_d) * 100
+            # # )
+            # dQout_dC = d_offset_flow * (
+            #     -inpres_sim_d
+            #     + (
+            #         theta[0]
+            #         + 2 * theta[3] * np.abs(bc_inflow)
+            #         # + theta[3] * bc_inflow**2 / np.abs(bc_inflow)
+            #     )
+            #     * inflow_sim_d
+            # )
+            # dQout_dL = np.zeros(num_pts_per_cycle)
+            # # dQout_dk = np.zeros(num_pts_per_cycle)
+            # dQout_dk = (
+            #     d_offset_flow
+            #     * (2 * np.abs(bc_inflow))
+            #     * theta[1]
+            #     * inflow_sim_d
+            # )
+
+            # gradient = [
+            #     np.mean(np.concatenate([dPin_dR, dQout_dR])),
+            #     np.mean(np.concatenate([dPin_dC, dQout_dC])),
+            #     np.mean(np.concatenate([dPin_dL, dQout_dL])),
+            #     np.mean(np.concatenate([dPin_dk, dQout_dk])),
+            # ]
+
+            # from rich import print
+
+            # print("Theta:", theta, "Gradient:", gradient)
+
+            # return (
+            #     np.mean(np.concatenate([offset_pres, offset_flow])),
+            #     gradient,
+            # )
             return np.mean(np.concatenate([offset_pres, offset_flow]))
 
         # Start optimization
@@ -381,7 +434,8 @@ class BloodVesselTuning(Task):
         result = optimize.minimize(
             fun=objective_function,
             x0=x0,
-            method=cls._OPT_METHOD,
+            # jac=True,
+            method="Nelder-Mead",  # "L-BFGS-B",
             options={"maxfev": segment_data["maxfev"], "adaptive": True},
             bounds=cls._OPT_BOUNDS,
         )
@@ -432,7 +486,7 @@ class BloodVesselTuning(Task):
             self.log(
                 f"Optimization for branch {output['branch_id']} segment "
                 f"{output['seg_id']} [bold red]failed[/bold red] with "
-                f"message: {output['message']}"
+                f"message {output['message']} after {output['nfev']} evaluations."
             )
 
     @classmethod
@@ -455,16 +509,16 @@ class BloodVesselTuning(Task):
                     "bc_name": "INFLOW",
                     "bc_type": "FLOW",
                     "bc_values": {
-                        "Q": bc_inflow.tolist(),
-                        "t": bc_times.tolist(),
+                        "Q": bc_inflow,
+                        "t": bc_times,
                     },
                 },
                 {
                     "bc_name": "OUTPRES",
                     "bc_type": "PRESSURE",
                     "bc_values": {
-                        "P": bc_outpres.tolist(),
-                        "t": bc_times.tolist(),
+                        "P": bc_outpres,
+                        "t": bc_times,
                     },
                 },
             ],
@@ -473,6 +527,8 @@ class BloodVesselTuning(Task):
                 "number_of_cardiac_cycles": cls._OPT_NUM_CYCLES,
                 "number_of_time_pts_per_cardiac_cycle": num_pts_per_cycle,
                 "steady_initial": False,
+                "output_last_cycle_only": True,
+                # "output_derivative": True,
             },
             "vessels": [
                 {
@@ -481,7 +537,6 @@ class BloodVesselTuning(Task):
                         "outlet": "OUTPRES",
                     },
                     "vessel_id": 0,
-                    "vessel_length": 10.0,
                     "vessel_name": "branch0_seg0",
                     "zero_d_element_type": "BloodVessel",
                     "zero_d_element_values": {
@@ -493,18 +548,45 @@ class BloodVesselTuning(Task):
                 }
             ],
         }
-
-        result = runnercpp.run_from_config(config)
+        try:
+            result = np.genfromtxt(
+                runnercpp.svzerodsolvercpp.run(
+                    orjson.dumps(
+                        config,
+                        option=orjson.OPT_NAIVE_UTC
+                        | orjson.OPT_SERIALIZE_NUMPY,
+                    )
+                ).splitlines(),
+                delimiter=",",
+            )
+        except RuntimeError:
+            return (
+                np.full(num_pts_per_cycle, np.nan),
+                np.full(num_pts_per_cycle, np.nan),
+                # np.full(num_pts_per_cycle, np.nan),
+                # np.full(num_pts_per_cycle, np.nan),
+                # np.full(num_pts_per_cycle, np.nan),
+                # np.full(num_pts_per_cycle, np.nan),
+            )
 
         # Extract quantities of interest
-        sim_times = np.array(result["time"])
-        sim_inpres = np.array(result["pressure_in"])
-        sim_outflow = np.array(result["flow_out"])
+        sim_inpres = result[1:, 4]
+        sim_outflow = result[1:, 3]
+        # sim_inflow_d = result[1:, 6]
+        # sim_outflow_d = result[1:, 7]
+        # sim_inpres_d = result[1:, 8]
+        # sim_outpres_d = result[1:, 9]
+        # times = result[1:, 1]
 
-        # Clip to last cardiac cycle
-        sim_times = sim_times[-num_pts_per_cycle:]
-        sim_times = sim_times - np.amin(sim_times)
-        sim_inpres = sim_inpres[-num_pts_per_cycle:]
-        sim_outflow = sim_outflow[-num_pts_per_cycle:]
+        # import plotly.express as px
 
-        return sim_times, sim_inpres, sim_outflow
+        # deriv_easy = (bc_outpres[1:] - bc_outpres[:-1]) / (times[1] - times[0])
+
+        return (
+            sim_inpres,
+            sim_outflow,
+            # sim_inflow_d,
+            # sim_outflow_d,
+            # sim_inpres_d,
+            # sim_outpres_d,
+        )
