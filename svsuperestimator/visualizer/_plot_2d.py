@@ -25,6 +25,7 @@ class Plot2D(PlotBase):
         opacity: float = 1.0,
         colorscale: str = "viridis",
         showlegend: bool = False,
+        **kwargs,
     ):
         """Add a point scatter trace.
 
@@ -50,6 +51,7 @@ class Plot2D(PlotBase):
                     size=size,
                     opacity=opacity,
                     colorscale=colorscale,
+                    **kwargs,
                 ),
                 showlegend=showlegend,
             )

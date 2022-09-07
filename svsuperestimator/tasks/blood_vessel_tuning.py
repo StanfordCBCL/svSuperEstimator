@@ -66,7 +66,7 @@ class BloodVesselTuning(Task):
             threed_result_handler,
             threed_time_step_size,
         )
-        for vessel in zerod_config_handler.vessels:
+        for vessel in zerod_config_handler.vessels.values():
             name = vessel["vessel_name"]
             branch_id, seg_id = name.split("_")
             branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
@@ -123,7 +123,7 @@ class BloodVesselTuning(Task):
             }
 
         # Update 0D simulation config with optimized parameters
-        for vessel_config in zerod_config_handler.vessels:
+        for vessel_config in zerod_config_handler.vessels.values():
             name = vessel_config["vessel_name"]
             branch_id, seg_id = name.split("_")
             branch_id = int(branch_id[6:])
@@ -131,6 +131,9 @@ class BloodVesselTuning(Task):
             vessel_config["zero_d_element_values"] = branch_data[branch_id][
                 seg_id
             ]["theta_opt"]
+
+        # Improve junctions
+        taskutils.make_resistive_junctions(zerod_config_handler, branch_data)
 
         # Writing data to project
         self.log("Save optimized 0D simulation file")

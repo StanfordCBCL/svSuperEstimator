@@ -40,7 +40,17 @@ class SvZeroDSolverInputHandler(DataHandler):
     @property
     def vessels(self) -> dict[str, dict]:
         """Get the vessels of the configuration."""
-        return self.data["vessels"]
+        return {
+            vessel["vessel_name"]: vessel for vessel in self.data["vessels"]
+        }
+
+    @property
+    def junctions(self) -> dict[str, dict]:
+        """Get the vessels of the configuration."""
+        return {
+            junction["junction_name"]: junction
+            for junction in self.data["junctions"]
+        }
 
     @property
     def outlet_boundary_conditions(self) -> dict[str, dict]:
@@ -54,7 +64,7 @@ class SvZeroDSolverInputHandler(DataHandler):
     @property
     def vessel_to_bc_map(self):
         bc_map = {}
-        for vessel_data in self.vessels:
+        for vessel_data in self.vessels.values():
             if "boundary_conditions" in vessel_data:
                 for bc_type, bc_name in vessel_data[
                     "boundary_conditions"
@@ -69,11 +79,53 @@ class SvZeroDSolverInputHandler(DataHandler):
         return bc_map
 
     @property
+    def vessel_id_to_name_map(self):
+        id_map = {}
+        for vessel_data in self.vessels.values():
+            id_map[vessel_data["vessel_id"]] = vessel_data["vessel_name"]
+        return id_map
+
+    @property
     def num_pts_per_cycle(self) -> int:
         """Number of time steps per cardiac cycle."""
         return self.data["simulation_parameters"][
             "number_of_time_pts_per_cardiac_cycle"
         ]
+
+    @property
+    def nodes(self) -> dict:
+        id_map = self.vessel_id_to_name_map
+        connections = []
+        for junction in self.junctions.values():
+            for ivessel in junction["inlet_vessels"]:
+                connections.append(
+                    (id_map[ivessel], junction["junction_name"])
+                )
+            for ovessel in junction["outlet_vessels"]:
+                connections.append(
+                    (junction["junction_name"], id_map[ovessel])
+                )
+        for vessel in self.vessels.values():
+            try:
+                connections.append(
+                    (
+                        vessel["boundary_conditions"]["inlet"],
+                        vessel["vessel_name"],
+                    )
+                )
+            except KeyError:
+                pass
+            try:
+                connections.append(
+                    (
+                        vessel["vessel_name"],
+                        vessel["boundary_conditions"]["outlet"],
+                    )
+                )
+            except KeyError:
+                pass
+
+        return connections
 
     def copy(self) -> SvZeroDSolverInputHandler:
         """Create and return a copy of the handler.
@@ -87,6 +139,7 @@ class SvZeroDSolverInputHandler(DataHandler):
         self,
         abs_tol: float = None,
         max_nliter: int = None,
+        num_cycles: int = None,
         steady_initial: bool = None,
         mean_only: bool = None,
         output_interval: bool = None,
@@ -116,3 +169,5 @@ class SvZeroDSolverInputHandler(DataHandler):
             simparams["output_interval"] = output_interval
         if last_cycle_only is not None:
             simparams["output_last_cycle_only"] = last_cycle_only
+        if num_cycles is not None:
+            simparams["number_of_cardiac_cycles"] = num_cycles

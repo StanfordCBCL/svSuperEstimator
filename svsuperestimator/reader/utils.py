@@ -17,7 +17,7 @@ def get_0d_element_coordinates(project: SimVascularProject):
 
     # Extract branch information of 0D config
     branchdata = {}
-    for vessel_config in zerod_handler.vessels:
+    for vessel_config in zerod_handler.vessels.values():
 
         # Extract branch and segment id from name
         name = vessel_config["vessel_name"]

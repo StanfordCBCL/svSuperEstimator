@@ -22,6 +22,20 @@ parameter_estimation_folder:
   handler: SvSolverInputHandler
   path: Simulations/$CASE_NAME$/solver.inp
 
+3d_simulation_rcr:
+  type: data
+  handler: SvSolverRcrHandler
+  path: Simulations/$CASE_NAME$/rcrt.dat
+
+3d_simulation_inflow:
+  type: data
+  handler: SvSolverInflowHandler
+  path: Simulations/$CASE_NAME$/inflow.flow
+
+3d_simulation_input_path:
+  type: path
+  path: Simulations/$CASE_NAME$/solver.inp
+
 mesh:
   type: data
   handler: MeshHandler
@@ -32,3 +46,7 @@ centerline:
   handler: CenterlineHandler
   path: ROMSimulations/$CASE_NAME$/$CASE_NAME$.vtp
 
+rom_simulation_config_optimized:
+  type: data
+  handler: SvZeroDSolverInputHandler
+  path: ParameterEstimation/BloodVesselTuning/solver_0d.in
