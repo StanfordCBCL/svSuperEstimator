@@ -31,16 +31,17 @@ for result_file in [f for f in os.listdir("results") if f.endswith(".pickle")]:
     plot_opts = {
         "width": 750,
         "height": 700,
+        "legend": dict(traceorder="reversed"),
     }
 
     flow_opts = {
-        "xaxis_title": r"Systolic flow 3D [l/min]",
-        "yaxis_title": r"Systolic flow 0D [l/min]",
+        "xaxis_title": r"3D systolic flow [l/min]",
+        "yaxis_title": r"0D systolic flow [l/min]",
     }
 
     pres_opts = {
-        "xaxis_title": r"Systolic pressure 3D [mmHg]",
-        "yaxis_title": r"Systolic pressure 0D [mmHg]",
+        "xaxis_title": r"3D systolic pressure [mmHg]",
+        "yaxis_title": r"0D systolic pressure [mmHg]",
     }
 
     subtitle = "Systolic pressure at different nodes of the model for multiple variations of boundary conditions"
@@ -59,7 +60,7 @@ for result_file in [f for f in os.listdir("results") if f.endswith(".pickle")]:
         )
         max_pres = -9e99
         min_pres = 9e99
-        for var_id in sorted(data["3d"].keys()):
+        for var_id in sorted(data["3d"].keys(), reverse=True)[:-1] + [-1]:
 
             max_pres = max(
                 max(data["3d"][var_id]["pressure_systole"]),
@@ -106,7 +107,7 @@ for result_file in [f for f in os.listdir("results") if f.endswith(".pickle")]:
         pres_plot.add_line_trace(
             x=range,
             y=range,
-            name="1:1 relation",
+            name="1:1",
             showlegend=True,
             color="white",
             dash="dot",
@@ -132,7 +133,7 @@ for result_file in [f for f in os.listdir("results") if f.endswith(".pickle")]:
         )
         max_flow = -9e99
         min_flow = 9e99
-        for var_id in sorted(data["3d"].keys()):
+        for var_id in sorted(data["3d"].keys(), reverse=True)[:-1] + [-1]:
 
             max_flow = max(
                 max(data["3d"][var_id]["flow_systole"]),
@@ -175,7 +176,7 @@ for result_file in [f for f in os.listdir("results") if f.endswith(".pickle")]:
         flow_plot.add_line_trace(
             x=range,
             y=range,
-            name="1:1 relation",
+            name="1:1",
             showlegend=True,
             color="white",
             dash="dot",
