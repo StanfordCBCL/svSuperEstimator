@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import Any
 
 import pandas as pd
-from dash import html
 
 from ..app.helpers import create_columns
 
@@ -159,6 +158,8 @@ class Report:
 
     def to_dash(self) -> list:
         """Convert the report to dash content."""
+        from dash import html
+
         formatted_content = []
         for item in self._content:
             if isinstance(item, str):
