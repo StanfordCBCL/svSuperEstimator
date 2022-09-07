@@ -5,8 +5,6 @@ from base64 import b64encode
 from typing import Any
 
 import plotly.graph_objects as go
-from dash import html
-from dash.dcc import Graph
 
 
 class PlotBase:
@@ -110,6 +108,8 @@ class PlotBase:
             dark: Toggle dark mode.
             display_controls: Display plotly controls.
         """
+        from dash import html
+        from dash.dcc import Graph
         self._fig.update_layout(**self._layout_common)
         if dark:
             self._fig.update_layout(**self._layout_dark)
