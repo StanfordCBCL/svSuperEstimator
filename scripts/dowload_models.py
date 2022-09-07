@@ -19,7 +19,7 @@ def main(target_folder, models):
         source = get_download_link(model)
         target = os.path.join(target_folder, model)
         wget.download(source, target + ".zip")
-        print("Unzipping", model)
+        print("\nUnzipping", model)
         with zipfile.ZipFile(target + ".zip", "r") as zip_ref:
             zip_ref.extractall(target_folder)
         print("Cleaning up", model)
