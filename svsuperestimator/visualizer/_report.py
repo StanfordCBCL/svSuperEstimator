@@ -8,8 +8,6 @@ from typing import Any
 
 import pandas as pd
 
-from ..app.helpers import create_columns
-
 
 class Report:
     """Class for formatting results."""
@@ -159,6 +157,7 @@ class Report:
     def to_dash(self) -> list:
         """Convert the report to dash content."""
         from dash import html
+        from ..app.helpers import create_columns
 
         formatted_content = []
         for item in self._content:
