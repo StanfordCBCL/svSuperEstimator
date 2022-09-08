@@ -23,7 +23,7 @@ def main(model_folder, centerline_folder, num_procs, override):
                 model,
                 "ParameterEstimation",
                 "BloodVesselTuning",
-                "solver_0d.in",
+                "report.html",
             )
         ):
             print(

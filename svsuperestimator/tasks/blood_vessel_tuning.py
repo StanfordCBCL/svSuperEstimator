@@ -165,6 +165,9 @@ class BloodVesselTuning(Task):
         # Run simulation for both configurations
         zerod_config_handler.update_simparams(last_cycle_only=True)
         zerod_opt_config_handler.update_simparams(last_cycle_only=True)
+        for junction in zerod_config_handler.junctions.values():
+            if junction["junction_type"] == "BloodVesselJunction":
+                junction["junction_type"] = "NORMAL_JUNCTION"
         zerod_result = runnercpp.run_from_config(zerod_config_handler.data)
         zerod_opt_result = runnercpp.run_from_config(
             zerod_opt_config_handler.data
@@ -368,10 +371,6 @@ class BloodVesselTuning(Task):
             (
                 inpres_sim,
                 outflow_sim,
-                # inflow_sim_d,
-                # outflow_sim_d,
-                # inpres_sim_d,
-                # outpres_sim_d,
             ) = BloodVesselTuning._simulate_blood_vessel(
                 *theta,
                 bc_times=segment_data["times"],
@@ -383,52 +382,6 @@ class BloodVesselTuning(Task):
             offset_pres = np.abs(inpres_sim - inpres) / pres_norm_factor
             offset_flow = np.abs(outflow_sim - outflow) / flow_norm_factor
 
-            # d_offset_pres = 2 * (inpres_sim - inpres) / pres_norm_factor
-            # dPin_dR = d_offset_pres * bc_inflow
-            # dPin_dC = np.zeros(num_pts_per_cycle)
-            # dPin_dL = d_offset_pres * outflow_sim_d
-            # dPin_dk = d_offset_pres * np.abs(bc_inflow) * bc_inflow
-
-            # d_offset_flow = 2 * (outflow_sim - outflow) / flow_norm_factor
-            # # dQout_dR = np.zeros(num_pts_per_cycle)
-            # dQout_dR = d_offset_flow * inflow_sim_d * theta[1]
-            # # dQout_dC = np.zeros(num_pts_per_cycle)
-            # # (
-            # #     d_offset_flow * 0.5 * (inflow_sim_d + outflow_sim_d) * 100
-            # # )
-            # dQout_dC = d_offset_flow * (
-            #     -inpres_sim_d
-            #     + (
-            #         theta[0]
-            #         + 2 * theta[3] * np.abs(bc_inflow)
-            #         # + theta[3] * bc_inflow**2 / np.abs(bc_inflow)
-            #     )
-            #     * inflow_sim_d
-            # )
-            # dQout_dL = np.zeros(num_pts_per_cycle)
-            # # dQout_dk = np.zeros(num_pts_per_cycle)
-            # dQout_dk = (
-            #     d_offset_flow
-            #     * (2 * np.abs(bc_inflow))
-            #     * theta[1]
-            #     * inflow_sim_d
-            # )
-
-            # gradient = [
-            #     np.mean(np.concatenate([dPin_dR, dQout_dR])),
-            #     np.mean(np.concatenate([dPin_dC, dQout_dC])),
-            #     np.mean(np.concatenate([dPin_dL, dQout_dL])),
-            #     np.mean(np.concatenate([dPin_dk, dQout_dk])),
-            # ]
-
-            # from rich import print
-
-            # print("Theta:", theta, "Gradient:", gradient)
-
-            # return (
-            #     np.mean(np.concatenate([offset_pres, offset_flow])),
-            #     gradient,
-            # )
             return np.mean(np.concatenate([offset_pres, offset_flow]))
 
         # Start optimization
@@ -437,8 +390,7 @@ class BloodVesselTuning(Task):
         result = optimize.minimize(
             fun=objective_function,
             x0=x0,
-            # jac=True,
-            method="Nelder-Mead",  # "L-BFGS-B",
+            method="Nelder-Mead",
             options={"maxfev": segment_data["maxfev"], "adaptive": True},
             bounds=cls._OPT_BOUNDS,
         )
@@ -531,7 +483,6 @@ class BloodVesselTuning(Task):
                 "number_of_time_pts_per_cardiac_cycle": num_pts_per_cycle,
                 "steady_initial": False,
                 "output_last_cycle_only": True,
-                # "output_derivative": True,
             },
             "vessels": [
                 {
@@ -566,30 +517,13 @@ class BloodVesselTuning(Task):
             return (
                 np.full(num_pts_per_cycle, np.nan),
                 np.full(num_pts_per_cycle, np.nan),
-                # np.full(num_pts_per_cycle, np.nan),
-                # np.full(num_pts_per_cycle, np.nan),
-                # np.full(num_pts_per_cycle, np.nan),
-                # np.full(num_pts_per_cycle, np.nan),
             )
 
         # Extract quantities of interest
         sim_inpres = result[1:, 4]
         sim_outflow = result[1:, 3]
-        # sim_inflow_d = result[1:, 6]
-        # sim_outflow_d = result[1:, 7]
-        # sim_inpres_d = result[1:, 8]
-        # sim_outpres_d = result[1:, 9]
-        # times = result[1:, 1]
-
-        # import plotly.express as px
-
-        # deriv_easy = (bc_outpres[1:] - bc_outpres[:-1]) / (times[1] - times[0])
 
         return (
             sim_inpres,
             sim_outflow,
-            # sim_inflow_d,
-            # sim_outflow_d,
-            # sim_inpres_d,
-            # sim_outpres_d,
         )

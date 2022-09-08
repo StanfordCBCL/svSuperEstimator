@@ -103,7 +103,7 @@ def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
         seg_start = 0.0
         seg_start_index = 0
 
-        for seg_id in range(len(branch)):
+        for seg_id, segment in branch.items():
             segment = branch[seg_id]
             length = segment["length"]
 
