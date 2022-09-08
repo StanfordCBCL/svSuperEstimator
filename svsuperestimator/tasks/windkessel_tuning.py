@@ -33,6 +33,7 @@ class WindkesselTuning(Task):
         "num_rejuvenation_steps": 2,
         "resampling_threshold": 0.5,
         "noise_factor": 0.05,
+        **Task.DEFAULTS
     }
 
     _THETA_RANGE = [7.0, 13.0]

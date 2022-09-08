@@ -27,7 +27,7 @@ class Task(ABC):
     """
 
     TASKNAME = None
-    DEFAULTS = {}
+    DEFAULTS = {"report_html": True, "report_files": False}
 
     def __init__(self, project: SimVascularProject, config: dict):
         """Construct the task.
@@ -97,24 +97,30 @@ class Task(ABC):
         self.log("Generate task report")
         self.load_database()
         report = self.generate_report()
-        self.log(f"Export report files to {self.output_folder}")
-        report.to_files(self.output_folder)
+
+        # Export report files
+        if self.config["report_files"]:
+            report.to_files(self.output_folder)
+            self.log(f"Saved report files {self.output_folder}")
 
         # Save console output
         html_log_target = os.path.join(self.output_folder, "log.html")
-        self.log(f"Save task output to {html_log_target}", style="default")
         self.console.save_html(html_log_target, clear=False)
+        self.log(f"Saved html task log {html_log_target}", style="default")
         svg_log_target = os.path.join(self.output_folder, "log.svg")
-        self.log(f"Save task output to {svg_log_target}", style="default")
         self.console.save_svg(svg_log_target, clear=False, title="Output")
+        self.log(f"Saved svg task log {svg_log_target}", style="default")
 
         # Export html report
-        html_report_target = os.path.join(self.output_folder, "report.html")
-        self.log(f"Export report webpage to {html_report_target}")
-        report.to_html(
-            html_report_target,
-            title=self.project.name + " - svSuperEstimator",
-        )
+        if self.config["report_files"]:
+            html_report_target = os.path.join(
+                self.output_folder, "report.html"
+            )
+            report.to_html(
+                html_report_target,
+                title=self.project.name + " - svSuperEstimator",
+            )
+            self.log(f"Saved html report {html_report_target}")
 
         self.log(
             f"Task {self.TASKNAME} [bold green]completed[/bold green] in "

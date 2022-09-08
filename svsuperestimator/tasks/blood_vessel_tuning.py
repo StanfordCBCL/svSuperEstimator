@@ -30,6 +30,7 @@ class BloodVesselTuning(Task):
         "threed_solution_file": None,
         "num_procs": 1,
         "maxfev": 2000,
+        **Task.DEFAULTS,
     }
 
     # The sequence that the blood vessel parameters are saved in arrays
