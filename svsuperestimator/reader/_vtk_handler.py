@@ -45,13 +45,22 @@ class VtkHandler(DataHandler):
             raise NotImplementedError("Filetype not supported.")
         return cls(reader.GetOutput())
 
-    def to_file(cls, filename: str):
+    def to_file(self, filename: str):
         """Write the data to a file.
 
         Args:
             filename: Path to the file to read data from.
         """
-        raise NotImplementedError
+        if filename.endswith(".vtp"):
+            writer = vtk.vtkXMLPolyDataWriter()
+        elif filename.endswith(".vtu"):
+            writer = vtk.vtkXMLUnstructuredGridWriter()
+        else:
+            raise NotImplementedError("Filetype not supported.")
+        writer.SetFileName(filename)
+        writer.SetInputData(self.data)
+        writer.Update()
+        writer.Write()
 
     @property
     def points(self) -> np.ndarray:
