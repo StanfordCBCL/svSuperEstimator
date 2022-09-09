@@ -36,6 +36,16 @@ parameter_estimation_folder:
   type: path
   path: Simulations/$CASE_NAME$/solver.inp
 
+3d_simulation_volume:
+  type: data
+  handler: MeshHandler
+  path: Simulations/$CASE_NAME$/mesh-complete/mesh-complete.mesh.vtu
+
+3d_simulation_surface:
+  type: data
+  handler: MeshHandler
+  path: Simulations/$CASE_NAME$/mesh-complete/walls_combined.vtp
+
 mesh:
   type: data
   handler: MeshHandler

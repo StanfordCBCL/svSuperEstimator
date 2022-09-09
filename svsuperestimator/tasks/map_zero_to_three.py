@@ -2,20 +2,12 @@ from __future__ import annotations
 
 import os
 from multiprocessing import Pool
-from datetime import datetime
 
 import numpy as np
-import pandas as pd
-from rich import box
-from rich.table import Table
-from scipy import optimize
 from svzerodsolver import runnercpp
-import orjson
+import vtk
 
-from .. import reader, visualizer
-from ..reader import CenterlineHandler
-from ..reader import utils as readutils
-from . import plotutils, taskutils
+from .. import reader
 from .task import Task
 
 from collections import defaultdict
@@ -37,8 +29,7 @@ class MapZeroToThree(Task):
         """Core routine of the task."""
 
         self._map_0d_on_centerline()
-
-        pass
+        self._map_centerline_on_3d()
 
     def post_run(self):
         """Postprocessing routine of the task."""
@@ -83,12 +74,12 @@ class MapZeroToThree(Task):
                 for field in ["flow", "pressure"]:
                     if seg == 0:
                         out[field][br] = [
-                            list(df[df.name == name][field + "_in"])
+                            list(df[df.name == name][field + "_in"])[0:1]
                         ]
                     out[field][br] += [
-                        list(df[df.name == name][field + "_out"])
+                        list(df[df.name == name][field + "_out"])[0:1]
                     ]
-                out["time"] = list(df[df.name == name]["time"])
+                out["time"] = list(df[df.name == name]["time"])[0:1]
 
                 # add path distance
                 for vessel in zerod_handler.data["vessels"]:
@@ -233,5 +224,263 @@ class MapZeroToThree(Task):
             cl_handler.data.GetPointData().AddArray(out_array)
 
         cl_handler.to_file(
-            os.path.join(self.output_folder, "centerline_result.vtp")
+            os.path.join(self.output_folder, "initial_centerline.vtp")
         )
+
+    def _map_centerline_on_3d(self):
+
+        cl_handler = reader.CenterlineHandler.from_file(
+            os.path.join(self.output_folder, "initial_centerline.vtp")
+        )
+        vol_handler = self.project["3d_simulation_volume"]
+        surf_handler = self.project["3d_simulation_surface"]
+
+        # assemble output dict
+        rec_dd = lambda: defaultdict(rec_dd)
+        arrays = rec_dd()
+
+        def collect_arrays(output):
+            res = {}
+            for i in range(output.GetNumberOfArrays()):
+                name = output.GetArrayName(i)
+                data = output.GetArray(i)
+                res[name] = vtk_to_numpy(data)
+            return res
+
+        def get_centerline_3d_map(cl_handler, vol_handler):
+            """
+            Create a map from centerine to volume mesh through region growing
+            """
+            # get points
+            points_vol = vtk_to_numpy(vol_handler.data.GetPoints().GetData())
+            points_1d = vtk_to_numpy(cl_handler.data.GetPoints().GetData())
+
+            # get volume points closest to centerline
+            cp_vol = ClosestPoints(vol_handler.data)
+            seed_points = np.unique(cp_vol.search(points_1d))
+
+            # map centerline points to selected volume points
+            cp_1d = ClosestPoints(cl_handler.data)
+            seed_ids = np.array(cp_1d.search(points_vol[seed_points]))
+
+            # call region growing algorithm
+            ids, dist, rad = region_grow(
+                vol_handler.data, seed_points, seed_ids, n_max=999
+            )
+
+            # check 1d to 3d map
+            assert (
+                np.max(ids) <= cl_handler.data.GetNumberOfPoints() - 1
+            ), "1d-3d map non-conforming"
+
+            return ids, dist, rad
+
+        class ClosestPoints:
+            """
+            Find closest points within a geometry
+            """
+
+            def __init__(self, inp):
+                dataset = vtk.vtkPolyData()
+                dataset.SetPoints(inp.GetPoints())
+
+                locator = vtk.vtkPointLocator()
+                locator.Initialize()
+                locator.SetDataSet(dataset)
+                locator.BuildLocator()
+
+                self.locator = locator
+
+            def search(self, points, radius=None):
+                """
+                Get ids of points in geometry closest to input points
+                Args:
+                    points: list of points to be searched
+                    radius: optional, search radius
+                Returns:
+                    Id list
+                """
+                ids = []
+                for p in points:
+                    if radius is not None:
+                        result = vtk.vtkIdList()
+                        self.locator.FindPointsWithinRadius(radius, p, result)
+                        ids += [
+                            result.GetId(k)
+                            for k in range(result.GetNumberOfIds())
+                        ]
+                    else:
+                        ids += [self.locator.FindClosestPoint(p)]
+                return ids
+
+        def region_grow(geo, seed_points, seed_ids, n_max=99):
+            # initialize output arrays
+            array_ids = -1 * np.ones(geo.GetNumberOfPoints(), dtype=int)
+            array_rad = np.zeros(geo.GetNumberOfPoints())
+            array_dist = -1 * np.ones(geo.GetNumberOfPoints(), dtype=int)
+            array_ids[seed_points] = seed_ids
+
+            # initialize ids
+            cids_all = set()
+            pids_all = set(seed_points.tolist())
+            pids_new = set(seed_points.tolist())
+
+            # get points
+            pts = vtk_to_numpy(geo.GetPoints().GetData())
+
+            # loop until region stops growing or reaches maximum number of iterations
+            i = 0
+            while len(pids_new) > 0 and i < n_max:
+                # update
+                pids_old = pids_new
+
+                # print progress
+                print_str = "Iteration " + str(i)
+                print_str += "\tNew points " + str(len(pids_old)) + "     "
+                print_str += "\tTotal points " + str(len(pids_all))
+                print(print_str)
+
+                # grow region one step
+                pids_new = grow(geo, array_ids, pids_old, pids_all, cids_all)
+
+                # convert to array
+                pids_old_arr = list(pids_old)
+
+                # create point locator with old wave front
+                points = vtk.vtkPoints()
+                points.Initialize()
+                for i_old in pids_old:
+                    points.InsertNextPoint(geo.GetPoint(i_old))
+
+                dataset = vtk.vtkPolyData()
+                dataset.SetPoints(points)
+
+                locator = vtk.vtkPointLocator()
+                locator.Initialize()
+                locator.SetDataSet(dataset)
+                locator.BuildLocator()
+
+                # find closest point in new wave front
+                for i_new in pids_new:
+                    i_old = pids_old_arr[
+                        locator.FindClosestPoint(geo.GetPoint(i_new))
+                    ]
+                    array_ids[i_new] = array_ids[i_old]
+                    array_rad[i_new] = array_rad[i_old] + np.linalg.norm(
+                        pts[i_new] - pts[i_old]
+                    )
+                    array_dist[i_new] = i
+
+                # count grow iterations
+                i += 1
+
+            return array_ids, array_dist + 1, array_rad
+
+        def grow(geo, array, pids_in, pids_all, cids_all):
+            # ids of propagating wave-front
+            pids_out = set()
+
+            # loop all points in wave-front
+            for pi_old in pids_in:
+                cids = vtk.vtkIdList()
+                geo.GetPointCells(pi_old, cids)
+
+                # get all connected cells in wave-front
+                for j in range(cids.GetNumberOfIds()):
+                    # get cell id
+                    ci = cids.GetId(j)
+
+                    # skip cells that are already in region
+                    if ci in cids_all:
+                        continue
+                    else:
+                        cids_all.add(ci)
+
+                    pids = vtk.vtkIdList()
+                    geo.GetCellPoints(ci, pids)
+
+                    # loop all points in cell
+                    for k in range(pids.GetNumberOfIds()):
+                        # get point id
+                        pi_new = pids.GetId(k)
+
+                        # add point only if it's new and doesn't fullfill stopping criterion
+                        if array[pi_new] == -1 and pi_new not in pids_in:
+                            pids_out.add(pi_new)
+                            pids_all.add(pi_new)
+
+            return pids_out
+
+        def add_array(geo, name, array):
+            """
+            Add array to geometry
+            """
+            arr = numpy_to_vtk(array)
+            arr.SetName(name)
+            geo.GetPointData().AddArray(arr)
+
+        # get 1d -> 3d map
+        map_ids, map_iter, map_rad = get_centerline_3d_map(
+            cl_handler, vol_handler
+        )
+
+        # get arrays
+        arrays_cent = collect_arrays(cl_handler.data.GetPointData())
+
+        # map all centerline arrays to volume geometry
+        for name, array in arrays_cent.items():
+            add_array(vol_handler.data, name, array[map_ids])
+
+        # add mapping to volume mesh
+        for name, array in zip(["MapIds", "MapIters"], [map_ids, map_iter]):
+            add_array(vol_handler.data, name, array)
+
+        # inverse map
+        map_ids_inv = {}
+        for i in np.unique(map_ids):
+            map_ids_inv[i] = np.where(map_ids == i)
+
+        # create radial coordinate [0, 1]
+        rad = np.zeros(vol_handler.data.GetNumberOfPoints())
+        for i, ids in map_ids_inv.items():
+            rad_max = np.max(map_rad[ids])
+            if rad_max == 0:
+                rad_max = np.max(map_rad)
+            rad[ids] = map_rad[ids] / rad_max
+        add_array(vol_handler.data, "rad", rad)
+
+        # set points at wall to hard 1
+        wall_ids = (
+            collect_arrays(surf_handler.data.GetPointData())[
+                "GlobalNodeID"
+            ].astype(int)
+            - 1
+        )
+        rad[wall_ids] = 1
+
+        # mean velocity
+        for a in arrays_cent.keys():
+            if "flow" in a:
+                u_mean = arrays_cent[a] / arrays_cent["CenterlineSectionArea"]
+
+                # parabolic velocity
+                u_quad = 2 * u_mean[map_ids] * (1 - rad**2)
+
+                # scale parabolic flow profile to preserve mean flow
+                for i, ids in map_ids_inv.items():
+                    u_mean_is = np.mean(u_quad[map_ids_inv[i]])
+                    u_quad[ids] *= u_mean[i] / u_mean_is
+
+                # parabolic velocity vector field
+                velocity = (
+                    np.outer(u_quad, np.ones(3))
+                    * arrays_cent["CenterlineSectionNormal"][map_ids]
+                )
+
+                # add to volume mesh
+                add_array(
+                    vol_handler.data, a.replace("flow", "velocity"), velocity
+                )
+
+        # write to file
+        vol_handler.to_file(os.path.join(self.output_folder, "initial.vtu"))

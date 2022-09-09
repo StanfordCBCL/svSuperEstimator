@@ -39,10 +39,12 @@ class VtkHandler(DataHandler):
             raise FileNotFoundError(f"File {filename} does not exist")
         if filename.endswith(".vtp"):
             reader = vtk.vtkXMLPolyDataReader()
-            reader.SetFileName(filename)
-            reader.Update()
+        elif filename.endswith(".vtu"):
+            reader = vtk.vtkXMLUnstructuredGridReader()
         else:
             raise NotImplementedError("Filetype not supported.")
+        reader.SetFileName(filename)
+        reader.Update()
         return cls(reader.GetOutput())
 
     def to_file(self, filename: str):
