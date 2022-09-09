@@ -20,9 +20,12 @@ class CenterlineHandler(VtkHandler):
             n for n in array_names if n.startswith("pressure")
         ]
         self.flow_names = [n for n in array_names if n.startswith("velocity")]
-        self.time_steps = np.array(
-            [float(k.split("_")[1]) for k in self.pressure_names]
-        )
+        try:
+            self.time_steps = np.array(
+                [float(k.split("_")[1]) for k in self.pressure_names]
+            )
+        except IndexError:
+            self.time_steps = []
 
     def get_branch_data(self, branch_id: int) -> dict:
         """Get branch data by branch id.

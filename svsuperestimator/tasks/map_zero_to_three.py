@@ -231,20 +231,8 @@ class MapZeroToThree(Task):
         cl_handler = reader.CenterlineHandler.from_file(
             os.path.join(self.output_folder, "initial_centerline.vtp")
         )
-        vol_handler = self.project["3d_simulation_volume"]
+        vol_handler: reader.MeshHandler = self.project["3d_simulation_volume"]
         surf_handler = self.project["3d_simulation_surface"]
-
-        # assemble output dict
-        rec_dd = lambda: defaultdict(rec_dd)
-        arrays = rec_dd()
-
-        def collect_arrays(output):
-            res = {}
-            for i in range(output.GetNumberOfArrays()):
-                name = output.GetArrayName(i)
-                data = output.GetArray(i)
-                res[name] = vtk_to_numpy(data)
-            return res
 
         def get_centerline_3d_map(cl_handler, vol_handler):
             """
@@ -410,25 +398,13 @@ class MapZeroToThree(Task):
 
             return pids_out
 
-        def add_array(geo, name, array):
-            """
-            Add array to geometry
-            """
-            arr = numpy_to_vtk(array)
-            arr.SetName(name)
-            geo.GetPointData().AddArray(arr)
-
         # get 1d -> 3d map
         map_ids, map_iter, map_rad = get_centerline_3d_map(
             cl_handler, vol_handler
         )
 
-        # get arrays
-        arrays_cent = collect_arrays(cl_handler.data.GetPointData())
-
-        # map all centerline arrays to volume geometry
-        add_array(
-            vol_handler.data, "pressure", arrays_cent["pressure"][map_ids]
+        vol_handler.set_point_data_array(
+            "pressure", cl_handler.get_point_data_array("pressure")[map_ids]
         )
 
         # inverse map
@@ -446,36 +422,33 @@ class MapZeroToThree(Task):
 
         # set points at wall to hard 1
         wall_ids = (
-            collect_arrays(surf_handler.data.GetPointData())[
-                "GlobalNodeID"
-            ].astype(int)
-            - 1
+            surf_handler.get_point_data_array("GlobalNodeID").astype(int) - 1
         )
         rad[wall_ids] = 1
 
         # mean velocity
-        for a in arrays_cent.keys():
-            if "flow" in a:
-                u_mean = arrays_cent[a] / arrays_cent["CenterlineSectionArea"]
+        u_mean = cl_handler.get_point_data_array(
+            "flow"
+        ) / cl_handler.get_point_data_array("CenterlineSectionArea")
 
-                # parabolic velocity
-                u_quad = 2 * u_mean[map_ids] * (1 - rad**2)
+        # parabolic velocity
+        u_quad = 2 * u_mean[map_ids] * (1 - rad**2)
 
-                # scale parabolic flow profile to preserve mean flow
-                for i, ids in map_ids_inv.items():
-                    u_mean_is = np.mean(u_quad[map_ids_inv[i]])
-                    u_quad[ids] *= u_mean[i] / u_mean_is
+        # scale parabolic flow profile to preserve mean flow
+        for i, ids in map_ids_inv.items():
+            u_mean_is = np.mean(u_quad[map_ids_inv[i]])
+            u_quad[ids] *= u_mean[i] / u_mean_is
 
-                # parabolic velocity vector field
-                velocity = (
-                    np.outer(u_quad, np.ones(3))
-                    * arrays_cent["CenterlineSectionNormal"][map_ids]
-                )
+        # parabolic velocity vector field
+        velocity = (
+            np.outer(u_quad, np.ones(3))
+            * cl_handler.get_point_data_array("CenterlineSectionNormal")[
+                map_ids
+            ]
+        )
 
-                # add to volume mesh
-                add_array(
-                    vol_handler.data, a.replace("flow", "velocity"), velocity
-                )
+        # add to volume mesh
+        vol_handler.set_point_data_array("velocity", velocity)
 
         # write to file
         vol_handler.to_file(os.path.join(self.output_folder, "initial.vtu"))

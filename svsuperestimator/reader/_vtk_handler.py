@@ -5,7 +5,7 @@ import os
 
 import numpy as np
 import vtk
-from vtk.util.numpy_support import vtk_to_numpy
+from vtk.util.numpy_support import vtk_to_numpy, numpy_to_vtk
 
 from ._data_handler import DataHandler
 
@@ -126,6 +126,16 @@ class VtkHandler(DataHandler):
             data_array: Point data array.
         """
         return vtk_to_numpy(self.data.GetPointData().GetArray(label))
+
+    def set_point_data_array(self, label: str, array: np.ndarray) -> None:
+        """Set a point data array.
+
+        Args:
+            array: Point data array.
+        """
+        arr = numpy_to_vtk(array)
+        arr.SetName(label)
+        self.data.GetPointData().AddArray(arr)
 
     def get_cell_data_array(self, label: str) -> np.ndarray:
         """Return a cell data array.
