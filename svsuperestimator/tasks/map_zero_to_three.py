@@ -103,9 +103,9 @@ class MapZeroToThree(Task):
         # extract point arrays from geometries
         arrays_cent = collect_arrays(cl_handler.data.GetPointData())
 
-        # add centerline arrays
-        for name, data in arrays_cent.items():
-            arrays[name] = data
+        # # add centerline arrays
+        # for name, data in arrays_cent.items():
+        #     arrays[name] = data
 
         # centerline points
         points = vtk_to_numpy(cl_handler.data.GetPoints().GetData())
@@ -214,8 +214,7 @@ class MapZeroToThree(Task):
             array_f[is_jc] = (array_f[is_jc].T / n_outlet[is_jc]).T
 
             # assemble time steps
-            for i, t in enumerate(results["time"]):
-                arrays[f + "_" + str(t)] = array_f[:, i]
+            arrays[f] = array_f[:, 0]
 
         # add arrays to centerline and write to file
         for f, a in arrays.items():
@@ -428,12 +427,9 @@ class MapZeroToThree(Task):
         arrays_cent = collect_arrays(cl_handler.data.GetPointData())
 
         # map all centerline arrays to volume geometry
-        for name, array in arrays_cent.items():
-            add_array(vol_handler.data, name, array[map_ids])
-
-        # add mapping to volume mesh
-        for name, array in zip(["MapIds", "MapIters"], [map_ids, map_iter]):
-            add_array(vol_handler.data, name, array)
+        add_array(
+            vol_handler.data, "pressure", arrays_cent["pressure"][map_ids]
+        )
 
         # inverse map
         map_ids_inv = {}
@@ -447,7 +443,6 @@ class MapZeroToThree(Task):
             if rad_max == 0:
                 rad_max = np.max(map_rad)
             rad[ids] = map_rad[ids] / rad_max
-        add_array(vol_handler.data, "rad", rad)
 
         # set points at wall to hard 1
         wall_ids = (
