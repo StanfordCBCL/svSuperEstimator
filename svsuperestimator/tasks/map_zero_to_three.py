@@ -251,7 +251,7 @@ class MapZeroToThree(Task):
             seed_ids = np.array(cp_1d.search(points_vol[seed_points]))
 
             # call region growing algorithm
-            ids, dist, rad = region_grow(
+            ids, rad = region_grow(
                 vol_handler.data, seed_points, seed_ids, n_max=999
             )
 
@@ -260,7 +260,7 @@ class MapZeroToThree(Task):
                 np.max(ids) <= cl_handler.data.GetNumberOfPoints() - 1
             ), "1d-3d map non-conforming"
 
-            return ids, dist, rad
+            return ids, rad
 
         class ClosestPoints:
             """
@@ -361,7 +361,7 @@ class MapZeroToThree(Task):
                 # count grow iterations
                 i += 1
 
-            return array_ids, array_dist + 1, array_rad
+            return array_ids, array_rad
 
         def grow(geo, array, pids_in, pids_all, cids_all):
             # ids of propagating wave-front
@@ -399,9 +399,7 @@ class MapZeroToThree(Task):
             return pids_out
 
         # get 1d -> 3d map
-        map_ids, map_iter, map_rad = get_centerline_3d_map(
-            cl_handler, vol_handler
-        )
+        map_ids, map_rad = get_centerline_3d_map(cl_handler, vol_handler)
 
         vol_handler.set_point_data_array(
             "pressure", cl_handler.get_point_data_array("pressure")[map_ids]
@@ -433,8 +431,6 @@ class MapZeroToThree(Task):
 
         # parabolic velocity
         u_quad = 2 * u_mean[map_ids] * (1 - rad**2)
-
-        # scale parabolic flow profile to preserve mean flow
         for i, ids in map_ids_inv.items():
             u_mean_is = np.mean(u_quad[map_ids_inv[i]])
             u_quad[ids] *= u_mean[i] / u_mean_is

@@ -41,3 +41,22 @@ class SvSolverRcrHandler(PlainHandler):
                     continue
             i += 1
         return bc_data
+
+    def set_rcr_data(self, rcr_data: dict) -> None:
+        """Set the RCR data.
+
+        Args:
+            rcr_data: Dict with Rp, C, Rd, Pd and t for all RCR boundary
+                conditions.
+        """
+        max_points = max([len(rcr["Pd"]) for rcr in rcr_data])
+        self.data = f"{max_points}\n"
+
+        for rcr in rcr_data:
+            self.data += (
+                f"{len(rcr['Pd'])}\n{rcr['Rp']}\n{rcr['C']}\n{rcr['Rd']}\n"
+                + "\n".join(
+                    [f"{t} {pd}" for t, pd in zip(rcr["t"], rcr["Pd"])]
+                )
+                + "\n"
+            )
