@@ -30,6 +30,7 @@ class MapZeroToThree(Task):
 
         self._map_0d_on_centerline()
         self._map_centerline_on_3d()
+        self._map_boundary_conditions()
 
     def post_run(self):
         """Postprocessing routine of the task."""
@@ -448,3 +449,45 @@ class MapZeroToThree(Task):
 
         # write to file
         vol_handler.to_file(os.path.join(self.output_folder, "initial.vtu"))
+
+    def _map_boundary_conditions(self):
+
+        from rich import print
+
+        handler3d = self.project["3d_simulation_input"]
+        rcr_surface_ids = handler3d.rcr_surface_ids
+        handler_rcr = self.project["3d_simulation_rcr"]
+        handlermesh = self.project["mesh"]
+        zerod_handler = self.project["0d_simulation_input"]
+
+        face_ids = handlermesh.boundary_centers
+
+        bc_ids = list(face_ids.keys())
+        bc_ids_coords = list(face_ids.values())
+
+        mapped_data = reader.utils.get_0d_element_coordinates(self.project)
+
+        bc_mapping = {}
+        for bc_name, bc_coord in mapped_data.items():
+            if not bc_name.startswith("branch"):
+                index = np.argmin(
+                    np.linalg.norm(bc_ids_coords - bc_coord, axis=1)
+                )
+                bc_mapping[bc_ids[index]] = bc_name
+
+        threed_bc = handler_rcr.get_rcr_data()
+        threed_bc = [None] * len(threed_bc)
+        rcr_surface_ids = handler3d.rcr_surface_ids
+        bcs = zerod_handler.boundary_conditions
+        for i in range(len(threed_bc)):
+            surface_id = rcr_surface_ids[i]
+
+            threed_bc[i] = bcs[bc_mapping[surface_id]]["bc_values"]
+
+        for bc in threed_bc:
+            if not "t" in bc:
+                bc["t"] = [0.0, 1.0]
+                bc["Pd"] = [bc["Pd"], bc["Pd"]]
+
+        handler_rcr.set_rcr_data(threed_bc)
+        handler_rcr.to_file(os.path.join(self.output_folder, "rcrt.dat"))
