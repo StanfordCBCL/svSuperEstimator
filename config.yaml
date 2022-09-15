@@ -3,10 +3,15 @@ global:
   num_procs: 4
 tasks:
   # BloodVesselTuning:
-  #   threed_solution_file: /Users/stanford/data/3d_centerline/0069_0001.vtp
+  #   threed_solution_file: /Users/stanford/data/3d_centerline_2/0069_0001.vtp
   #   maxfev: 2000
-  WindkesselTuning:
-    num_particles: 100
-    num_rejuvenation_steps: 2
-    resampling_threshold: 0.5
-    noise_factor: 0.05
+  # WindkesselTuning:
+  #   num_particles: 100
+  #   num_rejuvenation_steps: 2
+  #   resampling_threshold: 0.5
+  #   noise_factor: 0.05
+  map_zero_d_result_to_three_d: {}
+  map_three_d_result_on_centerline:
+    slicer_executable: /home/users/richter7/sanddorn-toolbox/slicer/Release/slicer
+    threed_result_file: /scratch/users/richter7/data/ThreeDSimulation/0069_0001.vtu
+
