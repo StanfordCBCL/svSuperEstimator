@@ -46,6 +46,10 @@ parameter_estimation_folder:
   handler: MeshHandler
   path: Simulations/$CASE_NAME$/mesh-complete/walls_combined.vtp
 
+3d_simulation_folder_path:
+  type: path
+  path: Simulations/$CASE_NAME$/
+
 mesh:
   type: data
   handler: MeshHandler
@@ -54,6 +58,10 @@ mesh:
 centerline:
   type: data
   handler: CenterlineHandler
+  path: ROMSimulations/$CASE_NAME$/$CASE_NAME$.vtp
+
+centerline_path:
+  type: path
   path: ROMSimulations/$CASE_NAME$/$CASE_NAME$.vtp
 
 rom_simulation_config_optimized:

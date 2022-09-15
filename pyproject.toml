@@ -18,7 +18,8 @@ dependencies = [
     "click", # Easy to use argument parser
     "rich",
     "dash",
-    "kaleido"
+    "kaleido",
+    "wget"
 ]
 dynamic = ["version", "readme"]
 requires-python = ">=3.8"

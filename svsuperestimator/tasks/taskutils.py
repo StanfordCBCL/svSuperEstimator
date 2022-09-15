@@ -1,6 +1,8 @@
-from multiprocessing import connection
+from time import sleep
+from typing import Callable
 import numpy as np
 from scipy.interpolate import CubicSpline
+import subprocess
 
 
 def cgs_pressure_to_mmgh(cgs_pressure):
@@ -52,6 +54,39 @@ def refine_with_cubic_spline(y: np.ndarray, num: np.ndarray):
     x_new = np.linspace(0.0, 100.0, num)
     y_new = CubicSpline(x_old, y, bc_type="periodic")(x_new)
     return y_new
+
+
+def run_subprocess(
+    args: list, logger: Callable, refresh_rate=1.0, logprefix: str = ""
+) -> None:
+    """Run a subprocess.
+
+    Args:
+        args: Arguments for the subprocess.
+        logger: Logger to use for logging.
+        refresh_rate: Rate to update logging (in seconds).
+        logprefix: Prefix to put in front of lines when logging.
+    """
+
+    process = subprocess.Popen(
+        args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        shell=True,
+        # universal_newlines=True,
+    )
+
+    def check_io():
+        while True:
+            output = process.stdout.readline().decode()
+            if output:
+                logger(logprefix + output)
+            else:
+                break
+
+    while process.poll() is None:
+        check_io()
+        sleep(refresh_rate)
 
 
 def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):

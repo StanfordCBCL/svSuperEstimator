@@ -37,16 +37,22 @@ class Task(ABC):
             config: Configuration for the task.
         """
         self.project = project
-        self.console = None
+        self.console = Console(record=True)
         self.database = {}
         self.config = self.DEFAULTS.copy()
-        for key in config.keys():
-            if key not in self.DEFAULTS:
-                raise AttributeError(f"Unknown configuration option {key}")
         self.config.update(config)
         self.output_folder = os.path.join(
             self.project["parameter_estimation_folder"], self.TASKNAME
         )
+
+        self.log(
+            f"Created task [bold cyan]{type(self).__name__}[/bold cyan] "
+            "with the following configuration:"
+        )
+        self._log_config()
+        for key in config.keys():
+            if key not in self.DEFAULTS:
+                self.log(f"Unused configuration option {key}")
 
     @abstractmethod
     def core_run(self):
@@ -72,15 +78,7 @@ class Task(ABC):
 
         start = time()
 
-        # Setup task console to export stdout
-        self.console = Console(record=True)
-
-        # Log task configuration
-        self.log(
-            f"Task [bold cyan]{self.TASKNAME}[/bold cyan] [bold #ff9100]"
-            "started[/bold #ff9100] with the following configuration:"
-        )
-        self._log_config()
+        self.log(f"Starting task [bold cyan]{type(self).__name__}[/bold cyan]")
 
         # Make task output directory
         os.makedirs(self.output_folder, exist_ok=True)
@@ -123,7 +121,7 @@ class Task(ABC):
             self.log(f"Saved html report {html_report_target}")
 
         self.log(
-            f"Task {self.TASKNAME} [bold green]completed[/bold green] in "
+            f"Task [bold cyan]{type(self).__name__}[/bold cyan] [bold green]completed[/bold green] in "
             f"{time()-start:.1f} seconds"
         )
 

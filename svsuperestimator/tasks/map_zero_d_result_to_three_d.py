@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from multiprocessing import Pool
 
 import numpy as np
 from svzerodsolver import runnercpp
@@ -17,12 +16,11 @@ from scipy.interpolate import interp1d
 from rich.progress import Progress
 
 
-class MapZeroToThree(Task):
+class MapZeroDResultToThreeD(Task):
     """Map 0D result to 3D."""
 
-    TASKNAME = "MapZeroToThree"
+    TASKNAME = "map_zero_d_result_to_three_d"
     DEFAULTS = {
-        "num_procs": 1,
         **Task.DEFAULTS,
     }
 

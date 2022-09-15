@@ -25,7 +25,7 @@ class BloodVesselTuning(Task):
     Tunes all blood vessels in a 0D simulation file to a 3D simualtion result.
     """
 
-    TASKNAME = "BloodVesselTuning"
+    TASKNAME = "blood_vessel_tuning"
     DEFAULTS = {
         "threed_solution_file": None,
         "num_procs": 1,
