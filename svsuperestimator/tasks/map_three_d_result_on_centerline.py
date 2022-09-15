@@ -35,7 +35,7 @@ class MapThreeDResultOnCenterline(Task):
                 target,
             ],
             logger=self.log,
-            logprefix="Slicer: ",
+            logprefix="[slicer] ",
         )
 
     def post_run(self):

@@ -67,13 +67,11 @@ def run_subprocess(
         refresh_rate: Rate to update logging (in seconds).
         logprefix: Prefix to put in front of lines when logging.
     """
-
     process = subprocess.Popen(
-        args,
+        " ".join(args),
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         shell=True,
-        # universal_newlines=True,
     )
 
     def check_io():
