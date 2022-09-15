@@ -26,6 +26,7 @@ class MapThreeDResultOnCenterline(Task):
             self.output_folder, "result_mapped_on_centerline.vtp"
         )
 
+        self.log("Starting slicer")
         run_subprocess(
             [
                 f"OMP_NUM_THREADS={self.config['num_procs']}",
@@ -35,7 +36,7 @@ class MapThreeDResultOnCenterline(Task):
                 target,
             ],
             logger=self.log,
-            logprefix="[slicer] ",
+            logprefix="\[slicer] ",
         )
 
     def post_run(self):

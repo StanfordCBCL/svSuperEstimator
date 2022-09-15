@@ -76,7 +76,7 @@ def run_subprocess(
 
     def check_io():
         while True:
-            output = process.stdout.readline().decode()
+            output = process.stdout.readline().decode().strip()
             if output:
                 logger(logprefix + output)
             else:
