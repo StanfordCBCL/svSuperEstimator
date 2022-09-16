@@ -13,6 +13,11 @@ class SvSolverInputHandler(PlainHandler):
     def time_step_size(self) -> float:
         """Time step size of the simulation."""
         return float(self._find_configuration("Time Step Size"))
+    
+    @property
+    def num_time_steps(self) -> float:
+        """Number of time steps of the simulation."""
+        return int(self._find_configuration("Number of Timesteps"))
 
     @property
     def rcr_surface_ids(self) -> list[int]:
