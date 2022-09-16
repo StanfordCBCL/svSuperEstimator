@@ -69,7 +69,7 @@ def run_subprocess(
         cwd: Working directory of the subprocess.
     """
     process = subprocess.Popen(
-        args,
+        " ".join(args),
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         shell=True,
