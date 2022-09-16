@@ -27,6 +27,7 @@ class BloodVesselTuning(Task):
 
     TASKNAME = "blood_vessel_tuning"
     DEFAULTS = {
+        "zerod_config_file": None,
         "threed_solution_file": None,
         "num_procs": 1,
         "maxfev": 2000,
@@ -50,7 +51,9 @@ class BloodVesselTuning(Task):
 
         # Loading data from project
         self.log("Loading 0D simulation input file")
-        zerod_config_handler = self.project["0d_simulation_input"]
+        zerod_config_handler = reader.SvZeroDSolverInputHandler.from_file(
+            self.config["zerod_config_file"]
+        )
 
         # Get 3D simulation time step size from 3d simulation input file
         threed_config_handler = self.project["3d_simulation_input"]
@@ -146,7 +149,9 @@ class BloodVesselTuning(Task):
         """Postprocessing routine of the task."""
 
         # Read data
-        zerod_config_handler = self.project["0d_simulation_input"]
+        zerod_config_handler = reader.SvZeroDSolverInputHandler.from_file(
+            self.config["zerod_config_file"]
+        )
         zerod_opt_config_handler = reader.SvZeroDSolverInputHandler.from_file(
             os.path.join(self.output_folder, "solver_0d.in")
         )

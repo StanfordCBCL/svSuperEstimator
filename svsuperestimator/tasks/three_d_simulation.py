@@ -14,7 +14,6 @@ class ThreeDSimulation(Task):
     TASKNAME = "three_d_simulation"
     DEFAULTS = {
         "num_procs": 1,
-        "result_slicer_exec": None,
         "rcrt_dat_path": None,
         "initial_vtu_path": None,
         "svsolver_executable": None,
@@ -51,19 +50,20 @@ class ThreeDSimulation(Task):
         copy2(self.config("rcrt_dat_path"), target)
 
         self.log("Collect initial.vtu")
-        target = os.path.join(self.output_folder, "mesh-complete", "initial.vtu")
+        target = os.path.join(
+            self.output_folder, "mesh-complete", "initial.vtu"
+        )
         copy2(self.config("initial_vtu_path"), target)
 
         run_subprocess(
             [
                 f"OMP_NUM_THREADS={self.config['num_procs']}",
                 self.config["svsolver_executable"],
-                os.path.join(self.output_folder, "solver.inp")
+                os.path.join(self.output_folder, "solver.inp"),
             ],
             logger=self.log,
             logprefix="svSolver: ",
         )
-
 
     def post_run(self):
         """Postprocessing routine of the task."""
@@ -74,5 +74,3 @@ class ThreeDSimulation(Task):
         """Generate the task report."""
 
         pass
-
-    

@@ -10,7 +10,7 @@ import orjson
 from rich.console import Console
 from svzerodsolver import runnercpp
 
-from .. import iterators, visualizer
+from .. import iterators, visualizer, reader
 from ..reader import utils as readutils
 from . import plotutils, statutils, taskutils
 from .task import Task
@@ -28,6 +28,7 @@ class WindkesselTuning(Task):
     TASKNAME = "windkessel_tuning"
 
     DEFAULTS = {
+        "zerod_config_file": None,
         "num_procs": 1,
         "num_particles": 100,
         "num_rejuvenation_steps": 2,
@@ -42,7 +43,9 @@ class WindkesselTuning(Task):
         """Core routine of the task."""
 
         # Load the 0D simulation configuration
-        zerod_config_handler = self.project["0d_simulation_input"]
+        zerod_config_handler = reader.SvZeroDSolverInputHandler.from_file(
+            self.config["zerod_config_file"]
+        )
 
         # Refine inflow boundary using cubic splines
         inflow_bc = zerod_config_handler.boundary_conditions["INFLOW"][
@@ -122,7 +125,9 @@ class WindkesselTuning(Task):
         # Read raw results
         self.log("Read raw result")
         particles, weights = self._get_raw_results()
-        zerod_config_handler = self.project["0d_simulation_input"]
+        zerod_config_handler = reader.SvZeroDSolverInputHandler.from_file(
+            self.config["zerod_config_file"]
+        )
 
         # Calculate metrics
         self.log("Calculate metrics")
@@ -218,7 +223,9 @@ class WindkesselTuning(Task):
             self.project, branch_data
         )
         report.add([model_plot])
-        zerod_config_handler = self.project["0d_simulation_input"]
+        zerod_config_handler = reader.SvZeroDSolverInputHandler.from_file(
+            self.config["zerod_config_file"]
+        )
         num_pts_per_cycle = zerod_config_handler.num_pts_per_cycle
         bc_map = zerod_config_handler.vessel_to_bc_map
 
@@ -238,7 +245,9 @@ class WindkesselTuning(Task):
         ) as ff:
             results = orjson.loads(ff.read())
         particles, weights = self._get_raw_results()
-        zerod_config = self.project["0d_simulation_input"]
+        zerod_config = reader.SvZeroDSolverInputHandler.from_file(
+            self.config["zerod_config_file"]
+        )
 
         # Format the labels
         outlet_bcs = zerod_config.outlet_boundary_conditions

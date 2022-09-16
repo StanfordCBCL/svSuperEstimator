@@ -175,12 +175,10 @@ def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
     return branchdata, times
 
 
-def map_centerline_result_to_0d_2(project, results_handler):
+def map_centerline_result_to_0d_2(
+    zerod_handler, cl_handler, threed_handler, results_handler
+):
     """Map centerine result onto 0d elements."""
-
-    zerod_handler = project["0d_simulation_input"]
-    cl_handler = project["centerline"]
-    threed_handler = project["3d_simulation_input"]
 
     # calculate cycle period
     cycle_period = (
@@ -225,9 +223,6 @@ def map_centerline_result_to_0d_2(project, results_handler):
             branch_id
         )["points"][0]
 
-    from rich import print
-
-    # print(results_branch_starts)
 
     keys = list(results_branch_starts.keys())
     starts = np.array(list(results_branch_starts.values()))
