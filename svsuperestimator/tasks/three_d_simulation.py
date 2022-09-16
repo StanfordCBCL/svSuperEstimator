@@ -71,10 +71,9 @@ class ThreeDSimulation(Task):
         self.log("Calling svsolver")
         run_subprocess(
             [
+                "sh",
                 self.config["svsolver_executable"],
                 "solver.inp",
-                "&",
-                "wait"
             ],
             logger=self.log,
             logprefix="\[svsolver]: ",
