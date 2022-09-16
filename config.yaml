@@ -2,9 +2,6 @@ project: /scratch/users/richter7/data/projects/0069_0001
 global: 
   num_procs: 24
 tasks:
-  # BloodVesselTuning:
-  #   threed_solution_file: /Users/stanford/data/3d_centerline_2/0069_0001.vtp
-  #   maxfev: 2000
   # WindkesselTuning:
   #   num_particles: 100
   #   num_rejuvenation_steps: 2
@@ -12,12 +9,15 @@ tasks:
   #   noise_factor: 0.05
   map_zero_d_result_to_three_d:
     zerod_config_file: /scratch/users/richter7/data/projects/0069_0001/ParameterEstimation/BloodVesselTuning/solver_0d.in
-  # map_three_d_result_on_centerline:
-  #   slicer_executable: /home/users/richter7/sanddorn-toolbox/slicer/Release/slicer
-  #   threed_result_file: /scratch/users/richter7/data/ThreeDSimulation/0069_0001.vtu
   three_d_simulation:
     rcrt_dat_path: /scratch/users/richter7/data/projects/0069_0001/ParameterEstimation/map_zero_d_result_to_three_d/rcrt.dat
     initial_vtu_path: /scratch/users/richter7/data/projects/0069_0001/ParameterEstimation/map_zero_d_result_to_three_d/initial.vtu
     svpre_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svpre
     svsolver_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svsolver
     svpost_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svpost
+  # map_three_d_result_on_centerline:
+  #   slicer_executable: /home/users/richter7/sanddorn-toolbox/slicer/Release/slicer
+  #   threed_result_file: /scratch/users/richter7/data/ThreeDSimulation/0069_0001.vtu
+  # BloodVesselTuning:
+  #   threed_solution_file: /Users/stanford/data/3d_centerline_2/0069_0001.vtp
+  #   maxfev: 2000

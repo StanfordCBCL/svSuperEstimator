@@ -60,7 +60,6 @@ class ThreeDSimulation(Task):
         self.log("Calling svpre")
         run_subprocess(
             [
-                f"OMP_NUM_THREADS={self.config['num_procs']}",
                 self.config["svpre_executable"],
                 f"{self.project.name}.svpre",
             ],
@@ -72,9 +71,10 @@ class ThreeDSimulation(Task):
         self.log("Calling svsolver")
         run_subprocess(
             [
-                f"OMP_NUM_THREADS={self.config['num_procs']}",
                 self.config["svsolver_executable"],
                 "solver.inp",
+                "&",
+                "wait"
             ],
             logger=self.log,
             logprefix="\[svsolver]: ",
