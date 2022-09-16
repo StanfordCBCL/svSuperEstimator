@@ -37,6 +37,7 @@ class MapThreeDResultOnCenterline(Task):
             ],
             logger=self.log,
             logprefix="\[slicer] ",
+            cwd=self.output_folder
         )
 
     def post_run(self):

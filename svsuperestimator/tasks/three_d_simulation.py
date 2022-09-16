@@ -62,10 +62,11 @@ class ThreeDSimulation(Task):
             [
                 f"OMP_NUM_THREADS={self.config['num_procs']}",
                 self.config["svpre_executable"],
-                os.path.join(self.output_folder, f"{self.project.name}.svpre"),
+                f"{self.project.name}.svpre",
             ],
             logger=self.log,
             logprefix="\[svpre]: ",
+            cwd=self.output_folder
         )
 
         self.log("Calling svsolver")
@@ -73,10 +74,11 @@ class ThreeDSimulation(Task):
             [
                 f"OMP_NUM_THREADS={self.config['num_procs']}",
                 self.config["svsolver_executable"],
-                os.path.join(self.output_folder, "solver.inp"),
+                "solver.inp",
             ],
             logger=self.log,
             logprefix="\[svsolver]: ",
+            cwd=self.output_folder
         )
 
         self.log("Calling svpost")
@@ -84,10 +86,10 @@ class ThreeDSimulation(Task):
             [
                 f"OMP_NUM_THREADS={self.config['num_procs']}",
                 self.config["svpost_executable"],
-                os.path.join(self.output_folder, "solver.inp"),
             ],
             logger=self.log,
             logprefix="\[svpost]: ",
+            cwd=self.output_folder
         )
 
     def post_run(self):

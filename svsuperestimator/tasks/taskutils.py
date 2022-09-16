@@ -57,7 +57,7 @@ def refine_with_cubic_spline(y: np.ndarray, num: np.ndarray):
 
 
 def run_subprocess(
-    args: list, logger: Callable, refresh_rate=1.0, logprefix: str = ""
+    args: list, logger: Callable, refresh_rate=1.0, logprefix: str = "", cwd=None
 ) -> None:
     """Run a subprocess.
 
@@ -66,12 +66,14 @@ def run_subprocess(
         logger: Logger to use for logging.
         refresh_rate: Rate to update logging (in seconds).
         logprefix: Prefix to put in front of lines when logging.
+        cwd: Working directory of the subprocess.
     """
     process = subprocess.Popen(
         " ".join(args),
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         shell=True,
+        cwd=cwd
     )
 
     def check_io():
