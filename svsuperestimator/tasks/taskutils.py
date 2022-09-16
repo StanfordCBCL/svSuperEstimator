@@ -86,6 +86,9 @@ def run_subprocess(
         check_io()
         sleep(refresh_rate)
 
+    if process.returncode != 0:
+        raise RuntimeError("Subprocess failed")
+
 
 def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
     """Map centerine result onto 0d elements."""
@@ -284,7 +287,6 @@ def map_centerline_result_to_0d_2(
 def set_initial_condition(zerod_handler, mapped_data):
 
     nodes = zerod_handler.nodes
-    from rich import print
 
     bcs = zerod_handler.boundary_conditions
     vessels = zerod_handler.vessels

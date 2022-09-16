@@ -28,7 +28,7 @@ class ThreeDSimulation(Task):
         self.log("Collect mesh-complete")
         source = os.path.join(sim_folder_path, "mesh-complete")
         target = os.path.join(self.output_folder, "mesh-complete")
-        copytree(source, target, ignore=ignore_patterns("initial.vtu"))
+        copytree(source, target, ignore=ignore_patterns("initial.vtu"), dirs_exist_ok=True)
 
         self.log("Collect solver.inp")
         source = os.path.join(sim_folder_path, "solver.inp")
@@ -47,13 +47,13 @@ class ThreeDSimulation(Task):
 
         self.log("Collect rcrt.dat")
         target = os.path.join(self.output_folder, "rcrt.dat")
-        copy2(self.config("rcrt_dat_path"), target)
+        copy2(self.config["rcrt_dat_path"], target)
 
         self.log("Collect initial.vtu")
         target = os.path.join(
             self.output_folder, "mesh-complete", "initial.vtu"
         )
-        copy2(self.config("initial_vtu_path"), target)
+        copy2(self.config["initial_vtu_path"], target)
 
         run_subprocess(
             [
@@ -62,7 +62,7 @@ class ThreeDSimulation(Task):
                 os.path.join(self.output_folder, "solver.inp"),
             ],
             logger=self.log,
-            logprefix="svSolver: ",
+            logprefix="\[svSolver]: ",
         )
 
     def post_run(self):
