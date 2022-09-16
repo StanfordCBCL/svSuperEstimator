@@ -16,7 +16,9 @@ class ThreeDSimulation(Task):
         "num_procs": 1,
         "rcrt_dat_path": None,
         "initial_vtu_path": None,
+        "svpre_executable": None,
         "svsolver_executable": None,
+        "svpost_executable": None,
         **Task.DEFAULTS,
     }
 
@@ -55,6 +57,18 @@ class ThreeDSimulation(Task):
         )
         copy2(self.config["initial_vtu_path"], target)
 
+        self.log("Calling svpre")
+        run_subprocess(
+            [
+                f"OMP_NUM_THREADS={self.config['num_procs']}",
+                self.config["svpre_executable"],
+                os.path.join(self.output_folder, f"{self.project.name}.svpre"),
+            ],
+            logger=self.log,
+            logprefix="\[svpre]: ",
+        )
+
+        self.log("Calling svsolver")
         run_subprocess(
             [
                 f"OMP_NUM_THREADS={self.config['num_procs']}",
@@ -62,7 +76,18 @@ class ThreeDSimulation(Task):
                 os.path.join(self.output_folder, "solver.inp"),
             ],
             logger=self.log,
-            logprefix="\[svSolver]: ",
+            logprefix="\[svsolver]: ",
+        )
+
+        self.log("Calling svpost")
+        run_subprocess(
+            [
+                f"OMP_NUM_THREADS={self.config['num_procs']}",
+                self.config["svpost_executable"],
+                os.path.join(self.output_folder, "solver.inp"),
+            ],
+            logger=self.log,
+            logprefix="\[svpost]: ",
         )
 
     def post_run(self):

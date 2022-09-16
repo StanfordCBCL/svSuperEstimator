@@ -18,4 +18,6 @@ tasks:
   three_d_simulation:
     rcrt_dat_path: /scratch/users/richter7/data/projects/0069_0001/ParameterEstimation/map_zero_d_result_to_three_d/rcrt.dat
     initial_vtu_path: /scratch/users/richter7/data/projects/0069_0001/ParameterEstimation/map_zero_d_result_to_three_d/initial.vtu
+    svpre_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svpre
     svsolver_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svsolver
+    svpost_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svpost
