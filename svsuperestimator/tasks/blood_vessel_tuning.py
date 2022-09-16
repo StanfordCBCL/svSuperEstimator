@@ -30,7 +30,6 @@ class BloodVesselTuning(Task):
         "zerod_config_file": None,
         "threed_solution_file": None,
         "num_procs": 1,
-        "maxfev": 2000,
         **Task.DEFAULTS,
     }
 
@@ -93,7 +92,7 @@ class BloodVesselTuning(Task):
                     "times": np.linspace(
                         times[0], times[-1], num_pts
                     ).tolist(),
-                    "maxfev": self.config["maxfev"],
+                    "maxfev": 2000,
                     "num_pts_per_cycle": num_pts,
                     "theta_start": np.array(segment["theta_start"]),
                     **{

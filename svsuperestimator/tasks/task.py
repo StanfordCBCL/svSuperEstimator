@@ -29,12 +29,13 @@ class Task(ABC):
     TASKNAME = None
     DEFAULTS = {"report_html": True, "report_files": False}
 
-    def __init__(self, project: SimVascularProject, config: dict):
+    def __init__(self, project: SimVascularProject, config: dict, suffix=""):
         """Construct the task.
 
         Args:
             project: SimVascular project to perform the task on.
             config: Configuration for the task.
+            suffix: Suffix for the task name.
         """
         self.project = project
         self.console = Console(record=True)
@@ -42,7 +43,7 @@ class Task(ABC):
         self.config = self.DEFAULTS.copy()
         self.config.update(config)
         self.output_folder = os.path.join(
-            self.project["parameter_estimation_folder"], self.TASKNAME
+            self.project["parameter_estimation_folder"], self.TASKNAME + suffix
         )
 
         self.log(

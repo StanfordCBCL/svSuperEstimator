@@ -57,7 +57,11 @@ def refine_with_cubic_spline(y: np.ndarray, num: np.ndarray):
 
 
 def run_subprocess(
-    args: list, logger: Callable, refresh_rate=1.0, logprefix: str = "", cwd=None
+    args: list,
+    logger: Callable,
+    refresh_rate=1.0,
+    logprefix: str = "",
+    cwd=None,
 ) -> None:
     """Run a subprocess.
 
@@ -73,7 +77,7 @@ def run_subprocess(
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         shell=True,
-        cwd=cwd
+        cwd=cwd,
     )
 
     def check_io():
@@ -227,7 +231,6 @@ def map_centerline_result_to_0d_2(
         results_branch_starts[branch_id] = results_handler.get_branch_data(
             branch_id
         )["points"][0]
-
 
     keys = list(results_branch_starts.keys())
     starts = np.array(list(results_branch_starts.values()))
