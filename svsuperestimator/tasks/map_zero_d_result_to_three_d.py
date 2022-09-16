@@ -21,6 +21,7 @@ class MapZeroDResultToThreeD(Task):
 
     TASKNAME = "map_zero_d_result_to_three_d"
     DEFAULTS = {
+        "zerod_config_file": None,
         **Task.DEFAULTS,
     }
 
@@ -46,7 +47,7 @@ class MapZeroDResultToThreeD(Task):
         self.log("Map 0D solution on centerline")
 
         cl_handler = self.project["centerline"]
-        zerod_handler = self.project["0d_simulation_input"]
+        zerod_handler = reader.SvZeroDSolverInputHandler.from_file(self.config["zerod_config_file"])
         zerod_handler.update_simparams(last_cycle_only=True)
 
         result0d = runnercpp.run_from_config(zerod_handler.data)
@@ -440,7 +441,7 @@ class MapZeroDResultToThreeD(Task):
         rcr_surface_ids = handler3d.rcr_surface_ids
         handler_rcr = self.project["3d_simulation_rcr"]
         handlermesh = self.project["mesh"]
-        zerod_handler = self.project["0d_simulation_input"]
+        zerod_handler = reader.SvZeroDSolverInputHandler.from_file(self.config["zerod_config_file"])
 
         face_ids = handlermesh.boundary_centers
 
