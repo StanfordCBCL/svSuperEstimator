@@ -1,4 +1,4 @@
-project: /Users/stanford/data/projects/0069_0001
+project: /scratch/users/richter7/data/projects/0069_0001
 global: 
   num_procs: 4
 tasks:
@@ -10,8 +10,12 @@ tasks:
   #   num_rejuvenation_steps: 2
   #   resampling_threshold: 0.5
   #   noise_factor: 0.05
-  map_zero_d_result_to_three_d: {}
-  map_three_d_result_on_centerline:
-    slicer_executable: /home/users/richter7/sanddorn-toolbox/slicer/Release/slicer
-    threed_result_file: /scratch/users/richter7/data/ThreeDSimulation/0069_0001.vtu
-
+  map_zero_d_result_to_three_d:
+    zerod_config_file: /scratch/users/richter7/data/projects/0069_0001/ParameterEstimation/BloodVesselTuning/solver_0d.in
+  # map_three_d_result_on_centerline:
+  #   slicer_executable: /home/users/richter7/sanddorn-toolbox/slicer/Release/slicer
+  #   threed_result_file: /scratch/users/richter7/data/ThreeDSimulation/0069_0001.vtu
+  three_d_simulation:
+    rcrt_dat_path: /scratch/users/richter7/data/projects/0069_0001/ParameterEstimation/map_zero_d_result_to_three_d/rcrt.dat
+    initial_vtu_path: /scratch/users/richter7/data/projects/0069_0001/ParameterEstimation/map_zero_d_result_to_three_d/initial.vtu
+    svsolver_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svsolver
