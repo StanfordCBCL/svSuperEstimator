@@ -30,6 +30,8 @@ class WindkesselTuning(Task):
     DEFAULTS = {
         "zerod_config_file": None,
         "num_procs": 1,
+        "theta_obs": None,
+        "y_obs": None,
         "num_particles": 100,
         "num_rejuvenation_steps": 2,
         "resampling_threshold": 0.5,
@@ -61,12 +63,7 @@ class WindkesselTuning(Task):
         )
 
         # Get ground truth distal to proximal ratio
-        theta_obs = np.log(
-            [
-                bc["bc_values"]["Rd"] + bc["bc_values"]["Rp"]
-                for bc in zerod_config_handler.outlet_boundary_conditions.values()
-            ]
-        )
+        theta_obs = np.array(self.config["theta_obs"])
         self.log("Setting target parameters to:", theta_obs)
         self.database["theta_obs"] = theta_obs.tolist()
 
@@ -74,9 +71,7 @@ class WindkesselTuning(Task):
         forward_model = _Forward_Model(zerod_config_handler)
 
         # Determine target observations through one forward evaluation
-        y_obs = forward_model.evaluate(
-            **{f"k{i}": val for i, val in enumerate(theta_obs)}
-        )
+        y_obs = np.array(self.config["y_obs"])
         self.log("Setting target observation to:", y_obs)
         self.database["y_obs"] = y_obs.tolist()
 

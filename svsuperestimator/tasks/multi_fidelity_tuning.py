@@ -17,6 +17,8 @@ class MultiFidelityTuning(Task):
     DEFAULTS = {
         "num_procs": 1,
         "num_iter": 1,
+        "theta_obs": None,
+        "y_obs": None,
         "smc_num_particles": 100,
         "smc_num_rejuvenation_steps": 2,
         "smc_resampling_threshold": 0.5,
@@ -43,6 +45,8 @@ class MultiFidelityTuning(Task):
                 config={
                     "zerod_config_file": zerod_config_file,
                     "num_procs": self.config["num_procs"],
+                    "theta_obs": self.config["theta_obs"],
+                    "y_obs": self.config["y_obs"],
                     "num_particles": self.config["smc_num_particles"],
                     "num_rejuvenation_steps": self.config[
                         "smc_num_rejuvenation_steps"
