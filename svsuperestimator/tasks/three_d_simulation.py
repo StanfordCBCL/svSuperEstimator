@@ -40,6 +40,11 @@ class ThreeDSimulation(Task):
             dirs_exist_ok=True,
         )
 
+        self.log("Collect inflow.flow")
+        source = os.path.join(sim_folder_path, "inflow.flow")
+        target = os.path.join(self.output_folder, "inflow.flow")
+        copy2(source, target)
+
         self.log("Collect solver.inp")
         input_handler = self.project["3d_simulation_input"]
         inflow_data = reader.SvSolverInflowHandler.from_file(
@@ -52,11 +57,6 @@ class ThreeDSimulation(Task):
         num_time_steps = steps_per_cycle * self.config["num_cardiac_cycles"]
         input_handler.num_time_steps = num_time_steps
         input_handler.to_file(os.path.join(self.output_folder, "solver.inp"))
-
-        self.log("Collect inflow.flow")
-        source = os.path.join(sim_folder_path, "inflow.flow")
-        target = os.path.join(self.output_folder, "inflow.flow")
-        copy2(source, target)
 
         self.log(f"Collect {self.project.name}.svpre")
         source = os.path.join(sim_folder_path, f"{self.project.name}.svpre")
