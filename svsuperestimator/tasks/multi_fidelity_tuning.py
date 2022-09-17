@@ -32,7 +32,7 @@ class MultiFidelityTuning(Task):
     def core_run(self):
         """Core routine of the task."""
 
-        zerod_config_file = self.project["0d_simulation_input"]
+        zerod_config_file = self.project["0d_simulation_input_path"]
 
         task_sequence = []
 

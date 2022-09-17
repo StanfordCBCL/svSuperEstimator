@@ -13,6 +13,10 @@
   handler: SvZeroDSolverInputHandler
   path: ROMSimulations/$CASE_NAME$/solver_0d.in
 
+0d_simulation_input_path:
+  type: path
+  path: ROMSimulations/$CASE_NAME$/solver_0d.in
+
 parameter_estimation_folder:
   type: path
   path: ParameterEstimation
