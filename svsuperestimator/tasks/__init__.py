@@ -12,12 +12,12 @@ from .multi_fidelity_tuning import MultiFidelityTuning
 __all__ = ["BloodVesselTuning"]
 
 _task_mapping = {
-    BloodVesselTuning.TASKNAME: BloodVesselTuning,
-    WindkesselTuning.TASKNAME: WindkesselTuning,
-    MapZeroDResultToThreeD.TASKNAME: MapZeroDResultToThreeD,
-    ThreeDSimulation.TASKNAME: ThreeDSimulation,
-    MapThreeDResultOnCenterline.TASKNAME: MapThreeDResultOnCenterline,
-    MultiFidelityTuning.TASKNAME: MultiFidelityTuning
+    BloodVesselTuning.__name__: BloodVesselTuning,
+    WindkesselTuning.__name__: WindkesselTuning,
+    MapZeroDResultToThreeD.__name__: MapZeroDResultToThreeD,
+    ThreeDSimulation.__name__: ThreeDSimulation,
+    MapThreeDResultOnCenterline.__name__: MapThreeDResultOnCenterline,
+    MultiFidelityTuning.__name__: MultiFidelityTuning
 }
 
 VALID_TASKS = list(_task_mapping.keys())
