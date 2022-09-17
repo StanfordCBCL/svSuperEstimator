@@ -87,7 +87,7 @@ class ThreeDSimulation(Task):
         self.log("Calling svsolver")
         run_subprocess(
             [
-                "sh",
+                f"mpiexec -n {self.config['num_procs']}",
                 self.config["svsolver_executable"],
                 "solver.inp",
             ],
