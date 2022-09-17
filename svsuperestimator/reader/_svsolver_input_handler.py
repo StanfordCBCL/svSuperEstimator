@@ -12,7 +12,7 @@ class SvSolverInputHandler(PlainHandler):
     @property
     def time_step_size(self) -> float:
         """Time step size of the simulation."""
-        return float(self._find_configuration("Time Step Size"))
+        return float(self._get_configuration("Time Step Size"))
 
     @property
     def num_time_steps(self) -> float:

@@ -16,6 +16,7 @@ class ThreeDSimulation(Task):
     TASKNAME = "three_d_simulation"
     DEFAULTS = {
         "num_procs": 1,
+        "num_cardiac_cycles": 2,
         "rcrt_dat_path": None,
         "initial_vtu_path": None,
         "svpre_executable": None,
@@ -40,9 +41,17 @@ class ThreeDSimulation(Task):
         )
 
         self.log("Collect solver.inp")
-        source = os.path.join(sim_folder_path, "solver.inp")
-        target = os.path.join(self.output_folder, "solver.inp")
-        copy2(source, target)
+        input_handler = self.project["3d_simulation_input"]
+        inflow_data = reader.SvSolverInflowHandler.from_file(
+            os.path.join(self.output_folder, "inflow.flow")
+        ).get_inflow_data()
+        cardiac_cycle_period = inflow_data["t"][-1] - inflow_data["t"][0]
+        time_step_size = input_handler.time_step_size
+        steps_per_cycle = int(np.rint(cardiac_cycle_period / time_step_size))
+        # TODO: Check if time step calculation is correct
+        num_time_steps = steps_per_cycle * self.config["num_cardiac_cycles"]
+        input_handler.num_time_steps = num_time_steps
+        input_handler.to_file(os.path.join(self.output_folder, "solver.inp"))
 
         self.log("Collect inflow.flow")
         source = os.path.join(sim_folder_path, "inflow.flow")
@@ -88,17 +97,6 @@ class ThreeDSimulation(Task):
         )
 
         self.log("Calling svpost")
-
-        inflow_data = reader.SvSolverInflowHandler.from_file(
-            os.path.join(self.output_folder, "inflow.flow")
-        ).get_inflow_data()
-        cardiac_cycle_period = inflow_data["t"][-1] - inflow_data["t"][0]
-        input_handler = reader.SvSolverInputHandler.from_file(
-            os.path.join(self.output_folder, "solver.inp")
-        )
-        time_step_size = input_handler.time_step_size
-        num_time_steps = input_handler.num_time_steps
-        steps_per_cycle = int(np.rint(cardiac_cycle_period, time_step_size))
         run_subprocess(
             [
                 self.config["svpost_executable"],

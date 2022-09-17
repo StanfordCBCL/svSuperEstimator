@@ -21,6 +21,7 @@ class MultiFidelityTuning(Task):
         "smc_num_rejuvenation_steps": 2,
         "smc_resampling_threshold": 0.5,
         "smc_noise_factor": 0.05,
+        "num_cardiac_cycles_3d": 2,
         "svpre_executable": None,
         "svsolver_executable": None,
         "svpost_executable": None,
@@ -77,6 +78,7 @@ class MultiFidelityTuning(Task):
                     "svpre_executable": self.config["svpre_executable"],
                     "svsolver_executable": self.config["svsolver_executable"],
                     "svpost_executable": self.config["svpost_executable"],
+                    "num_cardiac_cycles": self.config["num_cardiac_cycles_3d"]
                 },
                 suffix=suffix,
             )
