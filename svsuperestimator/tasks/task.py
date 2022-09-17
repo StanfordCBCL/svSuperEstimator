@@ -6,6 +6,7 @@ import orjson
 from rich import box
 from rich.console import Console
 from rich.table import Table
+from pathlib import Path
 
 from svsuperestimator import visualizer
 
@@ -27,7 +28,7 @@ class Task(ABC):
     """
 
     TASKNAME = None
-    DEFAULTS = {"report_html": True, "report_files": False}
+    DEFAULTS = {"report_html": True, "report_files": False, "overwrite": False}
 
     def __init__(self, project: SimVascularProject, config: dict, suffix=""):
         """Construct the task.
@@ -77,6 +78,10 @@ class Task(ABC):
     def run(self):
         """Run the task."""
 
+        if not self.config["overwrite"] and self.is_completed():
+            self.log(f"Skipping task [bold cyan]{type(self).__name__}[/bold cyan]")
+            return
+
         start = time()
 
         self.log(f"Starting task [bold cyan]{type(self).__name__}[/bold cyan]")
@@ -125,6 +130,11 @@ class Task(ABC):
             f"Task [bold cyan]{type(self).__name__}[/bold cyan] [bold green]completed[/bold green] in "
             f"{time()-start:.1f} seconds"
         )
+        Path(os.path.join(self.output_folder, "completed")).touch()
+
+    def is_completed(self):
+        """Check if task is already completed."""
+        return os.path.exists(os.path.join(self.output_folder, "completed"))
 
     def _log_config(self):
         """Log the task configuration"""

@@ -38,6 +38,8 @@ class MultiFidelityTuning(Task):
 
         task_sequence = []
 
+        global_config = {"report_html": self.config["report_html"], "report_files": self.config["report_files"], "overwrite": self.config["overwrite"]}
+
         for i in range(self.config["num_iter"]):
             suffix = f"_{i}"
             windkessel_task = WindkesselTuning(
@@ -55,6 +57,7 @@ class MultiFidelityTuning(Task):
                         "smc_resampling_threshold"
                     ],
                     "noise_factor": self.config["smc_noise_factor"],
+                    **global_config
                 },
                 suffix=suffix,
             )
@@ -64,7 +67,8 @@ class MultiFidelityTuning(Task):
                 config={
                     "zerod_config_file": os.path.join(
                         windkessel_task.output_folder, "solver_0d_map.in"
-                    )
+                    ),
+                    **global_config
                 },
                 suffix=suffix,
             )
@@ -82,7 +86,8 @@ class MultiFidelityTuning(Task):
                     "svpre_executable": self.config["svpre_executable"],
                     "svsolver_executable": self.config["svsolver_executable"],
                     "svpost_executable": self.config["svpost_executable"],
-                    "num_cardiac_cycles": self.config["num_cardiac_cycles_3d"]
+                    "num_cardiac_cycles": self.config["num_cardiac_cycles_3d"],
+                    **global_config
                 },
                 suffix=suffix,
             )
@@ -95,6 +100,7 @@ class MultiFidelityTuning(Task):
                     "threed_result_file": os.path.join(
                         three_d_sim_task.output_folder, "result.vtu"
                     ),
+                    **global_config
                 },
                 suffix=suffix,
             )
@@ -108,6 +114,7 @@ class MultiFidelityTuning(Task):
                         "result_mapped_on_centerline.vtp",
                     ),
                     "num_procs": self.config["num_procs"],
+                    **global_config
                 },
                 suffix=suffix,
             )
