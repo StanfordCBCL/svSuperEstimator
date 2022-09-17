@@ -36,7 +36,7 @@ class MultiFidelityTuning(Task):
 
         task_sequence = []
 
-        for i in self.config["num_iter"]:
+        for i in range(self.config["num_iter"]):
             suffix = f"_{i}"
             windkessel_task = WindkesselTuning(
                 project=self.project,
