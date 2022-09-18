@@ -73,28 +73,28 @@ class ThreeDSimulation(Task):
         )
         copy2(self.config["initial_vtu_path"], target)
 
-        self.log("Calling svpre")
-        run_subprocess(
-            [
-                self.config["svpre_executable"],
-                f"{self.project.name}.svpre",
-            ],
-            logger=self.log,
-            logprefix="\[svpre]: ",
-            cwd=self.output_folder,
-        )
+        # self.log("Calling svpre")
+        # run_subprocess(
+        #     [
+        #         self.config["svpre_executable"],
+        #         f"{self.project.name}.svpre",
+        #     ],
+        #     logger=self.log,
+        #     logprefix="\[svpre]: ",
+        #     cwd=self.output_folder,
+        # )
 
-        self.log("Calling svsolver")
-        run_subprocess(
-            [
-                f"mpiexec -n {self.config['num_procs']}",
-                self.config["svsolver_executable"],
-                "solver.inp",
-            ],
-            logger=self.log,
-            logprefix="\[svsolver]: ",
-            cwd=self.output_folder,
-        )
+        # self.log("Calling svsolver")
+        # run_subprocess(
+        #     [
+        #         f"mpiexec -n {self.config['num_procs']}",
+        #         self.config["svsolver_executable"],
+        #         "solver.inp",
+        #     ],
+        #     logger=self.log,
+        #     logprefix="\[svsolver]: ",
+        #     cwd=self.output_folder,
+        # )
 
         self.log("Calling svpost")
         run_subprocess(
