@@ -52,9 +52,13 @@ class Task(ABC):
             "with the following configuration:"
         )
         self._log_config()
-        for key in config.keys():
+        for key, value in self.config.items():
             if key not in self.DEFAULTS:
                 self.log(f"Unused configuration option {key}")
+            if value is None:
+                raise RuntimeError(
+                    f"Required option {key} for task {type(self).__name__} not specified."
+                )
 
     @abstractmethod
     def core_run(self):
@@ -79,7 +83,9 @@ class Task(ABC):
         """Run the task."""
 
         if not self.config["overwrite"] and self.is_completed():
-            self.log(f"Skipping task [bold cyan]{type(self).__name__}[/bold cyan]")
+            self.log(
+                f"Skipping task [bold cyan]{type(self).__name__}[/bold cyan]"
+            )
             return
 
         start = time()
@@ -130,11 +136,11 @@ class Task(ABC):
             f"Task [bold cyan]{type(self).__name__}[/bold cyan] [bold green]completed[/bold green] in "
             f"{time()-start:.1f} seconds"
         )
-        Path(os.path.join(self.output_folder, "completed")).touch()
+        Path(os.path.join(self.output_folder, ".completed")).touch()
 
     def is_completed(self):
         """Check if task is already completed."""
-        return os.path.exists(os.path.join(self.output_folder, "completed"))
+        return os.path.exists(os.path.join(self.output_folder, ".completed"))
 
     def _log_config(self):
         """Log the task configuration"""

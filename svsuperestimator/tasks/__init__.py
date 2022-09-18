@@ -17,7 +17,7 @@ _task_mapping = {
     MapZeroDResultToThreeD.__name__: MapZeroDResultToThreeD,
     ThreeDSimulation.__name__: ThreeDSimulation,
     MapThreeDResultOnCenterline.__name__: MapThreeDResultOnCenterline,
-    MultiFidelityTuning.__name__: MultiFidelityTuning
+    MultiFidelityTuning.__name__: MultiFidelityTuning,
 }
 
 VALID_TASKS = list(_task_mapping.keys())

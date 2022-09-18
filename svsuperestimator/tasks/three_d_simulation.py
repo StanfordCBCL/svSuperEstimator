@@ -109,12 +109,12 @@ class ThreeDSimulation(Task):
             logger=self.log,
             logprefix="\[svpost]: ",
             cwd=os.path.join(
-                self.output_folder, f"{self.config['num_procs']}-procs"
+                self.output_folder, f"{self.config['num_procs']}-procs_case"
             ),
         )
 
         # self.log("Cleaning up")
-        # rmtree(os.path.join(self.output_folder, f"{self.config['num_procs']}-procs"))
+        # rmtree(os.path.join(self.output_folder, f"{self.config['num_procs']}-procs_case"))
 
     def post_run(self):
         """Postprocessing routine of the task."""
