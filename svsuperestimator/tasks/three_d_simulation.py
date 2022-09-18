@@ -73,28 +73,28 @@ class ThreeDSimulation(Task):
         )
         copy2(self.config["initial_vtu_path"], target)
 
-        # self.log("Calling svpre")
-        # run_subprocess(
-        #     [
-        #         self.config["svpre_executable"],
-        #         f"{self.project.name}.svpre",
-        #     ],
-        #     logger=self.log,
-        #     logprefix="\[svpre]: ",
-        #     cwd=self.output_folder,
-        # )
+        self.log("Calling svpre")
+        run_subprocess(
+            [
+                self.config["svpre_executable"],
+                f"{self.project.name}.svpre",
+            ],
+            logger=self.log,
+            logprefix="\[svpre]: ",
+            cwd=self.output_folder,
+        )
 
-        # self.log("Calling svsolver")
-        # run_subprocess(
-        #     [
-        #         f"mpiexec -n {self.config['num_procs']}",
-        #         self.config["svsolver_executable"],
-        #         "solver.inp",
-        #     ],
-        #     logger=self.log,
-        #     logprefix="\[svsolver]: ",
-        #     cwd=self.output_folder,
-        # )
+        self.log("Calling svsolver")
+        run_subprocess(
+            [
+                f"mpiexec -n {self.config['num_procs']}",
+                self.config["svsolver_executable"],
+                "solver.inp",
+            ],
+            logger=self.log,
+            logprefix="\[svsolver]: ",
+            cwd=self.output_folder,
+        )
 
         self.log("Calling svpost")
         run_subprocess(
@@ -113,8 +113,8 @@ class ThreeDSimulation(Task):
             ),
         )
 
-        # self.log("Cleaning up")
-        # rmtree(os.path.join(self.output_folder, f"{self.config['num_procs']}-procs_case"))
+        self.log("Cleaning up")
+        rmtree(os.path.join(self.output_folder, f"{self.config['num_procs']}-procs_case"))
 
     def post_run(self):
         """Postprocessing routine of the task."""
