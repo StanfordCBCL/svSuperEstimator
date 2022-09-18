@@ -239,11 +239,8 @@ def map_centerline_result_to_0d_2(
 
         cl_data = cl_handler.get_branch_data(branch_id)
         start = cl_data["points"][0]
-        # print(start)
 
         new_id = keys[np.argmin(np.linalg.norm(starts - start, axis=1))]
-
-        # print(branch_id, "->", new_id)
 
         branch_data = results_handler.get_branch_data(new_id)
 
@@ -353,8 +350,6 @@ def set_initial_condition(zerod_handler, mapped_data):
 
 def make_resistive_junctions(zerod_handler, mapped_data):
 
-    from rich import print
-
     vessel_id_map = zerod_handler.vessel_id_to_name_map
 
     nodes = zerod_handler.nodes
@@ -387,16 +382,11 @@ def make_resistive_junctions(zerod_handler, mapped_data):
         branch_id, seg_id = inlet_branch_name.split("_")
         branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-        # print(inlet_branch_name)
-
         pressure_in = np.amax(mapped_data[branch_id][seg_id]["pressure_out"])
-        # print("Pressure_in:", pressure_in)
-        # flow_in = mapped_data[branch_id][seg_id]["flow_out"]
 
         for ovessel in outlet_vessels:
 
             outlet_branch_name = vessel_id_map[ovessel]
-            # print(outlet_branch_name)
             branch_id, seg_id = outlet_branch_name.split("_")
             branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
@@ -404,12 +394,8 @@ def make_resistive_junctions(zerod_handler, mapped_data):
                 mapped_data[branch_id][seg_id]["pressure_in"]
             )
             flow_out = np.amax(mapped_data[branch_id][seg_id]["flow_in"])
-            # print("Pressure_out:", pressure_out)
-            # print("Flow_out:", flow_out)
 
-            rs.append((pressure_in - pressure_out) / flow_out)
+            rs.append(max((pressure_in - pressure_out) / flow_out, 0.0))
 
         junction_data["junction_type"] = "resistive_junction"
         junction_data["junction_values"] = {"R": rs}
-
-    # print(zerod_handler.data)
