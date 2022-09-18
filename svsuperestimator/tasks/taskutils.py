@@ -177,7 +177,7 @@ def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
             seg_start_index = seg_end_index
 
     if start_last_cycle == -1:
-        pass
+        times -= times[0]
     else:
         times = times[start_last_cycle:-1] - np.amin(times[start_last_cycle])
 
