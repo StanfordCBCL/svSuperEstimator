@@ -122,7 +122,7 @@ class Task(ABC):
         self.log(f"Saved svg task log {svg_log_target}", style="default")
 
         # Export html report
-        if self.config["report_files"]:
+        if self.config["report_html"] and report is not None:
             html_report_target = os.path.join(
                 self.output_folder, "report.html"
             )
