@@ -30,8 +30,9 @@ pip install git+https://github.com/SimVascular/svSuperEstimator.git
 
 The remaining dependencies have to be installed manually:
 
-* [C++ svZeroDSolver](https://github.com/richterjakob/svZeroDSolver): Install via pip and build release version in local folder.
-* [C++ 3D result slicer](https://gitlab.com/sanddorn/sanddorn-toolbox/-/tree/main/slicer): Build release version and specify path to executable in config file.
+* [svZeroDSolver](https://github.com/richterjakob/svZeroDSolver): Install via pip and build release version in local folder.
+* [3D result slicer](https://gitlab.com/sanddorn/sanddorn-toolbox/-/tree/main/slicer): Build release version and specify path to executable in config file.
+* [svSolver](https://github.com/SimVascular/svSolver): Build release version and specify path to executable in config file.
 * **QUEENS** (currently not publicly available)
 
 ### For Contributers
