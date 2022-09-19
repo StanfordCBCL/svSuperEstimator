@@ -8,29 +8,35 @@
 <img src="https://github.com/SimVascular/svSuperEstimator/actions/workflows/documentation.yml/badge.svg"/>
 </p>
 
-A framework for multi-fidelity estimation of boundary condition
-parameters for cardiovascular fluid dynamics simulations.
+Multi-fidelity parameter estimation framework for cardiovascular fluid dynamics
+simulations.
 
 ## Installation
 
-svSuperEstimator and all its dependencies can be installed via pip:
+It is highly recommended to use a virtual environment like
+[Miniconda](https://docs.conda.io/en/latest/miniconda.html).
+After installing Miniconda you can create and activate a new environment using:
+
+```bash
+conda create -n estimator python=3.9
+conda activate estimator
+```
+
+svSuperEstimator and most of the dependencies can be installed via pip:
 
 ```bash
 pip install git+https://github.com/SimVascular/svSuperEstimator.git
 ```
 
+The remaining dependencies have to be installed manually:
+
+* [C++ svZeroDSolver](https://github.com/richterjakob/svZeroDSolver): Install via pip and build release version in local folder.
+* [C++ 3D result slicer](https://gitlab.com/sanddorn/sanddorn-toolbox/-/tree/main/slicer): Build release version and specify path to executable in config file.
+* **QUEENS** (currently not publicly available)
+
 ### For Contributers
 
-If you are contributing to svSuperEstimator, it is highly recommended to use a virtual
-environment like [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
-After installing Miniconda you can create a new environment and enter it using:
-
-```bash
-conda create -n superestimator python=3.9
-conda activate superestimator
-```
-
-After that you can install the svSuperEstimator **with development related dependencies**
+You can install svSuperEstimator **with development related dependencies**
 using:
 
 ```bash
@@ -38,3 +44,17 @@ pip install -e .[dev]
 ```
 
 *If you are using the `zsh` shell, enter: `pip install -e ".[dev]"`*
+
+### Sherlock
+
+To run svSuperEstimator on sherlock, the following modules are required:
+
+```
+module purge
+module load system
+module load binutils/2.38
+module load qt
+module load openmpi
+module load mesa
+module load x11
+```

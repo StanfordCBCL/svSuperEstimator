@@ -3,22 +3,26 @@ global:
   num_procs: 48
 tasks:
   # WindkesselTuning:
+  #   zerod_config_file: /Users/stanford/data/projects/0069_0001/ROMSimulations/0069_0001/solver_0d.in
+  #   theta_obs: [11.31430378, 9.56612492, 12.13497399, 11.89435741]
+  #   y_obs: [7.96939000e+04, 1.28615495e+05, 1.17452432e+00, 5.73790727e+00, 5.16607267e-01, 6.57691899e-01]
   #   num_particles: 100
   #   num_rejuvenation_steps: 2
   #   resampling_threshold: 0.5
   #   noise_factor: 0.05
-  # map_zero_d_result_to_three_d:
+  # MapZeroDResultToThreeD:
   #   zerod_config_file: /scratch/users/richter7/data/projects/0069_0001/ParameterEstimation/BloodVesselTuning/solver_0d.in
-  # three_d_simulation:
+  # ThreeDSimulation:
   #   rcrt_dat_path: /scratch/users/richter7/data/projects/0069_0001/ParameterEstimation/map_zero_d_result_to_three_d/rcrt.dat
   #   initial_vtu_path: /scratch/users/richter7/data/projects/0069_0001/ParameterEstimation/map_zero_d_result_to_three_d/initial.vtu
   #   svpre_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svpre
   #   svsolver_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svsolver
   #   svpost_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svpost
-  # map_three_d_result_on_centerline:
+  # MapThreeDResultOnCenterline:
   #   slicer_executable: /home/users/richter7/sanddorn-toolbox/slicer/Release/slicer
   #   threed_result_file: /scratch/users/richter7/data/ThreeDSimulation/0069_0001.vtu
   # BloodVesselTuning:
+  #   zerod_config_file: /Users/stanford/data/projects/0069_0001/ROMSimulations/0069_0001/solver_0d.in
   #   threed_solution_file: /Users/stanford/data/3d_centerline_2/0069_0001.vtp
   #   maxfev: 2000
   MultiFidelityTuning:
@@ -34,3 +38,5 @@ tasks:
     svsolver_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svsolver
     svpost_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svpost
     slicer_executable: /home/users/richter7/sanddorn-toolbox/slicer/Release/slicer
+    MapThreeDResultOnCenterline: 
+      num_procs: 24
