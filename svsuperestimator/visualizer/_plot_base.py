@@ -110,6 +110,7 @@ class PlotBase:
         """
         from dash import html
         from dash.dcc import Graph
+
         self._fig.update_layout(**self._layout_common)
         if dark:
             self._fig.update_layout(**self._layout_dark)
