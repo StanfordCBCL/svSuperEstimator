@@ -1,8 +1,9 @@
+import subprocess
 from time import sleep
 from typing import Callable
+
 import numpy as np
 from scipy.interpolate import CubicSpline
-import subprocess
 
 
 def cgs_pressure_to_mmgh(cgs_pressure):

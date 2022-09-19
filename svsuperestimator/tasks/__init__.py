@@ -3,11 +3,11 @@
 Contains the different optimization problems.
 """
 from .blood_vessel_tuning import BloodVesselTuning
-from .windkessel_tuning import WindkesselTuning
-from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
 from .map_three_d_result_on_centerline import MapThreeDResultOnCenterline
-from .three_d_simulation import ThreeDSimulation
+from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
 from .multi_fidelity_tuning import MultiFidelityTuning
+from .three_d_simulation import ThreeDSimulation
+from .windkessel_tuning import WindkesselTuning
 
 __all__ = ["BloodVesselTuning"]
 

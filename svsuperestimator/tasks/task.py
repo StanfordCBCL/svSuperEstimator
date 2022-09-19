@@ -1,12 +1,12 @@
 import os
 from abc import ABC, abstractmethod
+from pathlib import Path
 from time import time
 
 import orjson
 from rich import box
 from rich.console import Console
 from rich.table import Table
-from pathlib import Path
 
 from svsuperestimator import visualizer
 

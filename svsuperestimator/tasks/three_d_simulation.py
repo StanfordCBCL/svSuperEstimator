@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import os
-from shutil import copytree, copy2, ignore_patterns, rmtree
+from shutil import copy2, copytree, ignore_patterns, rmtree
+
 import numpy as np
 
-from .taskutils import run_subprocess
 from .. import reader
-
 from .task import Task
+from .taskutils import run_subprocess
 
 
 class ThreeDSimulation(Task):

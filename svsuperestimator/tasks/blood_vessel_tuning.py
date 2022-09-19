@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 import os
-from multiprocessing import Pool
 from datetime import datetime
+from multiprocessing import Pool
 
 import numpy as np
+import orjson
 import pandas as pd
 from rich import box
 from rich.table import Table
 from scipy import optimize
 from svzerodsolver import runnercpp
-import orjson
 
 from .. import reader, visualizer
 from ..reader import CenterlineHandler

@@ -3,14 +3,14 @@ from __future__ import annotations
 import os
 import pickle
 from datetime import datetime
-import pandas as pd
 
 import numpy as np
 import orjson
+import pandas as pd
 from rich.console import Console
 from svzerodsolver import runnercpp
 
-from .. import iterators, visualizer, reader
+from .. import iterators, reader, visualizer
 from ..reader import utils as readutils
 from . import plotutils, statutils, taskutils
 from .task import Task

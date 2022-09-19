@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import os
 
-from .task import Task
-from .windkessel_tuning import WindkesselTuning
-from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
-from .three_d_simulation import ThreeDSimulation
-from .map_three_d_result_on_centerline import MapThreeDResultOnCenterline
 from .blood_vessel_tuning import BloodVesselTuning
+from .map_three_d_result_on_centerline import MapThreeDResultOnCenterline
+from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
+from .task import Task
+from .three_d_simulation import ThreeDSimulation
+from .windkessel_tuning import WindkesselTuning
 
 
 class MultiFidelityTuning(Task):
