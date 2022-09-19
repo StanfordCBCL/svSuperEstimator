@@ -1,0 +1,160 @@
+html {
+    height: auto !important;
+    padding-bottom: 700px !important;
+}
+
+body {
+    margin: 0;
+    font-family: 'Open Sans', sans-serif;
+    background-color: #121212;
+    color: #ffffffe8;
+    font-size: 10pt;
+    margin-bottom: 50;
+}
+
+.topbar {
+    overflow: hidden;
+    background-color: #212121;
+    text-align: center;
+    margin-bottom: 30px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.07), 0 4px 8px rgba(0, 0, 0, 0.07), 0 8px 16px rgba(0, 0, 0, 0.07), 0 16px 32px rgba(0, 0, 0, 0.07), 0 32px 64px rgba(0, 0, 0, 0.07);
+}
+
+.timestamp {
+    text-align: right;
+    color: #ffffffb5;
+    padding-right: 20px;
+    font-size: 12pt;
+}
+
+.topbar h1 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-weight: lighter;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    /* padding: 10px; */
+    align-items: flex-start;
+}
+
+.item {
+    flex: 0;
+    background-color: #212121;
+    border-radius: 10px;
+    padding: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    flex-grow: 4;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.07), 0 4px 8px rgba(0, 0, 0, 0.07), 0 8px 16px rgba(0, 0, 0, 0.07), 0 16px 32px rgba(0, 0, 0, 0.07), 0 32px 64px rgba(0, 0, 0, 0.07);
+}
+
+h1 {
+    font-size: 16pt;
+    margin-left: 10px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 14pt;
+}
+
+
+.input {
+    border: none;
+    overflow: auto;
+    outline: none;
+
+    background-color: rgb(30, 30, 30);
+    color: #ffffffe8;
+    border-color: transparent;
+    width: 100%;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+tr:hover {
+    background: transparent !important;
+}
+
+tr:hover td {
+    background: transparent;
+}
+
+.dropdown {
+    background: transparent;
+    background-color: transparent;
+    font-size: 11pt;
+    font-family: "sans-serif";
+}
+
+.Select-control {
+    background-color: #212121 !important;
+}
+
+.Select.is-focused>.Select-control {
+    background-color: #212121;
+}
+
+/* changes the text color of input box */
+.Select-value-label {
+    color: #ffffffe8 !important;
+}
+
+
+.Select--single>.Select-control .Select-value,
+.Select-placeholder {
+    border: 1px solid #ffffffe8;
+    border-radius: 4px;
+}
+
+.VirtualizedSelectOption {
+    background-color: #212121;
+    color: #ffffffe8;
+}
+
+.VirtualizedSelectFocusedOption {
+    background-color: #212121;
+    opacity: .7;
+}
+
+.Select.is-focused:not(.is-open)>.Select-control {
+    background-color: #212121;
+    color: #ffffffe8;
+    /* border-color: var(--primary); */
+    /* box-shadow: none; */
+}
+
+.button {
+    border: none;
+    overflow: auto;
+    background-color: transparent;
+    color: #ffffffe8;
+    width: 100%;
+}
+
+.button:active {
+    color: #ffffff3b;
+}
+
+input {
+    color: #ffffffe8;
+}
+
+
+.dash-default-spinner-rect1,
+.dash-default-spinner-rect2,
+.dash-default-spinner-rect3,
+.dash-default-spinner-rect4,
+.dash-default-spinner-rect5 {
+    /* display: inline-block !important; */
+    margin-top: 3.5vh !important;
+    margin-bottom: 3.5vh !important;
+}

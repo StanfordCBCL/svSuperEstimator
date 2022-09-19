@@ -1,0 +1,74 @@
+# SimVascular file registry
+#
+# This file is used to register files in the SimVascular project folder. This
+# facilitates input/output operations in the svSuperEstimator. To specify a
+# new file, add a new entry as follows:
+#
+# unqiue_identifier:
+#   type: type_of_file
+#   path: path/to/my/file
+
+0d_simulation_input:
+  type: data
+  handler: SvZeroDSolverInputHandler
+  path: ROMSimulations/$CASE_NAME$/solver_0d.in
+
+0d_simulation_input_path:
+  type: path
+  path: ROMSimulations/$CASE_NAME$/solver_0d.in
+
+parameter_estimation_folder:
+  type: path
+  path: ParameterEstimation
+
+3d_simulation_input:
+  type: data
+  handler: SvSolverInputHandler
+  path: Simulations/$CASE_NAME$/solver.inp
+
+3d_simulation_rcr:
+  type: data
+  handler: SvSolverRcrHandler
+  path: Simulations/$CASE_NAME$/rcrt.dat
+
+3d_simulation_inflow:
+  type: data
+  handler: SvSolverInflowHandler
+  path: Simulations/$CASE_NAME$/inflow.flow
+
+3d_simulation_input_path:
+  type: path
+  path: Simulations/$CASE_NAME$/solver.inp
+
+3d_simulation_volume:
+  type: data
+  handler: MeshHandler
+  path: Simulations/$CASE_NAME$/mesh-complete/mesh-complete.mesh.vtu
+
+3d_simulation_surface:
+  type: data
+  handler: MeshHandler
+  path: Simulations/$CASE_NAME$/mesh-complete/walls_combined.vtp
+
+3d_simulation_folder_path:
+  type: path
+  path: Simulations/$CASE_NAME$/
+
+mesh:
+  type: data
+  handler: MeshHandler
+  path: Meshes/$CASE_NAME$.vtp
+
+centerline:
+  type: data
+  handler: CenterlineHandler
+  path: ROMSimulations/$CASE_NAME$/$CASE_NAME$.vtp
+
+centerline_path:
+  type: path
+  path: ROMSimulations/$CASE_NAME$/$CASE_NAME$.vtp
+
+rom_simulation_config_optimized:
+  type: data
+  handler: SvZeroDSolverInputHandler
+  path: ParameterEstimation/BloodVesselTuning/solver_0d.in
