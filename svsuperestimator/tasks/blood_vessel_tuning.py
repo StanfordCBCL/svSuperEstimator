@@ -60,15 +60,18 @@ class BloodVesselTuning(Task):
         threed_result_handler = CenterlineHandler.from_file(
             self.config["threed_solution_file"]
         )
+        cl_handler = self.project["centerline"]
         self.log("Found 3D simulation time step size:", threed_time_step_size)
 
         # Map centerline result to 3D simulation
         self.log("Map 3D centerline result to 0D elements")
-        branch_data, times = taskutils.map_centerline_result_to_0d(
+        branch_data, times = taskutils.map_centerline_result_to_0d_2(
             zerod_config_handler,
+            cl_handler,
+            threed_config_handler,
             threed_result_handler,
-            threed_time_step_size,
         )
+
         for vessel in zerod_config_handler.vessels.values():
             name = vessel["vessel_name"]
             branch_id, seg_id = name.split("_")
@@ -155,16 +158,16 @@ class BloodVesselTuning(Task):
             os.path.join(self.output_folder, "solver_0d.in")
         )
         threed_config_handler = self.project["3d_simulation_input"]
-        threed_time_step_size = threed_config_handler.time_step_size
         threed_result_handler = CenterlineHandler.from_file(
             self.config["threed_solution_file"]
         )
 
         # Map centerline data to 0D elements
-        branch_data, times = taskutils.map_centerline_result_to_0d(
+        branch_data, times = taskutils.map_centerline_result_to_0d_2(
             zerod_config_handler,
+            self.project["centerline"],
+            threed_config_handler,
             threed_result_handler,
-            threed_time_step_size,
         )
 
         # Run simulation for both configurations
@@ -198,7 +201,6 @@ class BloodVesselTuning(Task):
         for branch_id, branch in branch_data.items():
 
             for seg_id, segment in branch.items():
-                vessel_id = segment["vessel_id"]
                 vessel_name = f"branch{branch_id}_seg{seg_id}"
 
                 # Append 3d result

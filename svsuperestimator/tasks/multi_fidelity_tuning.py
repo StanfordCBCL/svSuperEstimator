@@ -28,6 +28,11 @@ class MultiFidelityTuning(Task):
         "svsolver_executable": None,
         "svpost_executable": None,
         "slicer_executable": None,
+        "WindkesselTuning": {},
+        "MapZeroDResultToThreeD": {},
+        "ThreeDSimulation": {},
+        "MapThreeDResultOnCenterline": {},
+        "BloodVesselTuning": {},
         **Task.DEFAULTS,
     }
 
@@ -62,6 +67,7 @@ class MultiFidelityTuning(Task):
                     ],
                     "noise_factor": self.config["smc_noise_factor"],
                     **global_config,
+                    **self.config["WindkesselTuning"]
                 },
                 suffix=suffix,
             )
@@ -73,6 +79,7 @@ class MultiFidelityTuning(Task):
                         windkessel_task.output_folder, "solver_0d_map.in"
                     ),
                     **global_config,
+                    **self.config["MapZeroDResultToThreeD"]
                 },
                 suffix=suffix,
             )
@@ -92,6 +99,7 @@ class MultiFidelityTuning(Task):
                     "svpost_executable": self.config["svpost_executable"],
                     "num_cardiac_cycles": self.config["num_cardiac_cycles_3d"],
                     **global_config,
+                    **self.config["ThreeDSimulation"]
                 },
                 suffix=suffix,
             )
@@ -105,6 +113,7 @@ class MultiFidelityTuning(Task):
                         three_d_sim_task.output_folder, "result.vtu"
                     ),
                     **global_config,
+                    **self.config["MapThreeDResultOnCenterline"]
                 },
                 suffix=suffix,
             )
@@ -119,6 +128,7 @@ class MultiFidelityTuning(Task):
                     ),
                     "num_procs": self.config["num_procs"],
                     **global_config,
+                    **self.config["BloodVesselTuning"]
                 },
                 suffix=suffix,
             )
