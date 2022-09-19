@@ -39,4 +39,4 @@ tasks:
     svpost_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svpost
     slicer_executable: /home/users/richter7/sanddorn-toolbox/slicer/Release/slicer
     MapThreeDResultOnCenterline: 
-      num_procs: 24
+      num_procs: 12
