@@ -1,4 +1,4 @@
-project: /scratch/users/richter7/data/projects/0069_0001
+project: /Users/stanford/data/projects/0069_0001
 global: 
   num_procs: 48
 tasks:
@@ -35,7 +35,7 @@ tasks:
     smc_noise_factor: 0.05
     num_cardiac_cycles_3d: 2
     svpre_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svpre
-    svsolver_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svsolver
+    svsolver_executable: /home/users/pfaller/work/repos/svSolver_fork/BuildWithMake/Bin/svsolver-openmpi.exe
     svpost_executable: /home/users/pfaller/work/repos/svSolver_fork/build2/svSolver-build/bin/svpost
     slicer_executable: /home/users/richter7/sanddorn-toolbox/slicer/Release/slicer
     MapThreeDResultOnCenterline: 
