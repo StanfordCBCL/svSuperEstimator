@@ -121,7 +121,9 @@ class MultiFidelityTuning(Task):
             bv_tuning_task = BloodVesselTuning(
                 project=self.project,
                 config={
-                    "zerod_config_file": zerod_config_file,
+                    "zerod_config_file": os.path.join(
+                        windkessel_task.output_folder, "solver_0d_map.in"
+                    ),
                     "threed_solution_file": os.path.join(
                         map_three_zero_task.output_folder,
                         "result_mapped_on_centerline.vtp",

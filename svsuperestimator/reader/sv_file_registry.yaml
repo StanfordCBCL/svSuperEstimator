@@ -67,8 +67,3 @@ centerline:
 centerline_path:
   type: path
   path: ROMSimulations/$CASE_NAME$/$CASE_NAME$.vtp
-
-rom_simulation_config_optimized:
-  type: data
-  handler: SvZeroDSolverInputHandler
-  path: ParameterEstimation/BloodVesselTuning/solver_0d.in

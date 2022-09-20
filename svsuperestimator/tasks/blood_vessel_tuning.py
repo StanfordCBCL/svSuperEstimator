@@ -139,7 +139,7 @@ class BloodVesselTuning(Task):
             ]["theta_opt"]
 
         # Improve junctions
-        taskutils.make_resistive_junctions(zerod_config_handler, branch_data)
+        self.make_resistive_junctions(zerod_config_handler, branch_data)
 
         # Writing data to project
         self.log("Save optimized 0D simulation file")
@@ -534,3 +534,79 @@ class BloodVesselTuning(Task):
             sim_inpres,
             sim_outflow,
         )
+
+    def make_resistive_junctions(self, zerod_handler, mapped_data):
+
+        vessel_id_map = zerod_handler.vessel_id_to_name_map
+
+        nodes = zerod_handler.nodes
+
+        junction_nodes = {
+            n for n in nodes if n[0].startswith("J") or n[1].startswith("J")
+        }
+
+        ele1s = [node[0] for node in junction_nodes]
+        target_junctions = set(
+            [x for i, x in enumerate(ele1s) if i != ele1s.index(x)]
+        )
+
+        junctions = zerod_handler.junctions
+
+        for junction_name in target_junctions:
+            junction_data = junctions[junction_name]
+
+            inlet_vessels = junction_data["inlet_vessels"]
+            outlet_vessels = junction_data["outlet_vessels"]
+
+            if len(inlet_vessels) > 1:
+                raise NotImplementedError(
+                    "Multiple inlets are currently not supported."
+                )
+
+            rs = [0.0]
+
+            inlet_branch_name = vessel_id_map[inlet_vessels[0]]
+            branch_id, seg_id = inlet_branch_name.split("_")
+            branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
+
+            pressure_in = np.amax(mapped_data[branch_id][seg_id]["pressure_out"])
+
+            for ovessel in outlet_vessels:
+
+                outlet_branch_name = vessel_id_map[ovessel]
+                branch_id, seg_id = outlet_branch_name.split("_")
+                branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
+
+                pressure_out = np.amax(
+                    mapped_data[branch_id][seg_id]["pressure_in"]
+                )
+                flow_out = np.amax(mapped_data[branch_id][seg_id]["flow_in"])
+
+                rs.append(max((pressure_in - pressure_out) / flow_out, 0.0))
+
+            junction_data["junction_type"] = "resistive_junction"
+            junction_values_bef = junction_data.get("junction_values", {})
+            junction_data["junction_values"] = {"R": rs}
+
+            self.log(
+                f"Optimization for junction [cyan]{junction_name}[/cyan] [bold green]successful[/bold green]"
+            )
+            table = Table(box=box.HORIZONTALS, show_header=False)
+            table.add_column()
+            table.add_column(style="cyan")
+
+            if junction_values_bef:
+
+                for i, ovessel in enumerate(outlet_vessels):
+                    table.add_row(
+                        f"resistance {inlet_branch_name} -> {vessel_id_map[ovessel]}",
+                        f"{junction_values_bef['R'][i+1]:.1e} -> {rs[i+1]:.1e}",
+                    )
+            else:
+                for i, ovessel in enumerate(outlet_vessels):
+                    table.add_row(
+                        f"resistance {inlet_branch_name} -> {vessel_id_map[ovessel]}",
+                        f"0.0 -> {rs[i+1]:.1e}",
+                    )
+
+            self.log(table)
