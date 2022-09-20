@@ -1,4 +1,4 @@
-project: /Users/stanford/data/projects/0069_0001
+project: /scratch/users/richter7/data/projects/0069_0001
 global: 
   num_procs: 48
 tasks:
