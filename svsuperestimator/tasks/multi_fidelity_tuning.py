@@ -50,7 +50,6 @@ class MultiFidelityTuning(Task):
         }
 
         for i in range(self.config["num_iter"]):
-            suffix = f"_{i}"
             windkessel_task = WindkesselTuning(
                 project=self.project,
                 config={
@@ -69,7 +68,8 @@ class MultiFidelityTuning(Task):
                     **global_config,
                     **self.config["WindkesselTuning"],
                 },
-                suffix=suffix,
+                prefix=f"{i*5}_",
+                parent_folder=self.output_folder,
             )
             task_sequence.append(windkessel_task)
             map_zero_three_task = MapZeroDResultToThreeD(
@@ -81,7 +81,8 @@ class MultiFidelityTuning(Task):
                     **global_config,
                     **self.config["MapZeroDResultToThreeD"],
                 },
-                suffix=suffix,
+                prefix=f"{i*5+1}_",
+                parent_folder=self.output_folder,
             )
             task_sequence.append(map_zero_three_task)
             three_d_sim_task = ThreeDSimulation(
@@ -101,7 +102,8 @@ class MultiFidelityTuning(Task):
                     **global_config,
                     **self.config["ThreeDSimulation"],
                 },
-                suffix=suffix,
+                prefix=f"{i*5+2}_",
+                parent_folder=self.output_folder,
             )
             task_sequence.append(three_d_sim_task)
             map_three_zero_task = MapThreeDResultOnCenterline(
@@ -115,7 +117,8 @@ class MultiFidelityTuning(Task):
                     **global_config,
                     **self.config["MapThreeDResultOnCenterline"],
                 },
-                suffix=suffix,
+                prefix=f"{i*5+3}_",
+                parent_folder=self.output_folder,
             )
             task_sequence.append(map_three_zero_task)
             bv_tuning_task = BloodVesselTuning(
@@ -132,7 +135,8 @@ class MultiFidelityTuning(Task):
                     **global_config,
                     **self.config["BloodVesselTuning"],
                 },
-                suffix=suffix,
+                prefix=f"{i*5+4}_",
+                parent_folder=self.output_folder,
             )
             task_sequence.append(bv_tuning_task)
             zerod_config_file = os.path.join(

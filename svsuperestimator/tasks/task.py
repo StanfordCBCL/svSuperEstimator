@@ -28,9 +28,20 @@ class Task(ABC):
     """
 
     TASKNAME = None
-    DEFAULTS = {"report_html": True, "report_files": False, "overwrite": False}
+    DEFAULTS = {
+        "report_html": True,
+        "report_files": False,
+        "overwrite": False,
+        "name": None,
+    }
 
-    def __init__(self, project: SimVascularProject, config: dict, suffix=""):
+    def __init__(
+        self,
+        project: SimVascularProject,
+        config: dict,
+        prefix="",
+        parent_folder=None,
+    ):
         """Construct the task.
 
         Args:
@@ -43,10 +54,13 @@ class Task(ABC):
         self.database = {}
         self.config = self.DEFAULTS.copy()
         self.config.update(config)
-        self.output_folder = os.path.join(
-            self.project["parameter_estimation_folder"], self.TASKNAME + suffix
-        )
+        if parent_folder is None:
+            parent_folder = self.project["parameter_estimation_folder"]
 
+        if self.config["name"] is None:
+            self.config["name"] = prefix + self.TASKNAME
+
+        self.output_folder = os.path.join(parent_folder, self.config["name"])
         self.log(
             f"Created task [bold cyan]{type(self).__name__}[/bold cyan] "
             "with the following configuration:"
