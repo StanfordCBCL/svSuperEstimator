@@ -52,7 +52,9 @@ class Task(ABC):
             suffix: Suffix for the task name.
         """
         self.project = project
-        self.console = Console(record=True)
+        self.console = Console(
+            record=True, log_time_format="[%m/%d/%y %H:%M:%S]"
+        )
         self.database = {}
         self.config = self.DEFAULTS.copy()
         self.config.update(config)

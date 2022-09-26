@@ -12,7 +12,7 @@ from rich import box
 from .tasks.taskutils import run_subprocess
 from .reader import SimVascularProject
 
-MAIN_CONSOLE = Console()
+MAIN_CONSOLE = Console(log_time_format="[%m/%d/%y %H:%M:%S]")
 
 slurm_base = """#!/bin/bash
 

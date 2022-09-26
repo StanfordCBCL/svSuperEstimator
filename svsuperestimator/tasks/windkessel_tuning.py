@@ -11,14 +11,13 @@ import orjson
 import pandas as pd
 from pqueens.main import run
 from rich.console import Console
+from rich.logging import RichHandler
 from svzerodsolver import runnercpp
 
 from .. import reader, visualizer
 from ..reader import utils as readutils
 from . import plotutils, statutils, taskutils
 from .task import Task
-
-CONSOLE = Console()
 
 
 class WindkesselTuning(Task):
@@ -39,7 +38,7 @@ class WindkesselTuning(Task):
         "num_rejuvenation_steps": 2,
         "resampling_threshold": 0.5,
         "noise_factor": 0.05,
-        "waste_free": True
+        "waste_free": True,
         **Task.DEFAULTS,
     }
 
@@ -110,7 +109,9 @@ class WindkesselTuning(Task):
 
         # Run the iterator
         self.log("Starting tuning process")
-        smc_runner.run()
+        smc_runner.run(
+            loghandler=RichHandler(console=self.console, show_level=False)
+        )
 
         # Save parameters to file
         self.database["timestamp"] = datetime.now().strftime(
@@ -669,7 +670,7 @@ class SMCRunner:
 
         self._config["parameters"]["random_variables"][name] = var_config
 
-    def run(self):
+    def run(self, loghandler):
         """Run the iterator."""
 
         with TemporaryDirectory() as tmpdir:
@@ -699,4 +700,8 @@ class SMCRunner:
                 )
 
             # Run queens
-            run(self._config, self._config["global_settings"]["output_dir"])
+            run(
+                self._config,
+                self._config["global_settings"]["output_dir"],
+                handler=loghandler,
+            )
