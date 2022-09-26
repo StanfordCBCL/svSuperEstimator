@@ -9,7 +9,6 @@ from rich.console import Console
 from rich.table import Table
 from rich import box
 
-from . import tasks
 from .tasks.taskutils import run_subprocess
 from .reader import SimVascularProject
 
@@ -76,10 +75,14 @@ def run_file(path):
     global_setting = config.get("global", {})
 
     for task_name, task_config in config["tasks"].items():
-        task_class = tasks.get_task_by_name(task_name)
 
         if "slurm" in config:
-            task = task_class(project, {**global_setting, **task_config}, log_config=False)
+
+            parent_folder = project["parameter_estimation_folder"]
+            name = task_config.get("name", None)
+            if name is None:
+                name = task_name
+            task_output_folder = os.path.join(parent_folder, name)
 
             slurm_config = slurm_default.copy()
             slurm_config.update(config["slurm"])
@@ -99,7 +102,7 @@ def run_file(path):
                 table.add_row(key, str(value))
             MAIN_CONSOLE.log(table)
 
-            logfile = os.path.join(task.output_folder, "slurm.log")
+            logfile = os.path.join(task_output_folder, "slurm.log")
             this_file_dir = os.path.abspath(os.path.dirname(__file__))
             estimator_path = os.path.join(this_file_dir, "main.py")
             config_file = os.path.abspath(path)
@@ -109,8 +112,7 @@ def run_file(path):
                     slurm_config[key.replace("-", "_")] = slurm_config[key]
                     del slurm_config[key]
 
-
-            new_config_file = os.path.join(task.output_folder, "config.yaml")
+            new_config_file = os.path.join(task_output_folder, "config.yaml")
             new_config = config.copy()
 
             del new_config["slurm"]
@@ -127,7 +129,7 @@ def run_file(path):
             )
 
             slurm_config_file = os.path.join(
-                task.output_folder, "slurm_script.sh"
+                task_output_folder, "slurm_script.sh"
             )
 
             with open(slurm_config_file, "w") as ff:
@@ -138,6 +140,9 @@ def run_file(path):
             )
 
         else:
+            from . import tasks
+
+            task_class = tasks.get_task_by_name(task_name)
             task = task_class(project, {**global_setting, **task_config})
             task.run()
 
@@ -153,6 +158,8 @@ def run_from_config(config):
     global_setting = config.get("global", {})
 
     for task_name, task_config in config["tasks"].items():
+        from . import tasks
+
         task_class = tasks.get_task_by_name(task_name)
         task = task_class(project, {**global_setting, **task_config})
         task.run()

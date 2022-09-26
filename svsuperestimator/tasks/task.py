@@ -42,7 +42,7 @@ class Task(ABC):
         config: dict,
         prefix="",
         parent_folder=None,
-        log_config=True
+        log_config=True,
     ):
         """Construct the task.
 
