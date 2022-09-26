@@ -625,7 +625,7 @@ class BloodVesselTuning(Task):
                 )
                 flow_out = np.amax(mapped_data[branch_id][seg_id]["flow_in"])
 
-                rs.append(max((pressure_in - pressure_out) / flow_out, 0.0))
+                rs.append((pressure_in - pressure_out) / flow_out)
 
             junction_data["junction_type"] = "resistive_junction"
             junction_values_bef = junction_data.get("junction_values", {})
