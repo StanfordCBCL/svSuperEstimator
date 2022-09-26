@@ -23,6 +23,7 @@ class MultiFidelityTuning(Task):
         "smc_num_rejuvenation_steps": 2,
         "smc_resampling_threshold": 0.5,
         "smc_noise_factor": 0.05,
+        "smc_waste_free": True,
         "num_cardiac_cycles_3d": 2,
         "svpre_executable": None,
         "svsolver_executable": None,
@@ -65,6 +66,7 @@ class MultiFidelityTuning(Task):
                         "smc_resampling_threshold"
                     ],
                     "noise_factor": self.config["smc_noise_factor"],
+                    "waste_free": self.config["smc_waste_free"],
                     **global_config,
                     **self.config["WindkesselTuning"],
                 },

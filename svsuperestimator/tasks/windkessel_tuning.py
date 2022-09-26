@@ -39,6 +39,7 @@ class WindkesselTuning(Task):
         "num_rejuvenation_steps": 2,
         "resampling_threshold": 0.5,
         "noise_factor": 0.05,
+        "waste_free": True
         **Task.DEFAULTS,
     }
 
@@ -95,6 +96,7 @@ class WindkesselTuning(Task):
             resampling_threshold=self.config["resampling_threshold"],
             noise_value=noise_vector,
             noise_type="fixed_variance_vector",
+            waste_free=self.config["waste_free"],
         )
 
         # Add random variables for each parameter
@@ -583,7 +585,7 @@ class SMCRunner:
                     "resampling_threshold": kwargs["resampling_threshold"],
                     "resampling_method": "systematic",
                     "feynman_kac_model": "adaptive_tempering",
-                    "waste_free": True,
+                    "waste_free": kwargs["waste_free"],
                     "num_rejuvenation_steps": kwargs["num_rejuvenation_steps"],
                     "model": "model",
                     "max_feval": 9e99,
