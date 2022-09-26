@@ -42,6 +42,7 @@ class Task(ABC):
         config: dict,
         prefix="",
         parent_folder=None,
+        log_config=True
     ):
         """Construct the task.
 
@@ -62,11 +63,12 @@ class Task(ABC):
             self.config["name"] = prefix + self.TASKNAME
 
         self.output_folder = os.path.join(parent_folder, self.config["name"])
-        self.log(
-            f"Created task [bold cyan]{type(self).__name__}[/bold cyan] "
-            "with the following configuration:"
-        )
-        self._log_config()
+        if log_config:
+            self.log(
+                f"Created task [bold cyan]{type(self).__name__}[/bold cyan] "
+                "with the following configuration:"
+            )
+            self._log_config()
         for key, value in self.config.items():
             if key not in self.DEFAULTS:
                 self.log(f"Unused configuration option {key}")
