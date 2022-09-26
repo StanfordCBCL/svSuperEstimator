@@ -103,7 +103,7 @@ def run_file(path):
 
             logfile = os.path.join(task_output_folder, "slurm.log")
             this_file_dir = os.path.abspath(os.path.dirname(__file__))
-            estimator_path = os.path.join(this_file_dir, "main.py")
+            estimator_path = os.path.join(this_file_dir, "..", "main.py")
 
             for key in list(slurm_config.keys()):
                 if "-" in key:
