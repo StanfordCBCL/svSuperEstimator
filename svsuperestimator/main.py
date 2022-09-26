@@ -114,7 +114,7 @@ def run_file(path):
             new_config = config.copy()
 
             del new_config["slurm"]
-            new_config["tasks"] = task_config
+            new_config["tasks"] = {task_name: task_config}
 
             with open(new_config_file, "w") as ff:
                 yaml.safe_dump(new_config, ff, indent=4)
