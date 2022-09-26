@@ -33,6 +33,7 @@ class Task(ABC):
         "report_files": False,
         "overwrite": False,
         "name": None,
+        "debug": False,
     }
 
     def __init__(

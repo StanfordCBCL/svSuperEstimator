@@ -71,7 +71,7 @@ class BloodVesselTuning(Task):
             cl_handler,
             threed_config_handler,
             threed_result_handler,
-            padding=self.config["centerline_padding"]
+            padding=self.config["centerline_padding"],
         )
 
         for vessel in zerod_config_handler.vessels.values():
@@ -100,6 +100,8 @@ class BloodVesselTuning(Task):
                     "maxfev": 2000,
                     "num_pts_per_cycle": num_pts,
                     "theta_start": np.array(segment["theta_start"]),
+                    "debug": self.config["debug"],
+                    "debug_folder": os.path.join(self.output_folder, "debug"),
                     **{
                         n: taskutils.refine_with_cubic_spline(
                             segment[n], num_pts
@@ -170,7 +172,7 @@ class BloodVesselTuning(Task):
             self.project["centerline"],
             threed_config_handler,
             threed_result_handler,
-            padding=self.config["centerline_padding"]
+            padding=self.config["centerline_padding"],
         )
 
         # Run simulation for both configurations
@@ -405,6 +407,42 @@ class BloodVesselTuning(Task):
             bounds=cls._OPT_BOUNDS,
         )
 
+        if segment_data["debug"]:
+            import plotly.express as px
+
+            os.makedirs(segment_data["debug_folder"], exist_ok=True)
+            num_pts_per_cycle = segment_data["num_pts_per_cycle"]
+            (
+                inpres_sim,
+                outflow_sim,
+            ) = BloodVesselTuning._simulate_blood_vessel(
+                *result.x,
+                bc_times=segment_data["times"],
+                bc_inflow=bc_inflow,
+                bc_outpres=bc_outpres,
+                num_pts_per_cycle=num_pts_per_cycle,
+            )
+            plot1 = px.line({"Result": inpres_sim, "Target": inpres})
+            plot1.update_traces(
+                selector={"name": "Target"}, line={"dash": "dash"}
+            )
+            plot1.write_image(
+                os.path.join(
+                    segment_data["debug_folder"],
+                    f"pres_branch_{segment_data['branch_id']}_seg{segment_data['seg_id']}.png",
+                )
+            )
+            plot2 = px.line({"Result": outflow_sim, "Target": outflow})
+            plot2.update_traces(
+                selector={"name": "Target"}, line={"dash": "dash"}
+            )
+            plot2.write_image(
+                os.path.join(
+                    segment_data["debug_folder"],
+                    f"flow_branch_{segment_data['branch_id']}_seg{segment_data['seg_id']}.png",
+                )
+            )
+
         return {
             "theta_opt": result.x,
             "nfev": result.nfev,
@@ -572,7 +610,9 @@ class BloodVesselTuning(Task):
             branch_id, seg_id = inlet_branch_name.split("_")
             branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-            pressure_in = np.amax(mapped_data[branch_id][seg_id]["pressure_out"])
+            pressure_in = np.amax(
+                mapped_data[branch_id][seg_id]["pressure_out"]
+            )
 
             for ovessel in outlet_vessels:
 

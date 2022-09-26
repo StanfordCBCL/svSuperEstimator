@@ -249,10 +249,10 @@ def map_centerline_result_to_0d_2(
         seg_start_index = 0
 
         if padding:
-            branch_data["flow"][:, 0] = branch_data["flow"][:,1]
-            branch_data["flow"][:,-1] = branch_data["flow"][:,-2]
-            branch_data["pressure"][:,0] = branch_data["pressure"][:,1]
-            branch_data["pressure"][:,-1] = branch_data["pressure"][:,-2]
+            branch_data["flow"][:, 0] = branch_data["flow"][:, 1]
+            branch_data["flow"][:, -1] = branch_data["flow"][:, -2]
+            branch_data["pressure"][:, 0] = branch_data["pressure"][:, 1]
+            branch_data["pressure"][:, -1] = branch_data["pressure"][:, -2]
 
         for seg_id in range(len(branch)):
             segment = branch[seg_id]

@@ -144,6 +144,7 @@ class SvZeroDSolverInputHandler(DataHandler):
         mean_only: bool = None,
         output_interval: bool = None,
         last_cycle_only: bool = None,
+        variable_based: bool = None,
     ) -> None:
         """Update the simulation parameters.
 
@@ -155,6 +156,7 @@ class SvZeroDSolverInputHandler(DataHandler):
                 condition.
             mean_only: Return only mean values over time steps.
             output_interval: Interval for writing a timestep to the output.
+            variable_based: Node based output.
         """
         simparams = self.data["simulation_parameters"]
         if abs_tol is not None:
@@ -171,3 +173,5 @@ class SvZeroDSolverInputHandler(DataHandler):
             simparams["output_last_cycle_only"] = last_cycle_only
         if num_cycles is not None:
             simparams["number_of_cardiac_cycles"] = num_cycles
+        if variable_based is not None:
+            simparams["output_variable_based"] = variable_based

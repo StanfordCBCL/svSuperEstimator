@@ -33,7 +33,7 @@ class PlotBase:
 
         # Layout options specific for the light color scheme
         self._layout_light = {
-            "template": "plotly_white",
+            "template": "simple_white",
         }
 
         # Layout options specific for the dark color scheme

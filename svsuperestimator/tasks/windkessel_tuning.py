@@ -528,6 +528,7 @@ class _Forward_Model:
 
         return np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean])
 
+
 class SMCRunner:
     """Sequentia-Monte-Carlo iterator for static models."""
 
@@ -537,7 +538,7 @@ class SMCRunner:
         y_obs: np.ndarray,
         output_dir=None,
         num_procs=1,
-        **kwargs
+        **kwargs,
     ):
         """Create a new SmcIterator instance.
 
@@ -589,10 +590,10 @@ class SMCRunner:
                     "result_description": {
                         "write_results": True,
                         "plot_results": False,
-                    }
-                }
+                    },
+                },
             },
-            "model":{
+            "model": {
                 "type": "gaussian",
                 "forward_model": "forward_model",
                 "output_label": "y_obs",
@@ -602,9 +603,9 @@ class SMCRunner:
                 "experimental_file_name_identifier": "*.csv",
                 "experimental_csv_data_base_dir": None,
                 "parameters": "parameters",
-            }
+            },
         }
-    
+
     def add_random_variable(
         self,
         name: str,
