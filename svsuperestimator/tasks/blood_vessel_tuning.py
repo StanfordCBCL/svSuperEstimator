@@ -30,6 +30,7 @@ class BloodVesselTuning(Task):
         "zerod_config_file": None,
         "threed_solution_file": None,
         "num_procs": 1,
+        "centerline_padding": False,
         **Task.DEFAULTS,
     }
 
@@ -70,6 +71,7 @@ class BloodVesselTuning(Task):
             cl_handler,
             threed_config_handler,
             threed_result_handler,
+            padding=self.config["centerline_padding"]
         )
 
         for vessel in zerod_config_handler.vessels.values():
@@ -168,6 +170,7 @@ class BloodVesselTuning(Task):
             self.project["centerline"],
             threed_config_handler,
             threed_result_handler,
+            padding=self.config["centerline_padding"]
         )
 
         # Run simulation for both configurations

@@ -186,7 +186,7 @@ def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
 
 
 def map_centerline_result_to_0d_2(
-    zerod_handler, cl_handler, threed_handler, results_handler
+    zerod_handler, cl_handler, threed_handler, results_handler, padding=False
 ):
     """Map centerine result onto 0d elements."""
 
@@ -247,6 +247,12 @@ def map_centerline_result_to_0d_2(
 
         seg_start = 0.0
         seg_start_index = 0
+
+        if padding:
+            branch_data["flow"][:, 0] = branch_data["flow"][:,1]
+            branch_data["flow"][:,-1] = branch_data["flow"][:,-2]
+            branch_data["pressure"][:,0] = branch_data["pressure"][:,1]
+            branch_data["pressure"][:,-1] = branch_data["pressure"][:,-2]
 
         for seg_id in range(len(branch)):
             segment = branch[seg_id]
