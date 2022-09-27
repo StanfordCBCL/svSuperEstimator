@@ -4,13 +4,17 @@ from __future__ import annotations
 import os
 import re
 from collections import defaultdict
+from typing import Any
 
 import numpy as np
+import pandas as pd
 import vtk
 from rich.progress import Progress
 from scipy.interpolate import interp1d
 from svzerodsolver import runnercpp
 from vtk.util.numpy_support import numpy_to_vtk
+
+from svsuperestimator import visualizer
 
 from .. import reader
 from .task import Task
@@ -25,24 +29,29 @@ class MapZeroDResultToThreeD(Task):
         **Task.DEFAULTS,
     }
 
-    def core_run(self):
+    def core_run(self) -> None:
         """Core routine of the task."""
 
         self._map_0d_on_centerline()
         self._map_centerline_on_3d()
         self._map_boundary_conditions()
 
-    def post_run(self):
+    def post_run(self) -> None:
         """Postprocessing routine of the task."""
 
         pass
 
-    def generate_report(self):
+    def generate_report(self) -> visualizer.Report:
         """Generate the task report."""
 
         pass
 
-    def _map_0d_on_centerline(self):
+    def _map_0d_on_centerline(self) -> None:
+        """Map 0D result on centerline.
+
+        TODO: This functions has been mainly copied from SimVascular. A cleanup
+            would increase the readability a lot.
+        """
 
         self.log("Map 0D solution on centerline")
 
@@ -55,15 +64,17 @@ class MapZeroDResultToThreeD(Task):
         result0d = runnercpp.run_from_config(zerod_handler.data)
 
         # assemble output dict
-        def rec_dd():
+        def rec_dd() -> defaultdict:
             return defaultdict(rec_dd)
 
         arrays = rec_dd()
 
-        def convert_csv_to_branch_result(df, zerod_handler):
+        def convert_csv_to_branch_result(
+            df: pd.Dataframe, zerod_handler: reader.SvZeroDSolverInputHandler
+        ) -> dict:
             # loop branches and segments
             names = list(sorted(set(df["name"])))
-            out = {"flow": {}, "pressure": {}, "distance": {}}
+            out: dict[str, Any] = {"flow": {}, "pressure": {}, "distance": {}}
 
             for name in names:
                 # extract ids
@@ -210,7 +221,12 @@ class MapZeroDResultToThreeD(Task):
         cl_handler.to_file(target)
         self.log(f"Saved centerline result {target}")
 
-    def _map_centerline_on_3d(self):
+    def _map_centerline_on_3d(self) -> None:
+        """Map centerline result to 3D.
+
+        TODO: This functions has been mainly copied from SimVascular. A cleanup
+            would increase the readability a lot.
+        """
 
         self.log("Map centerline solution on 3D")
 
@@ -220,7 +236,7 @@ class MapZeroDResultToThreeD(Task):
         vol_handler: reader.MeshHandler = self.project["3d_simulation_volume"]
         surf_handler = self.project["3d_simulation_surface"]
 
-        def get_centerline_3d_map(cl_handler, vol_handler):
+        def get_centerline_3d_map(cl_handler, vol_handler):  # type: ignore
             """Create a map from centerine to mesh through region growing."""
 
             # get volume points closest to centerline
@@ -243,7 +259,7 @@ class MapZeroDResultToThreeD(Task):
 
             return ids, rad
 
-        def find_closest_points(data, points, radius=None):
+        def find_closest_points(data, points, radius=None):  # type: ignore
             """Get ids of points in geometry closest to input points.
 
             Args:
@@ -274,7 +290,7 @@ class MapZeroDResultToThreeD(Task):
                     ids += [locator.FindClosestPoint(p)]
             return np.array(ids)
 
-        def region_grow(geo, seed_points, seed_ids, n_max=99):
+        def region_grow(geo, seed_points, seed_ids, n_max=99):  # type: ignore
 
             pts = geo.points
 
@@ -336,7 +352,7 @@ class MapZeroDResultToThreeD(Task):
 
                 return array_ids, array_rad
 
-        def grow(geo, array, pids_in, pids_all, cids_all):
+        def grow(geo, array, pids_in, pids_all, cids_all):  # type: ignore
             # ids of propagating wave-front
             pids_out = set()
 
@@ -430,7 +446,8 @@ class MapZeroDResultToThreeD(Task):
         vol_handler.to_file(target)
         self.log(f"Saved 3D inital condition {target}")
 
-    def _map_boundary_conditions(self):
+    def _map_boundary_conditions(self) -> None:
+        """Map boundary condtitions from 0D to 3D."""
 
         self.log("Map boundary conditions")
 
