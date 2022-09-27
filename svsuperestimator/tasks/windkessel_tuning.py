@@ -531,7 +531,7 @@ class _Forward_Model:
             for name, flow_id in zip(self.bc_names, self.bc_flow)
         ]
 
-        return np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean])
+        return np.expand_dims(np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean]), axis=0)
 
 
 class SMCRunner:
