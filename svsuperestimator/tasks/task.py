@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from time import time
-from typing import Any
+from typing import Any, Dict, Optional
 
 import orjson
 from rich import box
@@ -29,8 +29,8 @@ class Task(ABC):
         DEFAULTS: DEFAULT settings for the task.
     """
 
-    TASKNAME: str = None
-    DEFAULTS: dict[str, Any] = {
+    TASKNAME: Optional[str] = None
+    DEFAULTS: Dict[str, Any] = {
         "report_html": True,
         "report_files": False,
         "overwrite": False,
@@ -43,9 +43,9 @@ class Task(ABC):
         self,
         project: SimVascularProject,
         config: dict,
-        prefix="",
-        parent_folder=None,
-        log_config=True,
+        prefix: str = "",
+        parent_folder: Optional[str] = None,
+        log_config: bool = True,
     ):
         """Construct the task.
 
@@ -61,16 +61,17 @@ class Task(ABC):
         self.console = Console(
             record=True, log_time_format="[%m/%d/%y %H:%M:%S]"
         )
-        self.database = {}
+        self.database: Dict[str, Any] = {}
         self.config = self.DEFAULTS.copy()
         self.config.update(config)
         if parent_folder is None:
             parent_folder = self.project["parameter_estimation_folder"]
 
         if self.config["name"] is None:
-            self.config["name"] = prefix + self.TASKNAME
+            self.config["name"] = prefix + self.TASKNAME  # type: ignore
 
-        self.output_folder = os.path.join(parent_folder, self.config["name"])
+        self.output_folder = os.path.join(parent_folder, self.config["name"])  # type: ignore
+
         if log_config:
             self.log(
                 f"Created task [bold cyan]{type(self).__name__}[/bold cyan] "
@@ -87,12 +88,12 @@ class Task(ABC):
                 )
 
     @abstractmethod
-    def core_run(self):
+    def core_run(self) -> None:
         """Core routine of the task."""
         raise NotImplementedError
 
     @abstractmethod
-    def post_run(self):
+    def post_run(self) -> None:
         """Postprocessing routine of the task."""
         raise NotImplementedError
 
@@ -101,11 +102,11 @@ class Task(ABC):
         """Visualization routine of the task."""
         raise NotImplementedError
 
-    def log(self, *args, **kwargs):
+    def log(self, *args: Any, **kwargs: Any) -> None:
         """Log to the task console."""
         self.console.log(*args, **kwargs)
 
-    def run(self):
+    def run(self) -> None:
         """Run the task."""
 
         if not self.config["overwrite"] and self.is_completed():
@@ -166,11 +167,11 @@ class Task(ABC):
         )
         Path(os.path.join(self.output_folder, ".completed")).touch()
 
-    def is_completed(self):
+    def is_completed(self) -> bool:
         """Check if task is already completed."""
         return os.path.exists(os.path.join(self.output_folder, ".completed"))
 
-    def _log_config(self):
+    def _log_config(self) -> None:
         """Log the task configuration."""
         table = Table(box=box.HORIZONTALS, expand=True, show_header=False)
         table.add_column("Configuration", style="bold cyan")
@@ -179,7 +180,7 @@ class Task(ABC):
             table.add_row(key, str(value))
         self.log(table)
 
-    def save_database(self):
+    def save_database(self) -> None:
         """Set problem parameters.
 
         Args:
@@ -197,7 +198,7 @@ class Task(ABC):
             )
         self.database = {}
 
-    def load_database(self) -> dict:
+    def load_database(self) -> None:
         """Return problem parameters.
 
         Returns:

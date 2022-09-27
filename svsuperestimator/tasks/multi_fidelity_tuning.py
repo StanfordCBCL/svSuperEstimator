@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import os
+from typing import Any
 
+from .. import visualizer
 from .blood_vessel_tuning import BloodVesselTuning
 from .map_three_d_result_on_centerline import MapThreeDResultOnCenterline
 from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
@@ -15,7 +17,7 @@ class MultiFidelityTuning(Task):
     """Map 3D result on centerline task."""
 
     TASKNAME = "multi_fidelity_tuning"
-    DEFAULTS = {
+    DEFAULTS: dict[str, Any] = {
         "num_procs": 1,
         "num_iter": 1,
         "theta_obs": None,
@@ -38,12 +40,12 @@ class MultiFidelityTuning(Task):
         **Task.DEFAULTS,
     }
 
-    def core_run(self):
+    def core_run(self) -> None:
         """Core routine of the task."""
 
         zerod_config_file = self.project["0d_simulation_input_path"]
 
-        task_sequence = []
+        task_sequence: list[Task] = []
 
         global_config = {
             "report_html": self.config["report_html"],
@@ -151,10 +153,10 @@ class MultiFidelityTuning(Task):
         for task in task_sequence:
             task.run()
 
-    def post_run(self):
+    def post_run(self) -> None:
         """Postprocessing routine of the task."""
         pass
 
-    def generate_report(self):
+    def generate_report(self) -> visualizer.Report:
         """Generate the task report."""
         pass
