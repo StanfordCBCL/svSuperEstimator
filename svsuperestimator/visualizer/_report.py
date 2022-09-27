@@ -154,23 +154,6 @@ class Report:
                 )
             )
 
-    def to_dash(self) -> list:
-        """Convert the report to dash content."""
-        from dash import html
-
-        from ..app.helpers import create_columns
-
-        formatted_content = []
-        for item in self._content:
-            if isinstance(item, str):
-                formatted_content.append(html.H1(item))
-            else:
-                formatted_content.append(
-                    create_columns([iitem.to_dash() for iitem in item])
-                )
-
-        return formatted_content
-
     def to_files(self, folder: str) -> None:
         """Convert to report to seperate files.
 
