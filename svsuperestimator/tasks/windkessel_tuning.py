@@ -498,7 +498,7 @@ class _Forward_Model:
         self.inflow_name = bc_map["INFLOW"]["name"]
         self.inflow_pressure = bc_map["INFLOW"]["pressure"]
 
-    def evaluate(self, **kwargs):
+    def evaluate(self, sample_dict):
         """Objective function for the optimization.
 
         Evaluates the sum of the offsets for the input output pressure relation
@@ -509,7 +509,7 @@ class _Forward_Model:
         for i, bc in enumerate(
             self.base_config.outlet_boundary_conditions.values()
         ):
-            ki = np.exp(kwargs[f"k{i}"])
+            ki = np.exp(sample_dict[f"k{i}"])
             bc["bc_values"]["Rp"] = ki / (1.0 + self._distal_to_proximal[i])
             bc["bc_values"]["Rd"] = ki - bc["bc_values"]["Rp"]
             bc["bc_values"]["C"] = (
