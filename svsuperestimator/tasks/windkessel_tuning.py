@@ -34,6 +34,7 @@ class WindkesselTuning(Task):
         "num_procs": 1,
         "theta_obs": None,
         "y_obs": None,
+        "ground_truth_centerline": None,
         "num_particles": 100,
         "num_rejuvenation_steps": 2,
         "resampling_threshold": 0.5,

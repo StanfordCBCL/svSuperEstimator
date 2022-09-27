@@ -48,6 +48,8 @@ class MultiFidelityTuning(Task):
             "report_html": self.config["report_html"],
             "report_files": self.config["report_files"],
             "overwrite": self.config["overwrite"],
+            "debug": self.config["debug"],
+            "post_proc_only": self.config["post_proc_only"],
         }
 
         for i in range(self.config["num_iter"]):

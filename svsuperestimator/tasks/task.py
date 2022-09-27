@@ -34,6 +34,7 @@ class Task(ABC):
         "overwrite": False,
         "name": None,
         "debug": False,
+        "post_proc_only": False,
     }
 
     def __init__(
@@ -114,9 +115,10 @@ class Task(ABC):
         # Make task output directory
         os.makedirs(self.output_folder, exist_ok=True)
 
-        # Run the task and postprocessing of the data
-        self.core_run()
-        self.save_database()
+        if not self.config["post_proc_only"]:
+            # Run the task and postprocessing of the data
+            self.core_run()
+            self.save_database()
         self.log("Postprocessing results")
         self.load_database()
         self.post_run()
