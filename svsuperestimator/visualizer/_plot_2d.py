@@ -1,7 +1,7 @@
 """This module holds the Plot2D class."""
 from __future__ import annotations
 
-from typing import Union
+from typing import Any, Union
 
 import numpy as np
 import plotly.graph_objects as go
@@ -25,7 +25,7 @@ class Plot2D(PlotBase):
         opacity: float = 1.0,
         colorscale: str = "viridis",
         showlegend: bool = False,
-        **kwargs,
+        **kwargs: dict[str, Any],
     ):
         """Add a point scatter trace.
 

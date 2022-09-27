@@ -3,6 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from time import time
+from typing import Any
 
 import orjson
 from rich import box
@@ -28,8 +29,8 @@ class Task(ABC):
         DEFAULTS: DEFAULT settings for the task.
     """
 
-    TASKNAME = None
-    DEFAULTS = {
+    TASKNAME: str = None
+    DEFAULTS: dict[str, Any] = {
         "report_html": True,
         "report_files": False,
         "overwrite": False,

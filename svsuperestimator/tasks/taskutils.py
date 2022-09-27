@@ -43,7 +43,7 @@ def cgs_flow_to_lmin(cgs_flow):
     return np.array(np.array(cgs_flow) * 60.0 / 1000.0)
 
 
-def refine_with_cubic_spline(y: np.ndarray, num: np.ndarray):
+def refine_with_cubic_spline(y: np.ndarray, num: int):
     """Refine a curve using cubic spline interpolation.
 
     Args:

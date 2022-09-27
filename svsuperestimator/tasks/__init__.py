@@ -2,9 +2,12 @@
 
 Contains all the tasks for performing multi-fidelity parameter estimation.
 """
+from typing import Type
+
+from .task import Task
 
 
-def get_task_by_name(name):
+def get_task_by_name(name: str) -> Type[Task]:
     """Get the task class by it's name.
 
     Args:
