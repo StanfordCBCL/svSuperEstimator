@@ -1,8 +1,9 @@
+import subprocess
 from time import sleep
 from typing import Callable
+
 import numpy as np
 from scipy.interpolate import CubicSpline
-import subprocess
 
 
 def cgs_pressure_to_mmgh(cgs_pressure):
@@ -185,7 +186,7 @@ def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
 
 
 def map_centerline_result_to_0d_2(
-    zerod_handler, cl_handler, threed_handler, results_handler
+    zerod_handler, cl_handler, threed_handler, results_handler, padding=False
 ):
     """Map centerine result onto 0d elements."""
 
@@ -246,6 +247,12 @@ def map_centerline_result_to_0d_2(
 
         seg_start = 0.0
         seg_start_index = 0
+
+        if padding:
+            branch_data["flow"][:, 0] = branch_data["flow"][:, 1]
+            branch_data["flow"][:, -1] = branch_data["flow"][:, -2]
+            branch_data["pressure"][:, 0] = branch_data["pressure"][:, 1]
+            branch_data["pressure"][:, -1] = branch_data["pressure"][:, -2]
 
         for seg_id in range(len(branch)):
             segment = branch[seg_id]
@@ -346,56 +353,3 @@ def set_initial_condition(zerod_handler, mapped_data):
                     ] = initial_condition[f"pressure:{node[0]}:{node[1]}"]
 
     zerod_handler.data["initial_condition"] = initial_condition
-
-
-def make_resistive_junctions(zerod_handler, mapped_data):
-
-    vessel_id_map = zerod_handler.vessel_id_to_name_map
-
-    nodes = zerod_handler.nodes
-
-    junction_nodes = {
-        n for n in nodes if n[0].startswith("J") or n[1].startswith("J")
-    }
-
-    ele1s = [node[0] for node in junction_nodes]
-    target_junctions = set(
-        [x for i, x in enumerate(ele1s) if i != ele1s.index(x)]
-    )
-
-    junctions = zerod_handler.junctions
-
-    for junction_name in target_junctions:
-        junction_data = junctions[junction_name]
-
-        inlet_vessels = junction_data["inlet_vessels"]
-        outlet_vessels = junction_data["outlet_vessels"]
-
-        if len(inlet_vessels) > 1:
-            raise NotImplementedError(
-                "Multiple inlets are currently not supported."
-            )
-
-        rs = [0.0]
-
-        inlet_branch_name = vessel_id_map[inlet_vessels[0]]
-        branch_id, seg_id = inlet_branch_name.split("_")
-        branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
-
-        pressure_in = np.amax(mapped_data[branch_id][seg_id]["pressure_out"])
-
-        for ovessel in outlet_vessels:
-
-            outlet_branch_name = vessel_id_map[ovessel]
-            branch_id, seg_id = outlet_branch_name.split("_")
-            branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
-
-            pressure_out = np.amax(
-                mapped_data[branch_id][seg_id]["pressure_in"]
-            )
-            flow_out = np.amax(mapped_data[branch_id][seg_id]["flow_in"])
-
-            rs.append(max((pressure_in - pressure_out) / flow_out, 0.0))
-
-        junction_data["junction_type"] = "resistive_junction"
-        junction_data["junction_values"] = {"R": rs}

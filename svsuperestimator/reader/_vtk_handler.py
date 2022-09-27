@@ -5,7 +5,7 @@ import os
 
 import numpy as np
 import vtk
-from vtk.util.numpy_support import vtk_to_numpy, numpy_to_vtk
+from vtk.util.numpy_support import numpy_to_vtk, vtk_to_numpy
 
 from ._data_handler import DataHandler
 

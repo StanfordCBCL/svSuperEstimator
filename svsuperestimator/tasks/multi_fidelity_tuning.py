@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import os
 
-from .task import Task
-from .windkessel_tuning import WindkesselTuning
-from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
-from .three_d_simulation import ThreeDSimulation
-from .map_three_d_result_on_centerline import MapThreeDResultOnCenterline
 from .blood_vessel_tuning import BloodVesselTuning
+from .map_three_d_result_on_centerline import MapThreeDResultOnCenterline
+from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
+from .task import Task
+from .three_d_simulation import ThreeDSimulation
+from .windkessel_tuning import WindkesselTuning
 
 
 class MultiFidelityTuning(Task):
@@ -23,6 +23,7 @@ class MultiFidelityTuning(Task):
         "smc_num_rejuvenation_steps": 2,
         "smc_resampling_threshold": 0.5,
         "smc_noise_factor": 0.05,
+        "smc_waste_free": True,
         "num_cardiac_cycles_3d": 2,
         "svpre_executable": None,
         "svsolver_executable": None,
@@ -50,7 +51,6 @@ class MultiFidelityTuning(Task):
         }
 
         for i in range(self.config["num_iter"]):
-            suffix = f"_{i}"
             windkessel_task = WindkesselTuning(
                 project=self.project,
                 config={
@@ -66,10 +66,12 @@ class MultiFidelityTuning(Task):
                         "smc_resampling_threshold"
                     ],
                     "noise_factor": self.config["smc_noise_factor"],
+                    "waste_free": self.config["smc_waste_free"],
                     **global_config,
-                    **self.config["WindkesselTuning"]
+                    **self.config["WindkesselTuning"],
                 },
-                suffix=suffix,
+                prefix=f"{i*5}_",
+                parent_folder=self.output_folder,
             )
             task_sequence.append(windkessel_task)
             map_zero_three_task = MapZeroDResultToThreeD(
@@ -79,9 +81,10 @@ class MultiFidelityTuning(Task):
                         windkessel_task.output_folder, "solver_0d_map.in"
                     ),
                     **global_config,
-                    **self.config["MapZeroDResultToThreeD"]
+                    **self.config["MapZeroDResultToThreeD"],
                 },
-                suffix=suffix,
+                prefix=f"{i*5+1}_",
+                parent_folder=self.output_folder,
             )
             task_sequence.append(map_zero_three_task)
             three_d_sim_task = ThreeDSimulation(
@@ -99,9 +102,10 @@ class MultiFidelityTuning(Task):
                     "svpost_executable": self.config["svpost_executable"],
                     "num_cardiac_cycles": self.config["num_cardiac_cycles_3d"],
                     **global_config,
-                    **self.config["ThreeDSimulation"]
+                    **self.config["ThreeDSimulation"],
                 },
-                suffix=suffix,
+                prefix=f"{i*5+2}_",
+                parent_folder=self.output_folder,
             )
             task_sequence.append(three_d_sim_task)
             map_three_zero_task = MapThreeDResultOnCenterline(
@@ -113,24 +117,28 @@ class MultiFidelityTuning(Task):
                         three_d_sim_task.output_folder, "result.vtu"
                     ),
                     **global_config,
-                    **self.config["MapThreeDResultOnCenterline"]
+                    **self.config["MapThreeDResultOnCenterline"],
                 },
-                suffix=suffix,
+                prefix=f"{i*5+3}_",
+                parent_folder=self.output_folder,
             )
             task_sequence.append(map_three_zero_task)
             bv_tuning_task = BloodVesselTuning(
                 project=self.project,
                 config={
-                    "zerod_config_file": zerod_config_file,
+                    "zerod_config_file": os.path.join(
+                        windkessel_task.output_folder, "solver_0d_map.in"
+                    ),
                     "threed_solution_file": os.path.join(
                         map_three_zero_task.output_folder,
                         "result_mapped_on_centerline.vtp",
                     ),
                     "num_procs": self.config["num_procs"],
                     **global_config,
-                    **self.config["BloodVesselTuning"]
+                    **self.config["BloodVesselTuning"],
                 },
-                suffix=suffix,
+                prefix=f"{i*5+4}_",
+                parent_folder=self.output_folder,
             )
             task_sequence.append(bv_tuning_task)
             zerod_config_file = os.path.join(

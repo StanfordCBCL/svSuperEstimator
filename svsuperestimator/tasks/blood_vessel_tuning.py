@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 import os
-from multiprocessing import Pool
 from datetime import datetime
+from multiprocessing import Pool
 
 import numpy as np
+import orjson
 import pandas as pd
 from rich import box
 from rich.table import Table
 from scipy import optimize
 from svzerodsolver import runnercpp
-import orjson
 
 from .. import reader, visualizer
 from ..reader import CenterlineHandler
@@ -30,6 +30,7 @@ class BloodVesselTuning(Task):
         "zerod_config_file": None,
         "threed_solution_file": None,
         "num_procs": 1,
+        "centerline_padding": False,
         **Task.DEFAULTS,
     }
 
@@ -70,6 +71,7 @@ class BloodVesselTuning(Task):
             cl_handler,
             threed_config_handler,
             threed_result_handler,
+            padding=self.config["centerline_padding"],
         )
 
         for vessel in zerod_config_handler.vessels.values():
@@ -98,6 +100,8 @@ class BloodVesselTuning(Task):
                     "maxfev": 2000,
                     "num_pts_per_cycle": num_pts,
                     "theta_start": np.array(segment["theta_start"]),
+                    "debug": self.config["debug"],
+                    "debug_folder": os.path.join(self.output_folder, "debug"),
                     **{
                         n: taskutils.refine_with_cubic_spline(
                             segment[n], num_pts
@@ -139,7 +143,7 @@ class BloodVesselTuning(Task):
             ]["theta_opt"]
 
         # Improve junctions
-        taskutils.make_resistive_junctions(zerod_config_handler, branch_data)
+        self.make_resistive_junctions(zerod_config_handler, branch_data)
 
         # Writing data to project
         self.log("Save optimized 0D simulation file")
@@ -168,6 +172,7 @@ class BloodVesselTuning(Task):
             self.project["centerline"],
             threed_config_handler,
             threed_result_handler,
+            padding=self.config["centerline_padding"],
         )
 
         # Run simulation for both configurations
@@ -402,6 +407,42 @@ class BloodVesselTuning(Task):
             bounds=cls._OPT_BOUNDS,
         )
 
+        if segment_data["debug"]:
+            import plotly.express as px
+
+            os.makedirs(segment_data["debug_folder"], exist_ok=True)
+            num_pts_per_cycle = segment_data["num_pts_per_cycle"]
+            (
+                inpres_sim,
+                outflow_sim,
+            ) = BloodVesselTuning._simulate_blood_vessel(
+                *result.x,
+                bc_times=segment_data["times"],
+                bc_inflow=bc_inflow,
+                bc_outpres=bc_outpres,
+                num_pts_per_cycle=num_pts_per_cycle,
+            )
+            plot1 = px.line({"Result": inpres_sim, "Target": inpres})
+            plot1.update_traces(
+                selector={"name": "Target"}, line={"dash": "dash"}
+            )
+            plot1.write_image(
+                os.path.join(
+                    segment_data["debug_folder"],
+                    f"pres_branch_{segment_data['branch_id']}_seg{segment_data['seg_id']}.png",
+                )
+            )
+            plot2 = px.line({"Result": outflow_sim, "Target": outflow})
+            plot2.update_traces(
+                selector={"name": "Target"}, line={"dash": "dash"}
+            )
+            plot2.write_image(
+                os.path.join(
+                    segment_data["debug_folder"],
+                    f"flow_branch_{segment_data['branch_id']}_seg{segment_data['seg_id']}.png",
+                )
+            )
+
         return {
             "theta_opt": result.x,
             "nfev": result.nfev,
@@ -534,3 +575,81 @@ class BloodVesselTuning(Task):
             sim_inpres,
             sim_outflow,
         )
+
+    def make_resistive_junctions(self, zerod_handler, mapped_data):
+
+        vessel_id_map = zerod_handler.vessel_id_to_name_map
+
+        nodes = zerod_handler.nodes
+
+        junction_nodes = {
+            n for n in nodes if n[0].startswith("J") or n[1].startswith("J")
+        }
+
+        ele1s = [node[0] for node in junction_nodes]
+        target_junctions = set(
+            [x for i, x in enumerate(ele1s) if i != ele1s.index(x)]
+        )
+
+        junctions = zerod_handler.junctions
+
+        for junction_name in target_junctions:
+            junction_data = junctions[junction_name]
+
+            inlet_vessels = junction_data["inlet_vessels"]
+            outlet_vessels = junction_data["outlet_vessels"]
+
+            if len(inlet_vessels) > 1:
+                raise NotImplementedError(
+                    "Multiple inlets are currently not supported."
+                )
+
+            rs = [0.0]
+
+            inlet_branch_name = vessel_id_map[inlet_vessels[0]]
+            branch_id, seg_id = inlet_branch_name.split("_")
+            branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
+
+            pressure_in = np.amax(
+                mapped_data[branch_id][seg_id]["pressure_out"]
+            )
+
+            for ovessel in outlet_vessels:
+
+                outlet_branch_name = vessel_id_map[ovessel]
+                branch_id, seg_id = outlet_branch_name.split("_")
+                branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
+
+                pressure_out = np.amax(
+                    mapped_data[branch_id][seg_id]["pressure_in"]
+                )
+                flow_out = np.amax(mapped_data[branch_id][seg_id]["flow_in"])
+
+                rs.append((pressure_in - pressure_out) / flow_out)
+
+            junction_data["junction_type"] = "resistive_junction"
+            junction_values_bef = junction_data.get("junction_values", {})
+            junction_data["junction_values"] = {"R": rs}
+
+            self.log(
+                f"Optimization for junction [cyan]{junction_name}[/cyan] [bold green]successful[/bold green]"
+            )
+            table = Table(box=box.HORIZONTALS, show_header=False)
+            table.add_column()
+            table.add_column(style="cyan")
+
+            if junction_values_bef:
+
+                for i, ovessel in enumerate(outlet_vessels):
+                    table.add_row(
+                        f"resistance {inlet_branch_name} -> {vessel_id_map[ovessel]}",
+                        f"{junction_values_bef['R'][i+1]:.1e} -> {rs[i+1]:.1e}",
+                    )
+            else:
+                for i, ovessel in enumerate(outlet_vessels):
+                    table.add_row(
+                        f"resistance {inlet_branch_name} -> {vessel_id_map[ovessel]}",
+                        f"0.0 -> {rs[i+1]:.1e}",
+                    )
+
+            self.log(table)

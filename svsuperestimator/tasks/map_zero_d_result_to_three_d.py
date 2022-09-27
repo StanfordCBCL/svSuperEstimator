@@ -1,19 +1,18 @@
 from __future__ import annotations
 
 import os
+import re
+from collections import defaultdict
 
 import numpy as np
-from svzerodsolver import runnercpp
 import vtk
+from rich.progress import Progress
+from scipy.interpolate import interp1d
+from svzerodsolver import runnercpp
+from vtk.util.numpy_support import numpy_to_vtk, vtk_to_numpy
 
 from .. import reader
 from .task import Task
-
-from collections import defaultdict
-from vtk.util.numpy_support import vtk_to_numpy, numpy_to_vtk
-import re
-from scipy.interpolate import interp1d
-from rich.progress import Progress
 
 
 class MapZeroDResultToThreeD(Task):

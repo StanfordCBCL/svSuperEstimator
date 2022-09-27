@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import os
-from shutil import copytree, copy2, ignore_patterns, rmtree
+from shutil import copy2, copytree, ignore_patterns, rmtree
+
 import numpy as np
 
-from .taskutils import run_subprocess
 from .. import reader
-
 from .task import Task
+from .taskutils import run_subprocess
 
 
 class ThreeDSimulation(Task):
@@ -87,7 +87,7 @@ class ThreeDSimulation(Task):
         self.log("Calling svsolver")
         run_subprocess(
             [
-                f"mpiexec -n {self.config['num_procs']}",
+                f"UCX_POSIX_USE_PROC_LINK=n srun",
                 self.config["svsolver_executable"],
                 "solver.inp",
             ],
@@ -114,7 +114,11 @@ class ThreeDSimulation(Task):
         )
 
         self.log("Cleaning up")
-        rmtree(os.path.join(self.output_folder, f"{self.config['num_procs']}-procs_case"))
+        rmtree(
+            os.path.join(
+                self.output_folder, f"{self.config['num_procs']}-procs_case"
+            )
+        )
 
     def post_run(self):
         """Postprocessing routine of the task."""

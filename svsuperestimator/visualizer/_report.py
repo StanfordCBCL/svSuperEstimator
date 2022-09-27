@@ -157,6 +157,7 @@ class Report:
     def to_dash(self) -> list:
         """Convert the report to dash content."""
         from dash import html
+
         from ..app.helpers import create_columns
 
         formatted_content = []

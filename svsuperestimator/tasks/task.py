@@ -1,12 +1,12 @@
 import os
 from abc import ABC, abstractmethod
+from pathlib import Path
 from time import time
 
 import orjson
 from rich import box
 from rich.console import Console
 from rich.table import Table
-from pathlib import Path
 
 from svsuperestimator import visualizer
 
@@ -28,9 +28,22 @@ class Task(ABC):
     """
 
     TASKNAME = None
-    DEFAULTS = {"report_html": True, "report_files": False, "overwrite": False}
+    DEFAULTS = {
+        "report_html": True,
+        "report_files": False,
+        "overwrite": False,
+        "name": None,
+        "debug": False,
+    }
 
-    def __init__(self, project: SimVascularProject, config: dict, suffix=""):
+    def __init__(
+        self,
+        project: SimVascularProject,
+        config: dict,
+        prefix="",
+        parent_folder=None,
+        log_config=True,
+    ):
         """Construct the task.
 
         Args:
@@ -39,19 +52,25 @@ class Task(ABC):
             suffix: Suffix for the task name.
         """
         self.project = project
-        self.console = Console(record=True)
+        self.console = Console(
+            record=True, log_time_format="[%m/%d/%y %H:%M:%S]"
+        )
         self.database = {}
         self.config = self.DEFAULTS.copy()
         self.config.update(config)
-        self.output_folder = os.path.join(
-            self.project["parameter_estimation_folder"], self.TASKNAME + suffix
-        )
+        if parent_folder is None:
+            parent_folder = self.project["parameter_estimation_folder"]
 
-        self.log(
-            f"Created task [bold cyan]{type(self).__name__}[/bold cyan] "
-            "with the following configuration:"
-        )
-        self._log_config()
+        if self.config["name"] is None:
+            self.config["name"] = prefix + self.TASKNAME
+
+        self.output_folder = os.path.join(parent_folder, self.config["name"])
+        if log_config:
+            self.log(
+                f"Created task [bold cyan]{type(self).__name__}[/bold cyan] "
+                "with the following configuration:"
+            )
+            self._log_config()
         for key, value in self.config.items():
             if key not in self.DEFAULTS:
                 self.log(f"Unused configuration option {key}")

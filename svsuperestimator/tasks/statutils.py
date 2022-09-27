@@ -65,8 +65,8 @@ def gaussian_kde_1d(
     )
     kde, kde_x = estimate_pdf(
         x,
-        weights=weights,
         kernel_bandwidth=bandwidth,
+        weights=weights,
         support_points=lin_x,
         kernel="gaussian",
     )
