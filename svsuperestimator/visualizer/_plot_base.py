@@ -13,10 +13,11 @@ class PlotBase:
     Defines common methods to handle plotly plots.
     """
 
-    def __init__(self, static=False, **kwargs: Any) -> None:
+    def __init__(self, static: bool = False, **kwargs: Any) -> None:
         """Create a new PlotBase instance.
 
         Args:
+            static: Export image as static and not interactive.
             kwargs: Plotly layout options for the figure.
         """
         self._fig = go.Figure()
@@ -41,7 +42,7 @@ class PlotBase:
             "template": "plotly_dark",
         }
 
-    def add_footnote(self, text: str):
+    def add_footnote(self, text: str) -> None:
         """Add a footnote to the plot.
 
         Args:
@@ -100,26 +101,3 @@ class PlotBase:
         else:
             self._fig.update_layout(**self._layout_light)
         self._fig.write_image(path)
-
-    def to_dash(self, dark: bool = True, display_controls=True):
-        """Export the plot as a dash graph.
-
-        Args:
-            dark: Toggle dark mode.
-            display_controls: Display plotly controls.
-        """
-        from dash import html
-        from dash.dcc import Graph
-
-        self._fig.update_layout(**self._layout_common)
-        if dark:
-            self._fig.update_layout(**self._layout_dark)
-        else:
-            self._fig.update_layout(**self._layout_light)
-        config = {"displayModeBar": False} if not display_controls else {}
-        return html.Div(
-            Graph(
-                figure=self._fig,
-                config=config,
-            )
-        )

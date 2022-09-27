@@ -25,7 +25,7 @@ class CenterlineHandler(VtkHandler):
                 [float(k.split("_")[1]) for k in self.pressure_names]
             )
         except IndexError:
-            self.time_steps = []
+            self.time_steps = np.array([])
 
     def get_branch_data(self, branch_id: int) -> dict:
         """Get branch data by branch id.

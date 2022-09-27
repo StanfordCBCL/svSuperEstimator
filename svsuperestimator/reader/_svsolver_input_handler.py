@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from ._plain_handler import PlainHandler
 
@@ -41,9 +42,11 @@ class SvSolverInputHandler(PlainHandler):
         """
         return re.search(
             label + ":" + r".*$", self.data, re.MULTILINE
-        ).group()[len(label) + 2 :]
+        ).group()[  # type: ignore
+            len(label) + 2 :
+        ]
 
-    def _set_configuration(self, label: str, value: str) -> None:
+    def _set_configuration(self, label: str, value: Any) -> None:
         """Set a configuration by a label.
 
         Args:
@@ -52,7 +55,7 @@ class SvSolverInputHandler(PlainHandler):
         """
         match = re.search(label + ":" + r".*$", self.data, re.MULTILINE)
         self.data = (
-            self.data[: match.start()]
+            self.data[: match.start()]  # type: ignore
             + f"{label}: {value}"
-            + self.data[match.end() :]
+            + self.data[match.end() :]  # type: ignore
         )

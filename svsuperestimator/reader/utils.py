@@ -4,7 +4,7 @@ import numpy as np
 from ._svproject import SimVascularProject
 
 
-def get_0d_element_coordinates(project: SimVascularProject):
+def get_0d_element_coordinates(project: SimVascularProject) -> dict:
     """Extract 0D elements with coordinates from a project.
 
     Args:
@@ -16,7 +16,7 @@ def get_0d_element_coordinates(project: SimVascularProject):
     elements = {}
 
     # Extract branch information of 0D config
-    branchdata = {}
+    branchdata: dict = {}
     for vessel_config in zerod_handler.vessels.values():
 
         # Extract branch and segment id from name
@@ -24,7 +24,7 @@ def get_0d_element_coordinates(project: SimVascularProject):
         branch_id, seg_id = name.split("_")
         branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-        if not branch_id in branchdata:
+        if branch_id not in branchdata:
             branchdata[branch_id] = {}
 
         branchdata[branch_id][seg_id] = {}

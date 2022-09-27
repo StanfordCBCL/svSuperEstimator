@@ -62,7 +62,8 @@ class SvZeroDSolverInputHandler(DataHandler):
         }
 
     @property
-    def vessel_to_bc_map(self):
+    def vessel_to_bc_map(self) -> dict:
+        """Boundary condition to vessel name map."""
         bc_map = {}
         for vessel_data in self.vessels.values():
             if "boundary_conditions" in vessel_data:
@@ -79,7 +80,8 @@ class SvZeroDSolverInputHandler(DataHandler):
         return bc_map
 
     @property
-    def vessel_id_to_name_map(self):
+    def vessel_id_to_name_map(self) -> dict:
+        """Vessel ID to vessel name map."""
         id_map = {}
         for vessel_data in self.vessels.values():
             id_map[vessel_data["vessel_id"]] = vessel_data["vessel_name"]
@@ -93,7 +95,8 @@ class SvZeroDSolverInputHandler(DataHandler):
         ]
 
     @property
-    def nodes(self) -> dict:
+    def nodes(self) -> list:
+        """Nodes of the 0D model."""
         id_map = self.vessel_id_to_name_map
         connections = []
         for junction in self.junctions.values():
@@ -152,10 +155,12 @@ class SvZeroDSolverInputHandler(DataHandler):
             abs_tol: Absolute tolerance for simulation.
             max_nliter: Maximum number of non-linear iterations per time step
                 in time integration.
+            num_cycles: Number of cardiac cycles to simulate.
             steady_initial: Solve steady solution first and use as intitial
                 condition.
             mean_only: Return only mean values over time steps.
             output_interval: Interval for writing a timestep to the output.
+            last_cycle_only: Output only last cycle.
             variable_based: Node based output.
         """
         simparams = self.data["simulation_parameters"]

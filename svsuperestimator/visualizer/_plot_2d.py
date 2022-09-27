@@ -26,7 +26,7 @@ class Plot2D(PlotBase):
         colorscale: str = "viridis",
         showlegend: bool = False,
         **kwargs: Any,
-    ):
+    ) -> None:
         """Add a point scatter trace.
 
         Args:
@@ -67,7 +67,7 @@ class Plot2D(PlotBase):
         opacity: float = 1.0,
         showlegend: bool = False,
         dash: str = None,
-    ):
+    ) -> None:
         """Add a line scatter trace.
 
         Args:
@@ -78,6 +78,7 @@ class Plot2D(PlotBase):
             width: Width of the line.
             opacity: Opacity of the line.
             showlegend: Toggle display of trace in legend.
+            dash: Dashed line specification.
         """
         self._fig.add_trace(
             go.Scatter(
@@ -99,7 +100,7 @@ class Plot2D(PlotBase):
         color: str = None,
         opacity: float = 1.0,
         showlegend: bool = False,
-    ):
+    ) -> None:
         """Add a bar trace.
 
         Args:
@@ -125,7 +126,7 @@ class Plot2D(PlotBase):
 
     def add_vline_trace(
         self, x: float, text: str = None, width: int = 3, color: str = "orange"
-    ):
+    ) -> None:
         """Add vertical line marker trace.
 
         Args:
@@ -149,13 +150,13 @@ class Plot2D(PlotBase):
         symbol: list[str],
         color: str = "orange",
         size: int = 8,
-    ):
+    ) -> None:
         """Add an annotated point trace.
 
         Args:
             x: X-coordinate of the point.
             y: Y-coordinate of the point.
-            Name: Names of points to display in legend.
+            name: Name of trace.
             color: Colors of the points.
             symbol: Symbol of the points.
             size: Size of the point.
@@ -179,14 +180,17 @@ class Plot2D(PlotBase):
         x: Union[Sequence, np.ndarray] = None,
         y: Union[Sequence, np.ndarray] = None,
         colorscale: str = "viridis",
-        showscale=False,
-    ):
+        showscale: bool = False,
+    ) -> None:
         """Add a heatmap trace.
 
         Args:
+            z: Z-coordinates of the heatmap points.
+            name: Name of trace.
             x: X-coordinates of the heatmap points.
             y: Y-coordinates of the heatmap points.
             colorscale: Colorscale of the heatmap.
+            showscale: Show color scale.
         """
         self._fig.add_trace(
             go.Heatmap(
@@ -208,7 +212,7 @@ class Plot2D(PlotBase):
         name_x: str,
         name_y: str,
         color: str = None,
-    ):
+    ) -> None:
         """Add bar traces to the borders of the x and y axis.
 
         Args:
@@ -279,7 +283,7 @@ class Plot2D(PlotBase):
         y_lower: Union[Sequence, np.ndarray],
         y_upper: Union[Sequence[int], np.ndarray],
         name: str,
-    ):
+    ) -> None:
         """Add a line scatter trace with considence interval.
 
         Args:
@@ -325,10 +329,10 @@ class Plot2D(PlotBase):
     def add_parallel_coordinates_plots(
         self,
         values: Union[Sequence, np.ndarray],
-        names: list[str] = None,
+        names: list[str],
         color_by: Union[Sequence, np.ndarray] = None,
         plotrange: tuple[float, float] = None,
-    ):
+    ) -> None:
         """Add a parallel coordinates trace to the plot.
 
         Args:

@@ -12,6 +12,7 @@ from ._data_handler import DataHandler
 
 T = TypeVar("T", bound="VtkHandler")
 
+
 class VtkHandler(DataHandler):
     """Handler for vtk based data."""
 
@@ -49,7 +50,7 @@ class VtkHandler(DataHandler):
         reader.Update()
         return cls(reader.GetOutput())
 
-    def to_file(self, filename: str):
+    def to_file(self, filename: str) -> None:
         """Write the data to a file.
 
         Args:
@@ -133,6 +134,7 @@ class VtkHandler(DataHandler):
         """Set a point data array.
 
         Args:
+            label: Label of the point data array.
             array: Point data array.
         """
         arr = numpy_to_vtk(array)

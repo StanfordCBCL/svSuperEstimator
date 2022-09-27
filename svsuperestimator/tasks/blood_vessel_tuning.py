@@ -349,7 +349,9 @@ class BloodVesselTuning(Task):
 
                 # Create and append plot
                 plots.append(
-                    visualizer.Plot2D({"title": plot_title, **plot_opts})
+                    visualizer.Plot2D(
+                        title=plot_title, **plot_opts  # type: ignore
+                    )
                 )
                 for sfx, opt in zip(trace_suffix, trace_opts):
                     plots[-1].add_line_trace(

@@ -8,6 +8,7 @@ from ._data_handler import DataHandler
 
 T = TypeVar("T", bound="PlainHandler")
 
+
 class PlainHandler(DataHandler):
     """Class for plain text based data."""
 

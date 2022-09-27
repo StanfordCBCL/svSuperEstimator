@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from base64 import b64encode
 from datetime import datetime
-from typing import Any
+from typing import Any, List
 
 import pandas as pd
 
@@ -14,9 +14,9 @@ class Report:
 
     def __init__(self) -> None:
         """Create a new report."""
-        self._content = []
+        self._content: List[Any] = []
 
-    def add(self, content: Any):
+    def add(self, content: Any) -> None:
         """Add new content to the report."""
         self._content.append(content)
 
@@ -27,10 +27,11 @@ class Report:
         folder.
 
         Args:
-            path: Target folder for the webpage.
+            filename: Target folder for the webpage.
+            title: Title of the webpage.
         """
 
-        formatted_content = []
+        formatted_content: List[Any] = []
 
         for item in self._content:
             if isinstance(item, str):
@@ -141,7 +142,7 @@ class Report:
   h2 {
     font-size: 14pt;
   }
-"""
+"""  # noqa
 
         # Build and write html page
         with open(filename, "w") as ff:
@@ -224,7 +225,10 @@ class _HtmlFlexbox:
         for item in self._items:
             try:
                 if isinstance(item, pd.DataFrame):
-                    html += f"<div class='item'>{item.to_html(index=False)}</div>\n"
+                    html += (
+                        f"<div class='item'>{item.to_html(index=False)}"
+                        "</div>\n"
+                    )
                 else:
                     html += f"<div class='item'>{item.to_html()}</div>\n"
             except AttributeError:
@@ -236,7 +240,7 @@ class _HtmlFlexbox:
 class _HtmlItem:
     """Auxiliary class for generating html item."""
 
-    def __init__(self, item: str) -> None:
+    def __init__(self, item: Any) -> None:
         """Create a new instance of _HtmlItem.
 
         Args:
@@ -250,4 +254,7 @@ class _HtmlItem:
             content = self._item.to_html()
         except AttributeError:
             content = self._item
-        return f"<div class='item' style='margin-left:20px;margin-right:20px;margin-bottom:30px'>{content}</div>\n"
+        return (
+            "<div class='item' style='margin-left:20px;margin-right:20px;"
+            f"margin-bottom:30px'>{content}</div>\n"
+        )
