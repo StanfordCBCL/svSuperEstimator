@@ -6,7 +6,7 @@ from shutil import copy2, copytree, ignore_patterns, rmtree
 
 import numpy as np
 
-from .. import reader
+from .. import reader, visualizer
 from .task import Task
 from .taskutils import run_subprocess
 
@@ -26,7 +26,7 @@ class ThreeDSimulation(Task):
         **Task.DEFAULTS,
     }
 
-    def core_run(self):
+    def core_run(self) -> None:
         """Core routine of the task."""
 
         sim_folder_path = self.project["3d_simulation_folder_path"]
@@ -121,12 +121,12 @@ class ThreeDSimulation(Task):
             )
         )
 
-    def post_run(self):
+    def post_run(self) -> None:
         """Postprocessing routine of the task."""
 
         pass
 
-    def generate_report(self):
+    def generate_report(self) -> visualizer.Report:
         """Generate the task report."""
 
         pass
