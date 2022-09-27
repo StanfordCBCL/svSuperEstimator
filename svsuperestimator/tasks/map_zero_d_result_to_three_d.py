@@ -55,7 +55,9 @@ class MapZeroDResultToThreeD(Task):
         result0d = runnercpp.run_from_config(zerod_handler.data)
 
         # assemble output dict
-        rec_dd = lambda: defaultdict(rec_dd)
+        def rec_dd():
+            return defaultdict(rec_dd)
+
         arrays = rec_dd()
 
         def convert_csv_to_branch_result(df, zerod_handler):
@@ -138,17 +140,9 @@ class MapZeroDResultToThreeD(Task):
                 path_1d_res = results["distance"][br]
                 f_res = res_br
 
-                assert np.isclose(
-                    path_1d_res[0], 0.0
-                ), "ROM branch path does not start at 0"
-                assert np.isclose(
-                    path_cent[0], 0.0
-                ), "Centerline branch path does not start at 0"
-                msg = "ROM results and centerline have different branch path lengths"
-                assert np.isclose(path_1d_res[-1], path_cent[-1]), msg
-
                 # interpolate ROM onto centerline
-                # limit to interval [0,1] to avoid extrapolation error interp1d due to slightly incompatible lenghts
+                # limit to interval [0,1] to avoid extrapolation error interp1d
+                # due to slightly incompatible lenghts
                 f_cent = interp1d(path_1d_res / path_1d_res[-1], f_res.T)(
                     path_cent / path_cent[-1]
                 ).T
@@ -227,9 +221,7 @@ class MapZeroDResultToThreeD(Task):
         surf_handler = self.project["3d_simulation_surface"]
 
         def get_centerline_3d_map(cl_handler, vol_handler):
-            """
-            Create a map from centerine to volume mesh through region growing
-            """
+            """Create a map from centerine to mesh through region growing."""
 
             # get volume points closest to centerline
             seed_points = np.unique(
@@ -252,13 +244,14 @@ class MapZeroDResultToThreeD(Task):
             return ids, rad
 
         def find_closest_points(data, points, radius=None):
-            """
-            Get ids of points in geometry closest to input points
+            """Get ids of points in geometry closest to input points.
+
             Args:
-                points: list of points to be searched
-                radius: optional, search radius
+                points: list of points to be searched.
+                radius: optional, search radius.
+
             Returns:
-                Id list
+                Id list.
             """
             dataset = vtk.vtkPolyData()
             dataset.SetPoints(data.GetPoints())
@@ -295,7 +288,8 @@ class MapZeroDResultToThreeD(Task):
             pids_all = set(seed_points.tolist())
             pids_new = set(seed_points.tolist())
 
-            # loop until region stops growing or reaches maximum number of iterations
+            # loop until region stops growing or reaches maximum number of
+            # iterations
             i = 0
 
             with Progress(transient=True) as progress:
@@ -370,7 +364,8 @@ class MapZeroDResultToThreeD(Task):
                         # get point id
                         pi_new = pids.GetId(k)
 
-                        # add point only if it's new and doesn't fullfill stopping criterion
+                        # add point only if it's new and doesn't fullfill
+                        # stopping criterion
                         if array[pi_new] == -1 and pi_new not in pids_in:
                             pids_out.add(pi_new)
                             pids_all.add(pi_new)
@@ -472,7 +467,7 @@ class MapZeroDResultToThreeD(Task):
             threed_bc[i] = bcs[bc_mapping[surface_id]]["bc_values"]
 
         for bc in threed_bc:
-            if not "t" in bc:
+            if "t" not in bc:
                 bc["t"] = [0.0, 1.0]
                 bc["Pd"] = [bc["Pd"], bc["Pd"]]
 

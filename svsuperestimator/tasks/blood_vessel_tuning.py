@@ -144,7 +144,7 @@ class BloodVesselTuning(Task):
             ]["theta_opt"]
 
         # Improve junctions
-        self.make_resistive_junctions(zerod_config_handler, branch_data)
+        self._make_resistive_junctions(zerod_config_handler, branch_data)
 
         # Writing data to project
         self.log("Save optimized 0D simulation file")
@@ -190,7 +190,7 @@ class BloodVesselTuning(Task):
         # Extract time steps of last cardiac cycle
         pts_per_cycle = zerod_config_handler.num_pts_per_cycle
         sim_times = np.array(
-            zerod_result[zerod_result.name == f"branch0_seg0"]["time"][
+            zerod_result[zerod_result.name == "branch0_seg0"]["time"][
                 -pts_per_cycle:
             ]
         )
@@ -325,9 +325,8 @@ class BloodVesselTuning(Task):
         }
 
         # Filter for results
-        result_fiter = lambda name, label: results[results["name"] == name][
-            label
-        ]
+        def result_fiter(name, label):
+            return results[results["name"] == name][label]
 
         # Trace sequence
         trace_suffix = ["_3d", "_0d", "_0d_opt"]
@@ -430,7 +429,8 @@ class BloodVesselTuning(Task):
             plot1.write_image(
                 os.path.join(
                     segment_data["debug_folder"],
-                    f"pres_branch_{segment_data['branch_id']}_seg{segment_data['seg_id']}.png",
+                    f"pres_branch_{segment_data['branch_id']}_"
+                    f"seg{segment_data['seg_id']}.png",
                 )
             )
             plot2 = px.line({"Result": outflow_sim, "Target": outflow})
@@ -440,7 +440,8 @@ class BloodVesselTuning(Task):
             plot2.write_image(
                 os.path.join(
                     segment_data["debug_folder"],
-                    f"flow_branch_{segment_data['branch_id']}_seg{segment_data['seg_id']}.png",
+                    f"flow_branch_{segment_data['branch_id']}_"
+                    f"seg{segment_data['seg_id']}.png",
                 )
             )
 
@@ -467,30 +468,36 @@ class BloodVesselTuning(Task):
             table.add_row("number of evaluations", str(output["nfev"]))
             table.add_row(
                 "relative error",
-                f"{output['error_before']*100:.3f} -> {output['error']*100:.3f} %",
+                f"{output['error_before']*100:.3f} -> "
+                f"{output['error']*100:.3f} %",
             )
             table.add_row(
                 "resistance",
-                f"{output['theta_start'][0]:.1e} -> {output['theta_opt'][0]:.1e}",
+                f"{output['theta_start'][0]:.1e} -> "
+                f"{output['theta_opt'][0]:.1e}",
             )
             table.add_row(
                 "capacitance",
-                f"{output['theta_start'][1]:.1e} -> {output['theta_opt'][1]:.1e}",
+                f"{output['theta_start'][1]:.1e} -> "
+                f"{output['theta_opt'][1]:.1e}",
             )
             table.add_row(
                 "inductance",
-                f"{output['theta_start'][2]:.1e} -> {output['theta_opt'][2]:.1e}",
+                f"{output['theta_start'][2]:.1e} -> "
+                f"{output['theta_opt'][2]:.1e}",
             )
             table.add_row(
                 "stenosis coefficient",
-                f"{output['theta_start'][3]:.1e} -> {output['theta_opt'][3]:.1e}",
+                f"{output['theta_start'][3]:.1e} -> "
+                f"{output['theta_opt'][3]:.1e}",
             )
             self.log(table)
         else:
             self.log(
                 f"Optimization for branch {output['branch_id']} segment "
                 f"{output['seg_id']} [bold red]failed[/bold red] with "
-                f"message {output['message']} after {output['nfev']} evaluations."
+                f"message {output['message']} after {output['nfev']} "
+                "evaluations."
             )
 
     @classmethod
@@ -577,7 +584,8 @@ class BloodVesselTuning(Task):
             sim_outflow,
         )
 
-    def make_resistive_junctions(self, zerod_handler, mapped_data):
+    def _make_resistive_junctions(self, zerod_handler, mapped_data):
+        """Convert normal junctions to resistive junctions."""
 
         vessel_id_map = zerod_handler.vessel_id_to_name_map
 
@@ -633,7 +641,8 @@ class BloodVesselTuning(Task):
             junction_data["junction_values"] = {"R": rs}
 
             self.log(
-                f"Optimization for junction [cyan]{junction_name}[/cyan] [bold green]successful[/bold green]"
+                f"Optimization for junction [cyan]{junction_name}[/cyan] "
+                "[bold green]successful[/bold green]"
             )
             table = Table(box=box.HORIZONTALS, show_header=False)
             table.add_column()
@@ -643,13 +652,16 @@ class BloodVesselTuning(Task):
 
                 for i, ovessel in enumerate(outlet_vessels):
                     table.add_row(
-                        f"resistance {inlet_branch_name} -> {vessel_id_map[ovessel]}",
-                        f"{junction_values_bef['R'][i+1]:.1e} -> {rs[i+1]:.1e}",
+                        f"resistance {inlet_branch_name} -> "
+                        f"{vessel_id_map[ovessel]}",
+                        f"{junction_values_bef['R'][i+1]:.1e} -> "
+                        f"{rs[i+1]:.1e}",
                     )
             else:
                 for i, ovessel in enumerate(outlet_vessels):
                     table.add_row(
-                        f"resistance {inlet_branch_name} -> {vessel_id_map[ovessel]}",
+                        f"resistance {inlet_branch_name} -> "
+                        f"{vessel_id_map[ovessel]}",
                         f"0.0 -> {rs[i+1]:.1e}",
                     )
 

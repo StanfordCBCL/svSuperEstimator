@@ -81,19 +81,19 @@ class ThreeDSimulation(Task):
                 f"{self.project.name}.svpre",
             ],
             logger=self.log,
-            logprefix="\[svpre]: ",
+            logprefix=r"\[svpre]: ",
             cwd=self.output_folder,
         )
 
         self.log("Calling svsolver")
         run_subprocess(
             [
-                f"UCX_POSIX_USE_PROC_LINK=n srun",
+                "UCX_POSIX_USE_PROC_LINK=n srun",
                 self.config["svsolver_executable"],
                 "solver.inp",
             ],
             logger=self.log,
-            logprefix="\[svsolver]: ",
+            logprefix=r"\[svsolver]: ",
             cwd=self.output_folder,
         )
 
@@ -108,7 +108,7 @@ class ThreeDSimulation(Task):
                 "-vtu ../result.vtu",
             ],
             logger=self.log,
-            logprefix="\[svpost]: ",
+            logprefix=r"\[svpost]: ",
             cwd=os.path.join(
                 self.output_folder, f"{self.config['num_procs']}-procs_case"
             ),

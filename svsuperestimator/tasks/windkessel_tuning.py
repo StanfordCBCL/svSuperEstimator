@@ -11,7 +11,6 @@ import numpy as np
 import orjson
 import pandas as pd
 from pqueens.main import run
-from rich.console import Console
 from rich.logging import RichHandler
 from svzerodsolver import runnercpp
 
@@ -344,7 +343,8 @@ class WindkesselTuning(Task):
             distplot._fig.add_annotation(
                 text=(
                     f"ground truth [&#952;]: {gt:.2f}<br>"
-                    f"mean &#177; std [&#952;]: {wmean:.2f} &#177; {std:.2f}<br>"
+                    f"mean &#177; std [&#952;]: {wmean:.2f} &#177; "
+                    f"{std:.2f}<br>"
                     f"map [&#952;]: {map:.2f}<br>"
                     f"mean error [%]: {wmean_error:.2f}<br>"
                     f"map error [%]: {map_error:.2f}<br>"
@@ -620,7 +620,7 @@ class SMCRunner:
         """Add a new random variable to the iterator configuration.
 
         Args:
-            label: Name of the variable.
+            name: Name of the variable.
             dist_type: Distribution type of the variable (`normal`, `uniform`,
                 `lognormal`, `beta`)
             options: Parameters of the distribution. For `uniform` distribution

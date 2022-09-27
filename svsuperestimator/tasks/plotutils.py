@@ -7,6 +7,12 @@ from svsuperestimator import visualizer
 
 
 def create_3d_geometry_plot_with_vessels(project, branch_data):
+    """Create a 3D plot with mesh and 0D element traces.
+
+    Args:
+        project: The project.
+        branch_data: branch_data with 0D element coordinates.
+    """
 
     zerod_color = "cyan"
 

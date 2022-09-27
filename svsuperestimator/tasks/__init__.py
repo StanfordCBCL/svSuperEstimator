@@ -5,6 +5,14 @@ Contains all the tasks for performing multi-fidelity parameter estimation.
 
 
 def get_task_by_name(name):
+    """Get the task class by it's name.
+
+    Args:
+        name: Name of the task.
+
+    Returns:
+        cls: Class of the task.
+    """
     from .blood_vessel_tuning import BloodVesselTuning
     from .map_three_d_result_on_centerline import MapThreeDResultOnCenterline
     from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD

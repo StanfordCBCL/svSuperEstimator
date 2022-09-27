@@ -131,7 +131,7 @@ def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
         branch_id, seg_id = name.split("_")
         branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-        if not branch_id in branchdata:
+        if branch_id not in branchdata:
             branchdata[branch_id] = {}
 
         branchdata[branch_id][seg_id] = {}
@@ -219,7 +219,7 @@ def map_centerline_result_to_0d_2(
         branch_id, seg_id = name.split("_")
         branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-        if not branch_id in branchdata:
+        if branch_id not in branchdata:
             branchdata[branch_id] = {}
 
         branchdata[branch_id][seg_id] = {}
@@ -294,7 +294,13 @@ def map_centerline_result_to_0d_2(
     return branchdata, times
 
 
-def set_initial_condition(zerod_handler, mapped_data):
+def set_initial_condition(zerod_handler, mapped_data) -> None:
+    """Set initial condition of 0D configuration based on mapped 0D results.
+
+    Args:
+        zerod_handler: 0D simulation input handler.
+        mapped_data: Mapped 3D result.
+    """
 
     nodes = zerod_handler.nodes
 
@@ -310,7 +316,7 @@ def set_initial_condition(zerod_handler, mapped_data):
             flow = mapped_data[branch_id][seg_id]["flow_out"][0]
             initial_condition[f"pressure:{ele1}:{ele2}"] = pressure
             initial_condition[f"flow:{ele1}:{ele2}"] = flow
-        except:
+        except ValueError:
             pass
 
         try:
@@ -320,7 +326,7 @@ def set_initial_condition(zerod_handler, mapped_data):
             flow = mapped_data[branch_id][seg_id]["flow_in"][0]
             initial_condition[f"pressure:{ele1}:{ele2}"] = pressure
             initial_condition[f"flow:{ele1}:{ele2}"] = flow
-        except:
+        except ValueError:
             pass
 
         if ele2.startswith("RCR"):

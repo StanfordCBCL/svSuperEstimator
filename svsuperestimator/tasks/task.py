@@ -51,7 +51,10 @@ class Task(ABC):
         Args:
             project: SimVascular project to perform the task on.
             config: Configuration for the task.
-            suffix: Suffix for the task name.
+            prefix: Prefix for the naming of the task folder.
+            parent_folder: Parent folder for the task folder. If None,
+                parameter estimation folder of project is used.
+            log_config: Toggle logging of config at instantiation.
         """
         self.project = project
         self.console = Console(
@@ -78,7 +81,8 @@ class Task(ABC):
                 self.log(f"Unused configuration option {key}")
             if value is None:
                 raise RuntimeError(
-                    f"Required option {key} for task {type(self).__name__} not specified."
+                    f"Required option {key} for task "
+                    f"{type(self).__name__} not specified."
                 )
 
     @abstractmethod
@@ -155,7 +159,8 @@ class Task(ABC):
             self.log(f"Saved html report {html_report_target}")
 
         self.log(
-            f"Task [bold cyan]{type(self).__name__}[/bold cyan] [bold green]completed[/bold green] in "
+            f"Task [bold cyan]{type(self).__name__}[/bold cyan] "
+            "[bold green]completed[/bold green] in "
             f"{time()-start:.1f} seconds"
         )
         Path(os.path.join(self.output_folder, ".completed")).touch()
@@ -165,7 +170,7 @@ class Task(ABC):
         return os.path.exists(os.path.join(self.output_folder, ".completed"))
 
     def _log_config(self):
-        """Log the task configuration"""
+        """Log the task configuration."""
         table = Table(box=box.HORIZONTALS, expand=True, show_header=False)
         table.add_column("Configuration", style="bold cyan")
         table.add_column("Value", justify="right")

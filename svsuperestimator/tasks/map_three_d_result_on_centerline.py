@@ -37,7 +37,7 @@ class MapThreeDResultOnCenterline(Task):
                 target,
             ],
             logger=self.log,
-            logprefix="\[slicer] ",
+            logprefix=r"\[slicer] ",
             cwd=self.output_folder,
         )
 
