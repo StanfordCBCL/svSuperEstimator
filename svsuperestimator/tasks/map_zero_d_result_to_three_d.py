@@ -1,3 +1,4 @@
+"""This module holds the MapZeroDResultToThreeD task."""
 from __future__ import annotations
 
 import os
@@ -9,7 +10,7 @@ import vtk
 from rich.progress import Progress
 from scipy.interpolate import interp1d
 from svzerodsolver import runnercpp
-from vtk.util.numpy_support import numpy_to_vtk, vtk_to_numpy
+from vtk.util.numpy_support import numpy_to_vtk
 
 from .. import reader
 from .task import Task

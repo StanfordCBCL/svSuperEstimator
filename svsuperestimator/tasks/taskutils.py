@@ -1,3 +1,4 @@
+"""This module holds general task helper function."""
 import subprocess
 from time import sleep
 from typing import Callable

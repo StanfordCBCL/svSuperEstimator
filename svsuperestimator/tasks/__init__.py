@@ -1,6 +1,6 @@
-"""svSuperEstimator's problem subpackage.
+"""svSuperEstimator's task subpackage.
 
-Contains the different optimization problems.
+Contains all the tasks for performing multi-fidelity parameter estimation.
 """
 
 

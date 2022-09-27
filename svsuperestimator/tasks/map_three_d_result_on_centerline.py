@@ -1,3 +1,4 @@
+"""This module holds the MapThreeDResultOnCenterline task."""
 from __future__ import annotations
 
 import os
