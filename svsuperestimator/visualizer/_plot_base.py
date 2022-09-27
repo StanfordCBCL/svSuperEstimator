@@ -13,7 +13,7 @@ class PlotBase:
     Defines common methods to handle plotly plots.
     """
 
-    def __init__(self, static=False, **kwargs: dict[str, Any]) -> None:
+    def __init__(self, static=False, **kwargs: Any) -> None:
         """Create a new PlotBase instance.
 
         Args:
