@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from typing import Union
+from typing import Union, Sequence
 
 import numpy as np
 import plotly.graph_objects as go
@@ -29,7 +29,7 @@ class Plot3D(PlotBase):
         size: int = 3,
         opacity: float = 1.0,
         colorscale: str = "viridis",
-        text: str = None,
+        text: Union[Sequence, np.ndarray] = None,
         showlegend: bool = False,
         **kwargs,
     ):

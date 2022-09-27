@@ -70,7 +70,9 @@ class Task(ABC):
         if self.config["name"] is None:
             self.config["name"] = prefix + self.TASKNAME  # type: ignore
 
-        self.output_folder = os.path.join(parent_folder, self.config["name"])  # type: ignore
+        self.output_folder = os.path.join(
+            parent_folder, self.config["name"]  # type: ignore
+        )
 
         if log_config:
             self.log(

@@ -533,7 +533,9 @@ class _Forward_Model:
             for name, flow_id in zip(self.bc_names, self.bc_flow)
         ]
 
-        return np.expand_dims(np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean]), axis=0)
+        return np.expand_dims(
+            np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean]), axis=0
+        )
 
 
 class SMCRunner:
@@ -689,9 +691,10 @@ class SMCRunner:
             if self._config["global_settings"]["output_dir"] is None:
                 self._config["global_settings"]["output_dir"] = tmpdir
 
+            output_dir = self._config["global_settings"]["output_dir"]
             with open(
                 os.path.join(
-                    self._config["global_settings"]["output_dir"], # type: ignore
+                    output_dir,  # type: ignore
                     "queens_input.json",
                 ),
                 "w",

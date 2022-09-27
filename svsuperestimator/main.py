@@ -5,12 +5,12 @@ from time import time
 
 import click
 import yaml
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
 
-from .tasks.taskutils import run_subprocess
 from .reader import SimVascularProject
+from .tasks.taskutils import run_subprocess
 
 MAIN_CONSOLE = Console(log_time_format="[%m/%d/%y %H:%M:%S]")
 

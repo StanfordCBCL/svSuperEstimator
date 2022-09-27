@@ -1,12 +1,16 @@
 """This module holds task helper function related to plotting."""
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 
-from svsuperestimator import visualizer
+from .. import reader, visualizer
 
 
-def create_3d_geometry_plot_with_vessels(project, branch_data):
+def create_3d_geometry_plot_with_vessels(
+    project: reader.SimVascularProject, branch_data: Any
+) -> visualizer.Plot3D:
     """Create a 3D plot with mesh and 0D element traces.
 
     Args:
@@ -28,8 +32,8 @@ def create_3d_geometry_plot_with_vessels(project, branch_data):
             label_points.append(ele_config)
             label_texts.append(ele_name)
 
-    label_points = np.array(label_points)
-    line_points = np.array(line_points)
+    label_points_np = np.array(label_points)
+    line_points_np = np.array(line_points)
 
     plot = visualizer.Plot3D(
         scene=dict(
@@ -51,9 +55,9 @@ def create_3d_geometry_plot_with_vessels(project, branch_data):
         decimate=0.9,  # Reduce number of polygons by 90%
     )
     plot.add_point_trace(
-        x=label_points[:, 0],
-        y=label_points[:, 1],
-        z=label_points[:, 2],
+        x=label_points_np[:, 0],
+        y=label_points_np[:, 1],
+        z=label_points_np[:, 2],
         color="white",
         name="",
         text=label_texts,
@@ -63,9 +67,9 @@ def create_3d_geometry_plot_with_vessels(project, branch_data):
         textfont_color=zerod_color,
     )
     plot.add_line_trace(
-        x=line_points[:, 0],
-        y=line_points[:, 1],
-        z=line_points[:, 2],
+        x=line_points_np[:, 0],
+        y=line_points_np[:, 1],
+        z=line_points_np[:, 2],
         color=zerod_color,
         name="Elements",
         width=5,
