@@ -35,7 +35,6 @@ class WindkesselTuning(Task):
         "num_procs": 1,
         "theta_obs": None,
         "y_obs": None,
-        "ground_truth_centerline": None,
         "num_particles": 100,
         "num_rejuvenation_steps": 2,
         "resampling_threshold": 0.5,
@@ -183,9 +182,6 @@ class WindkesselTuning(Task):
                 )
             )
 
-        runnercpp.run_from_config(zerod_config_handler.data).to_csv(
-            os.path.join(self.output_folder, "solution_gt.csv")
-        )
         outlet_bcs = zerod_config_handler.outlet_boundary_conditions.values()
         distal_to_proximals = [
             bc["bc_values"]["Rd"] / bc["bc_values"]["Rp"] for bc in outlet_bcs
@@ -233,9 +229,6 @@ class WindkesselTuning(Task):
         num_pts_per_cycle = zerod_config_handler.num_pts_per_cycle
         bc_map = zerod_config_handler.vessel_to_bc_map
 
-        result_gt = pd.read_csv(
-            os.path.join(self.output_folder, "solution_gt.csv")
-        )
         result_map = pd.read_csv(
             os.path.join(self.output_folder, "solution_map.csv")
         )
@@ -277,13 +270,6 @@ class WindkesselTuning(Task):
         )
         report.add([paracoords, cov_plot])
 
-        gt_opts: Dict[str, Any] = {
-            "name": "Ground Truth",
-            "showlegend": True,
-            "color": "white",
-            "dash": "dot",
-            "width": 4,
-        }
         map_opts: Dict[str, Any] = {
             "name": "MAP estimate",
             "showlegend": True,
@@ -365,22 +351,14 @@ class WindkesselTuning(Task):
             )
             report.add([distplot])
 
-            bc_result = result_gt[result_gt.name == bc_map[bc_name]["name"]]
-            times = np.array(bc_result["time"])[-num_pts_per_cycle:]
-            times -= times[0]
             pressure_plot = visualizer.Plot2D(
                 title="Pressure",
                 xaxis_title=r"$s$",
                 yaxis_title=r"$mmHg$",
             )
-            pressure_plot.add_line_trace(
-                x=times,
-                y=taskutils.cgs_pressure_to_mmgh(
-                    bc_result[bc_map[bc_name]["pressure"]][-num_pts_per_cycle:]
-                ),
-                **gt_opts,
-            )
             bc_result = result_map[result_map.name == bc_map[bc_name]["name"]]
+            times = np.array(bc_result["time"])[-num_pts_per_cycle:]
+            times -= times[0]
             pressure_plot.add_line_trace(
                 x=times,
                 y=taskutils.cgs_pressure_to_mmgh(
@@ -401,13 +379,6 @@ class WindkesselTuning(Task):
                 title="Flow",
                 xaxis_title=r"$s$",
                 yaxis_title=r"$\frac{l}{h}$",
-            )
-            flow_plot.add_line_trace(
-                x=times,
-                y=taskutils.cgs_flow_to_lh(
-                    bc_result[bc_map[bc_name]["flow"]][-num_pts_per_cycle:]
-                ),
-                **gt_opts,
             )
             bc_result = result_map[result_map.name == bc_map[bc_name]["name"]]
             flow_plot.add_line_trace(
