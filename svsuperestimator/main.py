@@ -13,6 +13,8 @@ from rich.table import Table
 from .reader import SimVascularProject
 from .tasks.taskutils import run_subprocess
 
+if os.environ.get("COLUMNS") is None:
+    os.environ["COLUMNS"] = "180"
 MAIN_CONSOLE = Console(log_time_format="[%m/%d/%y %H:%M:%S]")
 
 slurm_base = """#!/bin/bash

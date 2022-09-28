@@ -126,7 +126,7 @@ class WindkesselTuning(Task):
 
         # Read raw results
         self.log("Read raw result")
-        particles, weights = self._get_raw_results()
+        particles, weights, log_post = self._get_raw_results()
         zerod_config_handler = reader.SvZeroDSolverInputHandler.from_file(
             self.config["zerod_config_file"]
         )
@@ -135,20 +135,54 @@ class WindkesselTuning(Task):
         self.log("Calculate metrics")
         ground_truth = self.database["theta_obs"]
         wmean = statutils.particle_wmean(particles=particles, weights=weights)
-        maxap = statutils.particle_map(particles=particles, weights=weights)
         cov = statutils.particle_covmat(particles=particles, weights=weights)
         std = [cov[i][i] ** 0.5 for i in range(cov.shape[0])]
         wmean_error = [abs(m - gt) / gt for m, gt in zip(wmean, ground_truth)]
-        map_error = [abs(m - gt) / gt for m, gt in zip(maxap, ground_truth)]
+
+        max_post = statutils.particle_map(
+            particles=particles, posterior=log_post
+        )
+        map_error = [abs(m - gt) / gt for m, gt in zip(max_post, ground_truth)]
         results["metrics"] = {
             "ground_truth": ground_truth,
-            "wmean": wmean,
-            "wmean_error": wmean_error,
-            "wstd": std,
-            "map": maxap,
-            "map_error": map_error,
+            "weighted_mean": wmean,
+            "weighted_mean_error": wmean_error,
+            "weighted_std": std,
+            "maximum_a_posteriori": max_post,
+            "maximum_a_posteriori_error": map_error,
             "covariance_matrix": cov,
         }
+
+        # Calculate exponential metrics
+        particles_exp = np.exp(particles)
+        ground_truth_exp = np.exp(self.database["theta_obs"])
+        wmean_exp = statutils.particle_wmean(
+            particles=particles_exp, weights=weights
+        )
+        maxap_exp = statutils.particle_map(
+            particles=particles_exp, posterior=log_post
+        )
+        cov_exp = statutils.particle_covmat(
+            particles=particles_exp, weights=weights
+        )
+        std_exp = [cov_exp[i][i] ** 0.5 for i in range(cov_exp.shape[0])]
+        wmean_exp_error = [
+            abs(m - gt) / gt for m, gt in zip(wmean_exp, ground_truth_exp)
+        ]
+        map_exp_error = [
+            abs(m - gt) / gt for m, gt in zip(maxap_exp, ground_truth_exp)
+        ]
+        results["metrics"].update(
+            {
+                "exp_ground_truth": ground_truth_exp,
+                "exp_weighted_mean": wmean_exp,
+                "exp_weighted_mean_error": wmean_exp_error,
+                "exp_weighted_std": std_exp,
+                "exp_maximum_a_posteriori": maxap_exp,
+                "exp_maximum_a_posteriori_error": map_exp_error,
+                "exp_covariance_matrix": cov_exp,
+            }
+        )
 
         # Calculate 1D marginal kernel density estimate
         kernel_densities = []
@@ -201,7 +235,7 @@ class WindkesselTuning(Task):
             os.path.join(self.output_folder, "solution_mean.csv")
         )
         for i, bc in enumerate(outlet_bcs):
-            ki = np.exp(maxap[i])
+            ki = np.exp(max_post[i])
             bc["bc_values"]["Rp"] = ki / (1.0 + distal_to_proximals[i])
             bc["bc_values"]["Rd"] = ki - bc["bc_values"]["Rp"]
             bc["bc_values"]["C"] = time_constants[i] / bc["bc_values"]["Rd"]
@@ -241,7 +275,7 @@ class WindkesselTuning(Task):
             os.path.join(self.output_folder, "results.json"), "rb"
         ) as ff:
             results = orjson.loads(ff.read())
-        particles, weights = self._get_raw_results()
+        particles, weights, _ = self._get_raw_results()
         zerod_config = reader.SvZeroDSolverInputHandler.from_file(
             self.config["zerod_config_file"]
         )
@@ -281,6 +315,7 @@ class WindkesselTuning(Task):
             "showlegend": True,
             "color": "#636efa",
             "width": 3,
+            "dash": "dash",
         }
 
         # Create distribition plots for all boundary conditions
@@ -322,11 +357,24 @@ class WindkesselTuning(Task):
                 x=results["metrics"]["ground_truth"][i], text="Ground Truth"
             )
             gt = results["metrics"]["ground_truth"][i]
-            wmean = results["metrics"]["wmean"][i]
-            std = results["metrics"]["wstd"][i]
-            wmean_error = results["metrics"]["wmean_error"][i] * 100
-            map = results["metrics"]["map"][i]
-            map_error = results["metrics"]["map_error"][i] * 100
+            wmean = results["metrics"]["weighted_mean"][i]
+            std = results["metrics"]["weighted_std"][i]
+            wmean_error = results["metrics"]["weighted_mean_error"][i] * 100
+            map = results["metrics"]["maximum_a_posteriori"][i]
+            map_error = (
+                results["metrics"]["maximum_a_posteriori_error"][i] * 100
+            )
+
+            gt_exp = results["metrics"]["exp_ground_truth"][i]
+            wmean_exp = results["metrics"]["exp_weighted_mean"][i]
+            std_exp = results["metrics"]["exp_weighted_std"][i]
+            wmean_exp_error = (
+                results["metrics"]["exp_weighted_mean_error"][i] * 100
+            )
+            map_exp = results["metrics"]["exp_maximum_a_posteriori"][i]
+            map_exp_error = (
+                results["metrics"]["exp_maximum_a_posteriori_error"][i] * 100
+            )
 
             distplot._fig.add_annotation(
                 text=(
@@ -336,7 +384,13 @@ class WindkesselTuning(Task):
                     f"map [&#952;]: {map:.2f}<br>"
                     f"mean error [%]: {wmean_error:.2f}<br>"
                     f"map error [%]: {map_error:.2f}<br>"
-                    f"bandwidth [&#952;]: {bandwidth:.2f}"
+                    f"bandwidth [&#952;]: {bandwidth:.2f}<br>"
+                    f"exp. ground truth [&#952;]: {gt_exp:.2f}<br>"
+                    f"exp. mean &#177; std [&#952;]: {wmean_exp:.2f} &#177; "
+                    f"{std_exp:.2f}<br>"
+                    f"exp. map [&#952;]: {map_exp:.2f}<br>"
+                    f"exp. mean error [%]: {wmean_exp_error:.2f}<br>"
+                    f"exp. map error [%]: {map_exp_error:.2f}"
                 ),
                 align="left",
                 showarrow=False,
@@ -403,7 +457,7 @@ class WindkesselTuning(Task):
 
     def _get_raw_results(
         self, frame: int = None
-    ) -> tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return raw queens result.
 
         Args:
@@ -413,6 +467,7 @@ class WindkesselTuning(Task):
         Returns:
             particles: Coordinates of the particles.
             weights: Weights of particles.
+            log_post: Log posterior of particles.
         """
 
         filename = (
@@ -426,8 +481,9 @@ class WindkesselTuning(Task):
 
         particles = np.array(results["raw_output_data"]["particles"])
         weights = np.array(results["raw_output_data"]["weights"])
+        log_post = np.array(results["raw_output_data"]["log_posterior"])
 
-        return particles, weights.flatten()
+        return particles, weights.flatten(), log_post
 
 
 class _Forward_Model:

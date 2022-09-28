@@ -19,14 +19,14 @@ def particle_wmean(particles: np.ndarray, weights: np.ndarray) -> np.ndarray:
     return np.average(particles, weights=weights, axis=0)
 
 
-def particle_map(particles: np.ndarray, weights: np.ndarray) -> np.ndarray:
+def particle_map(particles: np.ndarray, posterior: np.ndarray) -> np.ndarray:
     """Calculate maximum a posteriori (MAP) of particles.
 
     Args:
         particles: Coordinates of particles.
-        weights: Weights of particles.
+        posterior: Posterior or log-posterior of particles.
     """
-    return np.array(particles[np.argmax(weights)])
+    return np.array(particles[np.argmax(posterior)])
 
 
 def particle_covmat(particles: np.ndarray, weights: np.ndarray) -> np.ndarray:
