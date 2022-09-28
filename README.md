@@ -40,7 +40,7 @@ The remaining dependencies have to be installed manually:
 * [svSolver](https://github.com/SimVascular/svSolver): Build release version and specify path to executable in config file.
 * **QUEENS** (currently not public)
 
-### For Contributers
+### For Contributors
 
 You can install svSuperEstimator **with development related dependencies**
 using:
@@ -70,15 +70,16 @@ In the following, a few example configuration files will be shown.
 project: path/to/my_simvascular_project
 
 # -------------------------------------------------------------------------------------------
-# (Optional) Global settungs for all tasks (can also be specified individually for each task)
+# (Optional) Global settings for all tasks (can also be specified individually for each task)
 # -------------------------------------------------------------------------------------------
 global:
   num_procs: 48             # Number of processors
   overwrite: True           # Overwrite existing task results
   report_html: True         # Export task report as html
-  report_files: False       # Export task reports as seperate files
+  report_files: False       # Export task reports as separate files
   debug: False              # Generate debug output and files
-  post_proc_only: False     # Only perform postprocessing on existing results.
+  core_run: True            # Toggle core run
+  post_proc: True           # Toggle post processing
 
 # -------------------------------------------------------------------------------------------
 # Task configuration (configure one or more tasks)
@@ -123,7 +124,7 @@ slurm:
 project: path/to/my_simvascular_project
 
 # -------------------------------------------------------------------------------------------
-# (Optional) Global settungs for all tasks (can also be specified individually for each task)
+# (Optional) Global settings for all tasks (can also be specified individually for each task)
 # -------------------------------------------------------------------------------------------
 global: 
   num_procs: 4                  # Number of processors
@@ -164,7 +165,7 @@ slurm:
 project: path/to/my_simvascular_project
 
 # -------------------------------------------------------------------------------------------
-# (Optional) Global settungs for all tasks (can also be specified individually for each task)
+# (Optional) Global settings for all tasks (can also be specified individually for each task)
 # -------------------------------------------------------------------------------------------
 global:
   num_procs: 4                  # Number of processors

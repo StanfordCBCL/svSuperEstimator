@@ -13,6 +13,8 @@ from rich.table import Table
 from .reader import SimVascularProject
 from .tasks.taskutils import run_subprocess
 
+if os.environ.get("COLUMNS") is None:
+    os.environ["COLUMNS"] = "180"
 MAIN_CONSOLE = Console(log_time_format="[%m/%d/%y %H:%M:%S]")
 
 slurm_base = """#!/bin/bash
@@ -87,6 +89,7 @@ def run_file(path: str) -> None:
             if name is None:
                 name = task_name
             task_output_folder = os.path.join(parent_folder, name)
+            os.makedirs(task_output_folder, exist_ok=True)
 
             slurm_config = slurm_default.copy()
             slurm_config.update(config["slurm"])

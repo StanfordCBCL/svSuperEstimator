@@ -2,7 +2,7 @@
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from time import time
+from time import perf_counter as time
 from typing import Any, Dict, Optional
 
 import orjson
@@ -36,7 +36,8 @@ class Task(ABC):
         "overwrite": False,
         "name": None,
         "debug": False,
-        "post_proc_only": False,
+        "core_run": True,
+        "post_proc": True,
     }
 
     def __init__(
@@ -117,21 +118,28 @@ class Task(ABC):
             )
             return
 
-        start = time()
+        start_task = time()
 
         self.log(f"Starting task [bold cyan]{type(self).__name__}[/bold cyan]")
 
         # Make task output directory
         os.makedirs(self.output_folder, exist_ok=True)
 
-        if not self.config["post_proc_only"]:
+        if self.config["core_run"]:
             # Run the task and postprocessing of the data
+            start_core_run = time()
             self.core_run()
+            end_core_run = time()
+            self.database["core_runtime"] = end_core_run - start_core_run
             self.save_database()
-        self.log("Postprocessing results")
-        self.load_database()
-        self.post_run()
-        self.save_database()
+        if self.config["post_proc"]:
+            self.log("Postprocessing results")
+            self.load_database()
+            start_post_run = time()
+            self.post_run()
+            end_post_run = time()
+            self.database["post_runtime"] = start_post_run - end_post_run
+            self.save_database()
 
         # Generate task report and export data
         self.log("Generate task report")
@@ -162,10 +170,13 @@ class Task(ABC):
             )
             self.log(f"Saved html report {html_report_target}")
 
+        end_task = time()
+        self.database["total_runtime"] = end_task - start_task
+        self.save_database()
         self.log(
             f"Task [bold cyan]{type(self).__name__}[/bold cyan] "
             "[bold green]completed[/bold green] in "
-            f"{time()-start:.1f} seconds"
+            f"{end_task-start_task:.1f} seconds"
         )
         Path(os.path.join(self.output_folder, ".completed")).touch()
 
