@@ -284,6 +284,8 @@
 <span class="kn">from</span> <span class="nn">.reader</span> <span class="kn">import</span> <span class="n">SimVascularProject</span>
 <span class="kn">from</span> <span class="nn">.tasks.taskutils</span> <span class="kn">import</span> <span class="n">run_subprocess</span>
 
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;COLUMNS&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;COLUMNS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;180&quot;</span>
 <span class="n">MAIN_CONSOLE</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">log_time_format</span><span class="o">=</span><span class="s2">&quot;[%m/</span><span class="si">%d</span><span class="s2">/%y %H:%M:%S]&quot;</span><span class="p">)</span>
 
 <span class="n">slurm_base</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;#!/bin/bash</span>
@@ -358,6 +360,7 @@
             <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">task_name</span>
             <span class="n">task_output_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parent_folder</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">task_output_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="n">slurm_config</span> <span class="o">=</span> <span class="n">slurm_default</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">slurm_config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;slurm&quot;</span><span class="p">])</span>
