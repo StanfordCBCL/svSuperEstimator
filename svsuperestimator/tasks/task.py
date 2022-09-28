@@ -36,7 +36,8 @@ class Task(ABC):
         "overwrite": False,
         "name": None,
         "debug": False,
-        "post_proc_only": False,
+        "core_run": True,
+        "post_proc": True,
     }
 
     def __init__(
@@ -124,14 +125,15 @@ class Task(ABC):
         # Make task output directory
         os.makedirs(self.output_folder, exist_ok=True)
 
-        if not self.config["post_proc_only"]:
+        if self.config["core_run"]:
             # Run the task and postprocessing of the data
             self.core_run()
             self.save_database()
-        self.log("Postprocessing results")
-        self.load_database()
-        self.post_run()
-        self.save_database()
+        if self.config["post_proc"]:
+            self.log("Postprocessing results")
+            self.load_database()
+            self.post_run()
+            self.save_database()
 
         # Generate task report and export data
         self.log("Generate task report")

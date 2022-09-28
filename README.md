@@ -70,7 +70,7 @@ In the following, a few example configuration files will be shown.
 project: path/to/my_simvascular_project
 
 # -------------------------------------------------------------------------------------------
-# (Optional) Global settungs for all tasks (can also be specified individually for each task)
+# (Optional) Global settings for all tasks (can also be specified individually for each task)
 # -------------------------------------------------------------------------------------------
 global:
   num_procs: 48             # Number of processors
@@ -78,7 +78,8 @@ global:
   report_html: True         # Export task report as html
   report_files: False       # Export task reports as seperate files
   debug: False              # Generate debug output and files
-  post_proc_only: False     # Only perform postprocessing on existing results.
+  core_run: True            # Toggle core run
+  post_proc: True           # Toggle post processing
 
 # -------------------------------------------------------------------------------------------
 # Task configuration (configure one or more tasks)
@@ -123,7 +124,7 @@ slurm:
 project: path/to/my_simvascular_project
 
 # -------------------------------------------------------------------------------------------
-# (Optional) Global settungs for all tasks (can also be specified individually for each task)
+# (Optional) Global settings for all tasks (can also be specified individually for each task)
 # -------------------------------------------------------------------------------------------
 global: 
   num_procs: 4                  # Number of processors
@@ -164,7 +165,7 @@ slurm:
 project: path/to/my_simvascular_project
 
 # -------------------------------------------------------------------------------------------
-# (Optional) Global settungs for all tasks (can also be specified individually for each task)
+# (Optional) Global settings for all tasks (can also be specified individually for each task)
 # -------------------------------------------------------------------------------------------
 global:
   num_procs: 4                  # Number of processors
