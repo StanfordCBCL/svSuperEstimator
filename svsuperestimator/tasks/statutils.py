@@ -1,3 +1,4 @@
+"""This module holds task helper function related to statistics."""
 from __future__ import annotations
 
 import numpy as np
@@ -8,7 +9,7 @@ from pqueens.utils.pdf_estimation import (
 from scipy.stats import gaussian_kde
 
 
-def particle_wmean(particles: np.ndarray, weights: np.ndarray):
+def particle_wmean(particles: np.ndarray, weights: np.ndarray) -> np.ndarray:
     """Calculate weighted mean of particles.
 
     Args:
@@ -18,7 +19,7 @@ def particle_wmean(particles: np.ndarray, weights: np.ndarray):
     return np.average(particles, weights=weights, axis=0)
 
 
-def particle_map(particles: np.ndarray, weights: np.ndarray):
+def particle_map(particles: np.ndarray, weights: np.ndarray) -> np.ndarray:
     """Calculate maximum a posteriori (MAP) of particles.
 
     Args:
@@ -28,7 +29,7 @@ def particle_map(particles: np.ndarray, weights: np.ndarray):
     return np.array(particles[np.argmax(weights)])
 
 
-def particle_covmat(particles: np.ndarray, weights: np.ndarray):
+def particle_covmat(particles: np.ndarray, weights: np.ndarray) -> np.ndarray:
     """Calculate covariance matrix of particles.
 
     Args:
@@ -43,7 +44,7 @@ def gaussian_kde_1d(
     weights: np.ndarray,
     bounds: tuple[float, float],
     num: int = 100,
-):
+) -> tuple[np.ndarray, np.ndarray, float]:
     """Calculate 1d kernel-density estimate.
 
     Args:
@@ -78,8 +79,8 @@ def gaussian_kde_2d(
     y: np.ndarray,
     weights: np.ndarray,
     bounds: tuple[tuple[float, float], tuple[float, float]],
-    num=100,
-):
+    num: int = 100,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
     """Calculate 2d kernel-density estimate.
 
     Args:

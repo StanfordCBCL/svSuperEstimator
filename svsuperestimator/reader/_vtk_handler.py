@@ -2,12 +2,15 @@
 from __future__ import annotations
 
 import os
+from typing import Type, TypeVar
 
 import numpy as np
 import vtk
 from vtk.util.numpy_support import numpy_to_vtk, vtk_to_numpy
 
 from ._data_handler import DataHandler
+
+T = TypeVar("T", bound="VtkHandler")
 
 
 class VtkHandler(DataHandler):
@@ -29,7 +32,7 @@ class VtkHandler(DataHandler):
             return self.get_point_data_array(key)
 
     @classmethod
-    def from_file(cls, filename: str) -> VtkHandler:
+    def from_file(cls: Type[T], filename: str) -> T:
         """Create a new VtkHandler instance from file.
 
         Args:
@@ -47,7 +50,7 @@ class VtkHandler(DataHandler):
         reader.Update()
         return cls(reader.GetOutput())
 
-    def to_file(self, filename: str):
+    def to_file(self, filename: str) -> None:
         """Write the data to a file.
 
         Args:
@@ -131,6 +134,7 @@ class VtkHandler(DataHandler):
         """Set a point data array.
 
         Args:
+            label: Label of the point data array.
             array: Point data array.
         """
         arr = numpy_to_vtk(array)

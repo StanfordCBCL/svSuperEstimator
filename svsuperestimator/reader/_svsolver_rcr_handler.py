@@ -5,16 +5,16 @@ from ._plain_handler import PlainHandler
 class SvSolverRcrHandler(PlainHandler):
     """Handler for svSolver RCR BC data."""
 
-    def get_rcr_data(self) -> dict:
+    def get_rcr_data(self) -> list:
         """Get the RCR data.
 
         Returns:
             rcr_data: Dict with Rp, C, Rd, Pd and t for all RCR boundary
                 conditions.
         """
-        bc_data = []
+        bc_data: list = []
         i = 0
-        ele_data = {}
+        ele_data: dict = {}
         for j, line in enumerate(self.data.splitlines()):
             if j == 0:
                 continue

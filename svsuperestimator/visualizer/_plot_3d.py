@@ -1,13 +1,10 @@
 """This module holds various plotting classes."""
 from __future__ import annotations
 
-import os
-from typing import Union
+from typing import Any, Sequence, Union
 
 import numpy as np
 import plotly.graph_objects as go
-import vtk
-from vtk.util.numpy_support import vtk_to_numpy
 
 from ..reader import MeshHandler
 from ._plot_base import PlotBase
@@ -29,10 +26,10 @@ class Plot3D(PlotBase):
         size: int = 3,
         opacity: float = 1.0,
         colorscale: str = "viridis",
-        text: str = None,
+        text: Union[Sequence, np.ndarray] = None,
         showlegend: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Add a point scatter trace.
 
         Args:
@@ -81,8 +78,8 @@ class Plot3D(PlotBase):
         opacity: float = 1.0,
         colorscale: str = "viridis",
         showlegend: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Add a line scatter trace.
 
         Args:
@@ -92,10 +89,9 @@ class Plot3D(PlotBase):
             name: Name of the trace.
             color: Color of the lines as a color specifier or an array to be
                 used for color coding.
-            size: Size of the points.
+            width: Size of the points.
             opacity: Opacity of the points.
             colorscale: Colorscale to be used for color cording.
-            text: Optional text to be displayed next to the points.
             showlegend: Toggle display of trace in legend.
         """
         self._fig.add_trace(
@@ -125,7 +121,7 @@ class Plot3D(PlotBase):
         colorscale: str = "viridis",
         opacity: float = 1.0,
         showlegend: bool = False,
-    ):
+    ) -> None:
         """Add a surface trace.
 
         Args:
@@ -158,7 +154,7 @@ class Plot3D(PlotBase):
         opacity: float = 1.0,
         showlegend: bool = False,
         decimate: float = None,
-    ):
+    ) -> None:
         """Add a mesh trace from a vtk file.
 
         Args:
@@ -172,7 +168,7 @@ class Plot3D(PlotBase):
 
         # Simplify mesh
         if decimate:
-            mesh_handler = mesh_handler.decimate(0.9)
+            mesh_handler = mesh_handler.decimate(0.9)  # type: ignore
 
         # Extract mesh
         points = mesh_handler.points
@@ -199,12 +195,12 @@ class Plot3D(PlotBase):
         x: float,
         y: float,
         z: float,
-        text=str,
+        text: str,
         color: str = "orange",
         size: int = 5,
         opacity: float = 1.0,
         showlegend: bool = False,
-    ):
+    ) -> None:
         """Add an annotated point trace.
 
         Args:

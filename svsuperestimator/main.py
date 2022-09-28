@@ -1,3 +1,4 @@
+"""Main routine of svSuperEstimator."""
 import os
 import platform
 import sys
@@ -5,12 +6,12 @@ from time import time
 
 import click
 import yaml
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
 
-from .tasks.taskutils import run_subprocess
 from .reader import SimVascularProject
+from .tasks.taskutils import run_subprocess
 
 MAIN_CONSOLE = Console(log_time_format="[%m/%d/%y %H:%M:%S]")
 
@@ -54,8 +55,12 @@ slurm_default = {
 }
 
 
-def run_file(path):
-    """Run svSuperEstimator from a configuration file."""
+def run_file(path: str) -> None:
+    """Run svSuperEstimator from a configuration file.
+
+    Args:
+        path: Path to configuration file.
+    """
 
     MAIN_CONSOLE.log(
         f"Loading configuration [bold magenta]{path}[/bold magenta]"
@@ -89,10 +94,13 @@ def run_file(path):
             for key, value in slurm_config.items():
                 if value is None:
                     raise ValueError(
-                        f"Required option {key} not specified for slurm configuration"
+                        f"Required option {key} not specified for slurm "
+                        "configuration"
                     )
             MAIN_CONSOLE.log(
-                f"Scheduling task [bold cyan]{task_name}[/bold cyan] as [#ff9100]slurm[/#ff9100] job with the following configuration:"
+                f"Scheduling task [bold cyan]{task_name}[/bold cyan] as "
+                "[#ff9100]slurm[/#ff9100] job with the following "
+                "configuration:"
             )
             table = Table(box=box.HORIZONTALS, expand=True, show_header=False)
             table.add_column("Configuration", style="bold cyan")
@@ -145,7 +153,12 @@ def run_file(path):
             task.run()
 
 
-def run_from_config(config):
+def run_from_config(config: dict) -> None:
+    """Run svSuperEstimator from a config dictionary.
+
+    Args:
+        config: Configuration.
+    """
     # Loading the SimVascular project
     project_folder = config["project"]
     MAIN_CONSOLE.log(
@@ -163,7 +176,7 @@ def run_from_config(config):
         task.run()
 
 
-def run_folder(path):
+def run_folder(path: str) -> None:
     """Run all configuration files in a folder."""
 
     config_files = [f for f in os.listdir(path) if f.endswith(".yaml")]
@@ -174,7 +187,12 @@ def run_folder(path):
 
 @click.command()
 @click.argument("path")
-def estimate(path):
+def estimate(path: str) -> None:
+    """Run svSuperEstimator.
+
+    Args:
+        path: Path to the config file.
+    """
     start = time()
     MAIN_CONSOLE.rule(
         "[#ff9100]svSuperEstimator",
@@ -183,7 +201,8 @@ def estimate(path):
     )
     system = platform.uname()
     MAIN_CONSOLE.print(
-        f"platform [bold cyan]{system.system.lower()}[/bold cyan] | python {sys.version.split()[0]} at [bold cyan]{sys.executable}[/bold cyan]"
+        f"platform [bold cyan]{system.system.lower()}[/bold cyan] | python "
+        f"{sys.version.split()[0]} at [bold cyan]{sys.executable}[/bold cyan]"
     )
 
     if os.path.isdir(path):

@@ -51,7 +51,6 @@ dev = [
 ]
 
 [project.scripts]
-estimator = "svsuperestimator.app.app:run"
 estimate = "svsuperestimator.main:estimate"
 
 [tool.black]

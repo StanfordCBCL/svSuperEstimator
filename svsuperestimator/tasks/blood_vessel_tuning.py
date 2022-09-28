@@ -1,8 +1,10 @@
+"""This module holds the BloodVesselTuning task."""
 from __future__ import annotations
 
 import os
 from datetime import datetime
 from multiprocessing import Pool
+from typing import Any
 
 import numpy as np
 import orjson
@@ -46,7 +48,7 @@ class BloodVesselTuning(Task):
     # Optimization method used by scipy.optimize.minimize
     _OPT_METHOD = "Nelder-Mead"
 
-    def core_run(self):
+    def core_run(self) -> None:
         """Core routine of the task."""
 
         # Loading data from project
@@ -91,6 +93,13 @@ class BloodVesselTuning(Task):
         for branch_id, branch in branch_data.items():
             for seg_id, segment in branch.items():
 
+                results_data: dict[str, np.ndarray] = {
+                    n: taskutils.refine_with_cubic_spline(
+                        segment[n], num_pts
+                    ).tolist()
+                    for n in result_labels
+                }
+
                 segment_data = {
                     "branch_id": branch_id,
                     "seg_id": seg_id,
@@ -102,12 +111,7 @@ class BloodVesselTuning(Task):
                     "theta_start": np.array(segment["theta_start"]),
                     "debug": self.config["debug"],
                     "debug_folder": os.path.join(self.output_folder, "debug"),
-                    **{
-                        n: taskutils.refine_with_cubic_spline(
-                            segment[n], num_pts
-                        ).tolist()
-                        for n in result_labels
-                    },
+                    **results_data,
                 }
                 self.log(
                     f"Optimization for branch {branch_id} segment "
@@ -123,10 +127,9 @@ class BloodVesselTuning(Task):
         # Collect results when processes are complete
         for r in results:
             r.wait()
-        results = [r.get() for r in results]
 
         # Write results to respective branch in branch data
-        for result in results:
+        for result in [r.get() for r in results]:
             branch_data[result["branch_id"]][result["seg_id"]]["theta_opt"] = {
                 n: result["theta_opt"][j]
                 for j, n in enumerate(self._PARAMETER_SEQUENCE)
@@ -143,7 +146,7 @@ class BloodVesselTuning(Task):
             ]["theta_opt"]
 
         # Improve junctions
-        self.make_resistive_junctions(zerod_config_handler, branch_data)
+        self._make_resistive_junctions(zerod_config_handler, branch_data)
 
         # Writing data to project
         self.log("Save optimized 0D simulation file")
@@ -151,7 +154,7 @@ class BloodVesselTuning(Task):
             os.path.join(self.output_folder, "solver_0d.in")
         )
 
-    def post_run(self):
+    def post_run(self) -> None:
         """Postprocessing routine of the task."""
 
         # Read data
@@ -189,7 +192,7 @@ class BloodVesselTuning(Task):
         # Extract time steps of last cardiac cycle
         pts_per_cycle = zerod_config_handler.num_pts_per_cycle
         sim_times = np.array(
-            zerod_result[zerod_result.name == f"branch0_seg0"]["time"][
+            zerod_result[zerod_result.name == "branch0_seg0"]["time"][
                 -pts_per_cycle:
             ]
         )
@@ -249,7 +252,7 @@ class BloodVesselTuning(Task):
 
         results.to_csv(os.path.join(self.output_folder, "results.csv"))
 
-    def generate_report(self):
+    def generate_report(self) -> visualizer.Report:
         """Generate the task report."""
 
         results = pd.read_csv(os.path.join(self.output_folder, "results.csv"))
@@ -267,21 +270,21 @@ class BloodVesselTuning(Task):
         report.add([model_plot])
 
         # Options for all plots
-        common_plot_opts = {
+        common_plot_opts: dict[str, Any] = {
             "static": True,
             "width": 750,
             "height": 400,
         }
 
         # Options for pressure plots
-        pres_plot_opts = {
+        pres_plot_opts: dict[str, Any] = {
             "xaxis_title": r"$s$",
             "yaxis_title": r"$mmHg$",
             **common_plot_opts,
         }
 
         # Options for flow plots
-        flow_plot_opts = {
+        flow_plot_opts: dict[str, Any] = {
             "xaxis_title": r"$s$",
             "yaxis_title": r"$\frac{l}{h}$",
             **common_plot_opts,
@@ -303,20 +306,20 @@ class BloodVesselTuning(Task):
         ]
 
         # Options for 3d, 0d and 0d optimized
-        threed_opts = {
+        threed_opts: dict[str, Any] = {
             "name": "3D",
             "showlegend": True,
             "color": "white",
             "dash": "dot",
             "width": 4,
         }
-        zerod_opts = {
+        zerod_opts: dict[str, Any] = {
             "name": "0D",
             "showlegend": True,
             "color": "#EF553B",
             "width": 3,
         }
-        zerod_opt_opts = {
+        zerod_opt_opts: dict[str, Any] = {
             "name": "0D optimized",
             "showlegend": True,
             "color": "#636efa",
@@ -324,9 +327,8 @@ class BloodVesselTuning(Task):
         }
 
         # Filter for results
-        result_fiter = lambda name, label: results[results["name"] == name][
-            label
-        ]
+        def result_fiter(name: str, label: str) -> pd.DataFrame:
+            return results[results["name"] == name][label]
 
         # Trace sequence
         trace_suffix = ["_3d", "_0d", "_0d_opt"]
@@ -348,8 +350,7 @@ class BloodVesselTuning(Task):
                 # Create and append plot
                 plots.append(
                     visualizer.Plot2D(
-                        title=plot_title,
-                        **plot_opts,
+                        title=plot_title, **plot_opts  # type: ignore
                     )
                 )
                 for sfx, opt in zip(trace_suffix, trace_opts):
@@ -363,7 +364,7 @@ class BloodVesselTuning(Task):
         return report
 
     @classmethod
-    def _optimize_blood_vessel(cls, segment_data):
+    def _optimize_blood_vessel(cls, segment_data: dict) -> dict:
         """Optimization routine for one blood vessel."""
 
         # Determine normalization factor for pressure and flow
@@ -378,13 +379,16 @@ class BloodVesselTuning(Task):
         bc_outpres = np.array(segment_data["pressure_out"])
 
         # Define objective function
-        def objective_function(theta):
+        def _objective_function(theta: np.ndarray) -> float:
             num_pts_per_cycle = segment_data["num_pts_per_cycle"]
             (
                 inpres_sim,
                 outflow_sim,
             ) = BloodVesselTuning._simulate_blood_vessel(
-                *theta,
+                theta[0],
+                theta[1],
+                theta[2],
+                theta[3],
                 bc_times=segment_data["times"],
                 bc_inflow=bc_inflow,
                 bc_outpres=bc_outpres,
@@ -400,7 +404,7 @@ class BloodVesselTuning(Task):
         x0 = segment_data["theta_start"].copy()
         x0[1] = 1e-8  # Only good when 3d wall is stiff
         result = optimize.minimize(
-            fun=objective_function,
+            fun=_objective_function,
             x0=x0,
             method="Nelder-Mead",
             options={"maxfev": segment_data["maxfev"], "adaptive": True},
@@ -416,7 +420,10 @@ class BloodVesselTuning(Task):
                 inpres_sim,
                 outflow_sim,
             ) = BloodVesselTuning._simulate_blood_vessel(
-                *result.x,
+                result.x[0],
+                result.x[1],
+                result.x[2],
+                result.x[3],
                 bc_times=segment_data["times"],
                 bc_inflow=bc_inflow,
                 bc_outpres=bc_outpres,
@@ -429,7 +436,8 @@ class BloodVesselTuning(Task):
             plot1.write_image(
                 os.path.join(
                     segment_data["debug_folder"],
-                    f"pres_branch_{segment_data['branch_id']}_seg{segment_data['seg_id']}.png",
+                    f"pres_branch_{segment_data['branch_id']}_"
+                    f"seg{segment_data['seg_id']}.png",
                 )
             )
             plot2 = px.line({"Result": outflow_sim, "Target": outflow})
@@ -439,7 +447,8 @@ class BloodVesselTuning(Task):
             plot2.write_image(
                 os.path.join(
                     segment_data["debug_folder"],
-                    f"flow_branch_{segment_data['branch_id']}_seg{segment_data['seg_id']}.png",
+                    f"flow_branch_{segment_data['branch_id']}_"
+                    f"seg{segment_data['seg_id']}.png",
                 )
             )
 
@@ -449,11 +458,11 @@ class BloodVesselTuning(Task):
             "success": result.success,
             "message": result.message,
             "error": result.fun,
-            "error_before": objective_function(segment_data["theta_start"]),
+            "error_before": _objective_function(segment_data["theta_start"]),
             **segment_data,
         }
 
-    def _optimize_blood_vessel_callback(self, output):
+    def _optimize_blood_vessel_callback(self, output: dict) -> None:
         """Callback after optimization to log results."""
         if output["success"]:
             self.log(
@@ -466,44 +475,50 @@ class BloodVesselTuning(Task):
             table.add_row("number of evaluations", str(output["nfev"]))
             table.add_row(
                 "relative error",
-                f"{output['error_before']*100:.3f} -> {output['error']*100:.3f} %",
+                f"{output['error_before']*100:.3f} -> "
+                f"{output['error']*100:.3f} %",
             )
             table.add_row(
                 "resistance",
-                f"{output['theta_start'][0]:.1e} -> {output['theta_opt'][0]:.1e}",
+                f"{output['theta_start'][0]:.1e} -> "
+                f"{output['theta_opt'][0]:.1e}",
             )
             table.add_row(
                 "capacitance",
-                f"{output['theta_start'][1]:.1e} -> {output['theta_opt'][1]:.1e}",
+                f"{output['theta_start'][1]:.1e} -> "
+                f"{output['theta_opt'][1]:.1e}",
             )
             table.add_row(
                 "inductance",
-                f"{output['theta_start'][2]:.1e} -> {output['theta_opt'][2]:.1e}",
+                f"{output['theta_start'][2]:.1e} -> "
+                f"{output['theta_opt'][2]:.1e}",
             )
             table.add_row(
                 "stenosis coefficient",
-                f"{output['theta_start'][3]:.1e} -> {output['theta_opt'][3]:.1e}",
+                f"{output['theta_start'][3]:.1e} -> "
+                f"{output['theta_opt'][3]:.1e}",
             )
             self.log(table)
         else:
             self.log(
                 f"Optimization for branch {output['branch_id']} segment "
                 f"{output['seg_id']} [bold red]failed[/bold red] with "
-                f"message {output['message']} after {output['nfev']} evaluations."
+                f"message {output['message']} after {output['nfev']} "
+                "evaluations."
             )
 
     @classmethod
     def _simulate_blood_vessel(
         cls,
-        R,
-        C,
-        L,
-        stenosis_coefficient,
-        bc_times,
-        bc_inflow,
-        bc_outpres,
-        num_pts_per_cycle,
-    ):
+        R: float,
+        C: float,
+        L: float,
+        stenosis_coefficient: float,
+        bc_times: np.ndarray,
+        bc_inflow: np.ndarray,
+        bc_outpres: np.ndarray,
+        num_pts_per_cycle: int,
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Run a single-vessel simulation."""
 
         config = {
@@ -576,7 +591,12 @@ class BloodVesselTuning(Task):
             sim_outflow,
         )
 
-    def make_resistive_junctions(self, zerod_handler, mapped_data):
+    def _make_resistive_junctions(
+        self,
+        zerod_handler: reader.SvZeroDSolverInputHandler,
+        mapped_data: dict,
+    ) -> None:
+        """Convert normal junctions to resistive junctions."""
 
         vessel_id_map = zerod_handler.vessel_id_to_name_map
 
@@ -632,7 +652,8 @@ class BloodVesselTuning(Task):
             junction_data["junction_values"] = {"R": rs}
 
             self.log(
-                f"Optimization for junction [cyan]{junction_name}[/cyan] [bold green]successful[/bold green]"
+                f"Optimization for junction [cyan]{junction_name}[/cyan] "
+                "[bold green]successful[/bold green]"
             )
             table = Table(box=box.HORIZONTALS, show_header=False)
             table.add_column()
@@ -642,13 +663,16 @@ class BloodVesselTuning(Task):
 
                 for i, ovessel in enumerate(outlet_vessels):
                     table.add_row(
-                        f"resistance {inlet_branch_name} -> {vessel_id_map[ovessel]}",
-                        f"{junction_values_bef['R'][i+1]:.1e} -> {rs[i+1]:.1e}",
+                        f"resistance {inlet_branch_name} -> "
+                        f"{vessel_id_map[ovessel]}",
+                        f"{junction_values_bef['R'][i+1]:.1e} -> "
+                        f"{rs[i+1]:.1e}",
                     )
             else:
                 for i, ovessel in enumerate(outlet_vessels):
                     table.add_row(
-                        f"resistance {inlet_branch_name} -> {vessel_id_map[ovessel]}",
+                        f"resistance {inlet_branch_name} -> "
+                        f"{vessel_id_map[ovessel]}",
                         f"0.0 -> {rs[i+1]:.1e}",
                     )
 

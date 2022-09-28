@@ -1,7 +1,7 @@
 """This module holds the Plot2D class."""
 from __future__ import annotations
 
-from typing import Union
+from typing import Any, Sequence, Union
 
 import numpy as np
 import plotly.graph_objects as go
@@ -17,16 +17,16 @@ class Plot2D(PlotBase):
 
     def add_point_trace(
         self,
-        x: np.ndarray,
-        y: np.ndarray,
+        x: Union[Sequence, np.ndarray],
+        y: Union[Sequence, np.ndarray],
         name: str,
-        color: Union[str, np.ndarray] = None,
+        color: Union[str, Union[Sequence, np.ndarray]] = None,
         size: int = 4,
         opacity: float = 1.0,
         colorscale: str = "viridis",
         showlegend: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Add a point scatter trace.
 
         Args:
@@ -59,15 +59,15 @@ class Plot2D(PlotBase):
 
     def add_line_trace(
         self,
-        x: np.ndarray,
-        y: np.ndarray,
+        x: Union[Sequence, np.ndarray],
+        y: Union[Sequence, np.ndarray],
         name: str,
         color: str = None,
         width: int = 2,
         opacity: float = 1.0,
         showlegend: bool = False,
         dash: str = None,
-    ):
+    ) -> None:
         """Add a line scatter trace.
 
         Args:
@@ -78,6 +78,7 @@ class Plot2D(PlotBase):
             width: Width of the line.
             opacity: Opacity of the line.
             showlegend: Toggle display of trace in legend.
+            dash: Dashed line specification.
         """
         self._fig.add_trace(
             go.Scatter(
@@ -93,13 +94,13 @@ class Plot2D(PlotBase):
 
     def add_bar_trace(
         self,
-        x: np.ndarray,
-        y: np.ndarray,
+        x: Union[Sequence, np.ndarray],
+        y: Union[Sequence, np.ndarray],
         name: str,
         color: str = None,
         opacity: float = 1.0,
         showlegend: bool = False,
-    ):
+    ) -> None:
         """Add a bar trace.
 
         Args:
@@ -125,7 +126,7 @@ class Plot2D(PlotBase):
 
     def add_vline_trace(
         self, x: float, text: str = None, width: int = 3, color: str = "orange"
-    ):
+    ) -> None:
         """Add vertical line marker trace.
 
         Args:
@@ -143,19 +144,19 @@ class Plot2D(PlotBase):
 
     def add_annotated_point_trace(
         self,
-        x: np.ndarray,
-        y: np.ndarray,
+        x: Union[Sequence, np.ndarray],
+        y: Union[Sequence, np.ndarray],
         name: list[str],
         symbol: list[str],
         color: str = "orange",
         size: int = 8,
-    ):
+    ) -> None:
         """Add an annotated point trace.
 
         Args:
             x: X-coordinate of the point.
             y: Y-coordinate of the point.
-            Name: Names of points to display in legend.
+            name: Name of trace.
             color: Colors of the points.
             symbol: Symbol of the points.
             size: Size of the point.
@@ -174,19 +175,22 @@ class Plot2D(PlotBase):
 
     def add_heatmap_trace(
         self,
-        z: np.ndarray,
+        z: Union[Sequence, np.ndarray],
         name: str,
-        x: np.ndarray = None,
-        y: np.ndarray = None,
+        x: Union[Sequence, np.ndarray] = None,
+        y: Union[Sequence, np.ndarray] = None,
         colorscale: str = "viridis",
-        showscale=False,
-    ):
+        showscale: bool = False,
+    ) -> None:
         """Add a heatmap trace.
 
         Args:
+            z: Z-coordinates of the heatmap points.
+            name: Name of trace.
             x: X-coordinates of the heatmap points.
             y: Y-coordinates of the heatmap points.
             colorscale: Colorscale of the heatmap.
+            showscale: Show color scale.
         """
         self._fig.add_trace(
             go.Heatmap(
@@ -201,14 +205,14 @@ class Plot2D(PlotBase):
 
     def add_xy_bar_trace(
         self,
-        x: np.ndarray,
-        y: np.ndarray,
-        z_x: np.ndarray,
-        z_y: np.ndarray,
+        x: Union[Sequence, np.ndarray],
+        y: Union[Sequence, np.ndarray],
+        z_x: Union[Sequence, np.ndarray],
+        z_y: Union[Sequence, np.ndarray],
         name_x: str,
         name_y: str,
         color: str = None,
-    ):
+    ) -> None:
         """Add bar traces to the borders of the x and y axis.
 
         Args:
@@ -274,12 +278,12 @@ class Plot2D(PlotBase):
 
     def add_line_with_confidence_interval_trace(
         self,
-        x: np.ndarray,
-        y: np.ndarray,
-        y_lower: np.ndarray,
-        y_upper: np.ndarray,
+        x: Union[Sequence, np.ndarray],
+        y: Union[Sequence, np.ndarray],
+        y_lower: Union[Sequence, np.ndarray],
+        y_upper: Union[Sequence[int], np.ndarray],
         name: str,
-    ):
+    ) -> None:
         """Add a line scatter trace with considence interval.
 
         Args:
@@ -324,11 +328,11 @@ class Plot2D(PlotBase):
 
     def add_parallel_coordinates_plots(
         self,
-        values: list[np.ndarray],
-        names: list[str] = None,
-        color_by: np.ndarray = None,
+        values: Union[Sequence, np.ndarray],
+        names: list[str],
+        color_by: Union[Sequence, np.ndarray] = None,
         plotrange: tuple[float, float] = None,
-    ):
+    ) -> None:
         """Add a parallel coordinates trace to the plot.
 
         Args:

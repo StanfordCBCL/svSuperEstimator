@@ -1,6 +1,6 @@
 """This module holds the SimVascularProject class."""
 import os
-from typing import Any
+from typing import Any, Dict
 
 import yaml
 
@@ -33,12 +33,10 @@ class SimVascularProject:
             folder: SimVascular project folder.
         """
         self._folder = os.path.abspath(folder)
-        self._regex: dict[str, str] = {
+        self._regex: Dict[str, str] = {
             "$CASE_NAME$": os.path.basename(self._folder)
         }
         self.name = os.path.basename(folder)
-
-        self._cache = {}
 
         # Read file registry
         with open(
@@ -57,6 +55,7 @@ class SimVascularProject:
         Args:
             key: The index of the data element.
         """
+        data: Any
         if key not in self._file_registry:
             raise KeyError(f"Unknown key: {key}")
         elif self._file_registry[key]["type"] == "data":
@@ -66,7 +65,9 @@ class SimVascularProject:
             if "$" in target:
                 for regex, repl in self._regex.items():
                     target = target.replace(regex, repl)
-            data = _HANDLERS[self._file_registry[key]["handler"]].from_file(
+            data = _HANDLERS[
+                self._file_registry[key]["handler"]
+            ].from_file(  # type: ignore
                 target
             )
         elif self._file_registry[key]["type"] == "path":

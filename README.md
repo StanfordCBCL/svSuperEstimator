@@ -8,8 +8,13 @@
 <img src="https://github.com/SimVascular/svSuperEstimator/actions/workflows/documentation.yml/badge.svg"/>
 </p>
 
-Multi-fidelity parameter estimation framework for cardiovascular fluid dynamics
-simulations.
+Sequential multi-fidelity parameter estimation and model calibration in
+cardiovascular hemodynamics.
+
+svSuperEstimator is an open-source framework to perform boundary conditions
+parameter estimation and 0D-3D model calibrations for
+cardiovascular simulation models. Both tasks can either be performed alone or
+in serial as a sequential multi-fidelity tuning approach.
 
 ## Installation
 
@@ -33,7 +38,7 @@ The remaining dependencies have to be installed manually:
 * [svZeroDSolver](https://github.com/richterjakob/svZeroDSolver): Install via pip and build release version in local folder.
 * [3D result slicer](https://gitlab.com/sanddorn/sanddorn-toolbox/-/tree/main/slicer): Build release version and specify path to executable in config file.
 * [svSolver](https://github.com/SimVascular/svSolver): Build release version and specify path to executable in config file.
-* **QUEENS** (currently not publicly available)
+* **QUEENS** (currently not public)
 
 ### For Contributers
 
@@ -46,16 +51,143 @@ pip install -e .[dev]
 
 *If you are using the `zsh` shell, enter: `pip install -e ".[dev]"`*
 
-### Sherlock
+## Running
 
-To run svSuperEstimator on sherlock, the following modules are required:
+After installing svSuperEstimator, it can be executed with:
 
+```bash
+estimate path/to/my_config.yaml
 ```
-module purge
-module load system
-module load binutils/2.38
-module load qt
-module load openmpi
-module load mesa
-module load x11
+
+In the following, a few example configuration files will be shown.
+
+### Sequential multi-fidelity tuning
+
+```yaml
+# -------------------------------------------------------------------------------------------
+# SimVascular project
+# -------------------------------------------------------------------------------------------
+project: path/to/my_simvascular_project
+
+# -------------------------------------------------------------------------------------------
+# (Optional) Global settungs for all tasks (can also be specified individually for each task)
+# -------------------------------------------------------------------------------------------
+global:
+  num_procs: 48             # Number of processors
+  overwrite: True           # Overwrite existing task results
+  report_html: True         # Export task report as html
+  report_files: False       # Export task reports as seperate files
+  debug: False              # Generate debug output and files
+  post_proc_only: False     # Only perform postprocessing on existing results.
+
+# -------------------------------------------------------------------------------------------
+# Task configuration (configure one or more tasks)
+# -------------------------------------------------------------------------------------------
+tasks:
+  MultiFidelityTuning:                      # Run sequential multi-fidelity tuning
+    name: my_case                           # Name of the task (determines the folder name)
+    num_iter: 3                             # Number of multi-fidelity iterations to perform
+    theta_obs: [...]                        # Ground truth theta
+    y_obs: [...]                            # Target observations
+    smc_num_particles: 10000                # Number of particles for Sequential-Monte-Carlo
+    smc_num_rejuvenation_steps: 2           # Number of rejuvenation steps for Sequential-Monte-Carlo
+    smc_resampling_threshold: 0.5           # Resampling threshold for Sequential-Monte-Carlo
+    smc_noise_factor: 0.05                  # Relative noise on observations (relative standard deviation)
+    num_cardiac_cycles_3d: 2                # Number of cardiac cycles to simulate in 3D
+    svpre_executable: path/to/svpre         # Path to svpre
+    svsolver_executable: path/to/svsolver   # Path to svsolver
+    svpost_executable: path/to/svpost       # Path to svsolver
+    slicer_executable: path/to/slicer       # Path to result slicer
+    MapThreeDResultOnCenterline:            # Overwrite some global settings for task MapThreeDResultOnCenterline
+      num_procs: 12                         # Only use 12 num_procs for 3D-0D mapping
+
+# -------------------------------------------------------------------------------------------
+# (Optional) Submit as slurm job (creates and submits slurm job)
+# -------------------------------------------------------------------------------------------
+slurm:
+  partition: amarsden           # Partition to use
+  python-path: path/to/python   # Python path where estimator is installed
+  walltime: "48:00:00"          # Walltime
+  qos: normal                   # QOS
+  nodes: 2                      # Number of nodes
+  mem: 32GB                     # Memory
+  ntasks-per-node: 24           # Number of tasks per node
+```
+
+### Boundary condition parameter estimation
+
+```yaml
+# -------------------------------------------------------------------------------------------
+# SimVascular project
+# -------------------------------------------------------------------------------------------
+project: path/to/my_simvascular_project
+
+# -------------------------------------------------------------------------------------------
+# (Optional) Global settungs for all tasks (can also be specified individually for each task)
+# -------------------------------------------------------------------------------------------
+global: 
+  num_procs: 4                  # Number of processors
+
+# -------------------------------------------------------------------------------------------
+# Task configuration (configure one or more tasks)
+# -------------------------------------------------------------------------------------------
+tasks:
+  WindkesselTuning:                             # Run sequential Windkessel tuning
+    name: my_case                               # Name of the task (determines the folder name)
+    zerod_config_file: path/to/zerod_config.in  # Path to svZeroDSolver input file
+    theta_obs: [...]                            # Ground truth theta
+    y_obs: [...]                                # Target observations
+    num_particles: 100                          # Number of particles for Sequential-Monte-Carlo
+    num_rejuvenation_steps: 2                   # Number of rejuvenation steps for Sequential-Monte-Carlo
+    resampling_threshold: 0.5                   # Resampling threshold for Sequential-Monte-Carlo
+    noise_factor: 0.05                          # Relative noise on observations (relative standard deviation)
+
+# -------------------------------------------------------------------------------------------
+# (Optional) Submit as slurm job (creates and submits slurm job)
+# -------------------------------------------------------------------------------------------
+slurm:
+  partition: amarsden           # Partition to use
+  python-path: path/to/python   # Python path where estimator is installed
+  walltime: "48:00:00"          # Walltime
+  qos: normal                   # QOS
+  nodes: 2                      # Number of nodes
+  mem: 32GB                     # Memory
+  ntasks-per-node: 24           # Number of tasks per node
+```
+
+### Model calibration based on 3D result
+
+```yaml
+# -------------------------------------------------------------------------------------------
+# SimVascular project
+# -------------------------------------------------------------------------------------------
+project: path/to/my_simvascular_project
+
+# -------------------------------------------------------------------------------------------
+# (Optional) Global settungs for all tasks (can also be specified individually for each task)
+# -------------------------------------------------------------------------------------------
+global:
+  num_procs: 4                  # Number of processors
+
+# -------------------------------------------------------------------------------------------
+# Task configuration (configure one or more tasks)
+# -------------------------------------------------------------------------------------------
+tasks:
+  BloodVesselTuning:
+    name: my_case
+    zerod_config_file: path/to/zerod_config.in                  # Path to svZeroDSolver input file
+    threed_solution_file: path/to/threed_centerline_result.vtp  # Path 3D result mapped on centerline
+    centerline_padding: False                                   # Toggle padding over border nodes in centerline result
+
+# -------------------------------------------------------------------------------------------
+# (Optional) Submit as slurm job (creates and submits slurm job)
+# -------------------------------------------------------------------------------------------
+slurm:
+  partition: amarsden           # Partition to use
+  python-path: path/to/python   # Python path where estimator is installed
+  walltime: "48:00:00"          # Walltime
+  qos: normal                   # QOS
+  nodes: 2                      # Number of nodes
+  mem: 32GB                     # Memory
+  ntasks-per-node: 24           # Number of tasks per node
 ```

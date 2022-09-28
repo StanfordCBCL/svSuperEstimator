@@ -1,3 +1,4 @@
+"""This module holds the ThreeDSimulation task."""
 from __future__ import annotations
 
 import os
@@ -5,7 +6,7 @@ from shutil import copy2, copytree, ignore_patterns, rmtree
 
 import numpy as np
 
-from .. import reader
+from .. import reader, visualizer
 from .task import Task
 from .taskutils import run_subprocess
 
@@ -25,7 +26,7 @@ class ThreeDSimulation(Task):
         **Task.DEFAULTS,
     }
 
-    def core_run(self):
+    def core_run(self) -> None:
         """Core routine of the task."""
 
         sim_folder_path = self.project["3d_simulation_folder_path"]
@@ -80,19 +81,19 @@ class ThreeDSimulation(Task):
                 f"{self.project.name}.svpre",
             ],
             logger=self.log,
-            logprefix="\[svpre]: ",
+            logprefix=r"\[svpre]: ",
             cwd=self.output_folder,
         )
 
         self.log("Calling svsolver")
         run_subprocess(
             [
-                f"UCX_POSIX_USE_PROC_LINK=n srun",
+                "UCX_POSIX_USE_PROC_LINK=n srun",
                 self.config["svsolver_executable"],
                 "solver.inp",
             ],
             logger=self.log,
-            logprefix="\[svsolver]: ",
+            logprefix=r"\[svsolver]: ",
             cwd=self.output_folder,
         )
 
@@ -107,7 +108,7 @@ class ThreeDSimulation(Task):
                 "-vtu ../result.vtu",
             ],
             logger=self.log,
-            logprefix="\[svpost]: ",
+            logprefix=r"\[svpost]: ",
             cwd=os.path.join(
                 self.output_folder, f"{self.config['num_procs']}-procs_case"
             ),
@@ -120,12 +121,12 @@ class ThreeDSimulation(Task):
             )
         )
 
-    def post_run(self):
+    def post_run(self) -> None:
         """Postprocessing routine of the task."""
 
         pass
 
-    def generate_report(self):
+    def generate_report(self) -> visualizer.Report:
         """Generate the task report."""
 
         pass

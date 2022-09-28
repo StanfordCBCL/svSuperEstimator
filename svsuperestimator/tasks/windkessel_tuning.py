@@ -1,3 +1,4 @@
+"""This module holds the WindkesselTuning task."""
 from __future__ import annotations
 
 import json
@@ -5,12 +6,12 @@ import os
 import pickle
 from datetime import datetime
 from tempfile import TemporaryDirectory
+from typing import Any, Dict
 
 import numpy as np
 import orjson
 import pandas as pd
 from pqueens.main import run
-from rich.console import Console
 from rich.logging import RichHandler
 from svzerodsolver import runnercpp
 
@@ -42,9 +43,9 @@ class WindkesselTuning(Task):
         **Task.DEFAULTS,
     }
 
-    _THETA_RANGE = [7.0, 13.0]
+    _THETA_RANGE = (7.0, 13.0)
 
-    def core_run(self):
+    def core_run(self) -> None:
         """Core routine of the task."""
 
         # Load the 0D simulation configuration
@@ -118,10 +119,10 @@ class WindkesselTuning(Task):
             "%m/%d/%Y, %H:%M:%S"
         )
 
-    def post_run(self):
+    def post_run(self) -> None:
         """Postprocessing routine of the task."""
 
-        results = {}
+        results: Dict[str, Any] = {}
 
         # Read raw results
         self.log("Read raw result")
@@ -150,7 +151,7 @@ class WindkesselTuning(Task):
         }
 
         # Calculate 1D marginal kernel density estimate
-        results["kernel_density"] = []
+        kernel_densities = []
         for i in range(particles.shape[1]):
             self.log(f"Calculate kernel density estimates for parameter {i}")
             x, kde, bandwidth = statutils.gaussian_kde_1d(
@@ -159,7 +160,7 @@ class WindkesselTuning(Task):
                 bounds=self._THETA_RANGE,
                 num=1000,
             )
-            results["kernel_density"].append(
+            kernel_densities.append(
                 {
                     "x": x,
                     "kernel_density": kde,
@@ -167,6 +168,7 @@ class WindkesselTuning(Task):
                     "opt_method": "30-fold cross-validation",
                 }
             )
+        results["kernel_density"] = kernel_densities
 
         # Save the postprocessed result to a file
         self.log("Save postprocessed results")
@@ -180,9 +182,6 @@ class WindkesselTuning(Task):
                 )
             )
 
-        runnercpp.run_from_config(zerod_config_handler.data).to_csv(
-            os.path.join(self.output_folder, "solution_gt.csv")
-        )
         outlet_bcs = zerod_config_handler.outlet_boundary_conditions.values()
         distal_to_proximals = [
             bc["bc_values"]["Rd"] / bc["bc_values"]["Rp"] for bc in outlet_bcs
@@ -213,7 +212,7 @@ class WindkesselTuning(Task):
             os.path.join(self.output_folder, "solution_map.csv")
         )
 
-    def generate_report(self):
+    def generate_report(self) -> visualizer.Report:
         """Generate the task report."""
 
         # Add 3D plot of mesh with 0D elements
@@ -230,9 +229,6 @@ class WindkesselTuning(Task):
         num_pts_per_cycle = zerod_config_handler.num_pts_per_cycle
         bc_map = zerod_config_handler.vessel_to_bc_map
 
-        result_gt = pd.read_csv(
-            os.path.join(self.output_folder, "solution_gt.csv")
-        )
         result_map = pd.read_csv(
             os.path.join(self.output_folder, "solution_map.csv")
         )
@@ -274,20 +270,13 @@ class WindkesselTuning(Task):
         )
         report.add([paracoords, cov_plot])
 
-        gt_opts = {
-            "name": "Ground Truth",
-            "showlegend": True,
-            "color": "white",
-            "dash": "dot",
-            "width": 4,
-        }
-        map_opts = {
+        map_opts: Dict[str, Any] = {
             "name": "MAP estimate",
             "showlegend": True,
             "color": "#EF553B",
             "width": 3,
         }
-        mean_opts = {
+        mean_opts: Dict[str, Any] = {
             "name": "Mean estimate",
             "showlegend": True,
             "color": "#636efa",
@@ -342,7 +331,8 @@ class WindkesselTuning(Task):
             distplot._fig.add_annotation(
                 text=(
                     f"ground truth [&#952;]: {gt:.2f}<br>"
-                    f"mean &#177; std [&#952;]: {wmean:.2f} &#177; {std:.2f}<br>"
+                    f"mean &#177; std [&#952;]: {wmean:.2f} &#177; "
+                    f"{std:.2f}<br>"
                     f"map [&#952;]: {map:.2f}<br>"
                     f"mean error [%]: {wmean_error:.2f}<br>"
                     f"map error [%]: {map_error:.2f}<br>"
@@ -361,22 +351,14 @@ class WindkesselTuning(Task):
             )
             report.add([distplot])
 
-            bc_result = result_gt[result_gt.name == bc_map[bc_name]["name"]]
-            times = np.array(bc_result["time"])[-num_pts_per_cycle:]
-            times -= times[0]
             pressure_plot = visualizer.Plot2D(
                 title="Pressure",
                 xaxis_title=r"$s$",
                 yaxis_title=r"$mmHg$",
             )
-            pressure_plot.add_line_trace(
-                x=times,
-                y=taskutils.cgs_pressure_to_mmgh(
-                    bc_result[bc_map[bc_name]["pressure"]][-num_pts_per_cycle:]
-                ),
-                **gt_opts,
-            )
             bc_result = result_map[result_map.name == bc_map[bc_name]["name"]]
+            times = np.array(bc_result["time"])[-num_pts_per_cycle:]
+            times -= times[0]
             pressure_plot.add_line_trace(
                 x=times,
                 y=taskutils.cgs_pressure_to_mmgh(
@@ -397,13 +379,6 @@ class WindkesselTuning(Task):
                 title="Flow",
                 xaxis_title=r"$s$",
                 yaxis_title=r"$\frac{l}{h}$",
-            )
-            flow_plot.add_line_trace(
-                x=times,
-                y=taskutils.cgs_flow_to_lh(
-                    bc_result[bc_map[bc_name]["flow"]][-num_pts_per_cycle:]
-                ),
-                **gt_opts,
             )
             bc_result = result_map[result_map.name == bc_map[bc_name]["name"]]
             flow_plot.add_line_trace(
@@ -428,7 +403,7 @@ class WindkesselTuning(Task):
 
     def _get_raw_results(
         self, frame: int = None
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Return raw queens result.
 
         Args:
@@ -462,7 +437,7 @@ class _Forward_Model:
     given total resistance.
     """
 
-    def __init__(self, zerod_config) -> None:
+    def __init__(self, zerod_config: reader.SvZeroDSolverInputHandler) -> None:
         """Construct the forward model.
 
         Args:
@@ -496,7 +471,7 @@ class _Forward_Model:
         self.inflow_name = bc_map["INFLOW"]["name"]
         self.inflow_pressure = bc_map["INFLOW"]["pressure"]
 
-    def evaluate(self, **kwargs):
+    def evaluate(self, sample_dict: Dict[str, float]) -> np.ndarray:
         """Objective function for the optimization.
 
         Evaluates the sum of the offsets for the input output pressure relation
@@ -507,7 +482,7 @@ class _Forward_Model:
         for i, bc in enumerate(
             self.base_config.outlet_boundary_conditions.values()
         ):
-            ki = np.exp(kwargs[f"k{i}"])
+            ki = np.exp(sample_dict[f"k{i}"])
             bc["bc_values"]["Rp"] = ki / (1.0 + self._distal_to_proximal[i])
             bc["bc_values"]["Rd"] = ki - bc["bc_values"]["Rp"]
             bc["bc_values"]["C"] = (
@@ -529,7 +504,9 @@ class _Forward_Model:
             for name, flow_id in zip(self.bc_names, self.bc_flow)
         ]
 
-        return np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean])
+        return np.expand_dims(
+            np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean]), axis=0
+        )
 
 
 class SMCRunner:
@@ -537,12 +514,12 @@ class SMCRunner:
 
     def __init__(
         self,
-        forward_model,
+        forward_model: _Forward_Model,
         y_obs: np.ndarray,
-        output_dir=None,
-        num_procs=1,
-        **kwargs,
-    ):
+        output_dir: str,
+        num_procs: int,
+        **kwargs: Any,
+    ) -> None:
         """Create a new SmcIterator instance.
 
         Args:
@@ -558,7 +535,7 @@ class SMCRunner:
 
         """
         self._y_obs = y_obs
-        self._config = {
+        self._config: Dict[str, Any] = {
             "global_settings": {
                 "output_dir": output_dir,
                 "experiment_name": "results",
@@ -613,12 +590,12 @@ class SMCRunner:
         self,
         name: str,
         dist_type: str,
-        **kwargs: dict,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Add a new random variable to the iterator configuration.
 
         Args:
-            label: Name of the variable.
+            name: Name of the variable.
             dist_type: Distribution type of the variable (`normal`, `uniform`,
                 `lognormal`, `beta`)
             options: Parameters of the distribution. For `uniform` distribution
@@ -670,7 +647,7 @@ class SMCRunner:
 
         self._config["parameters"]["random_variables"][name] = var_config
 
-    def run(self, loghandler):
+    def run(self, loghandler: RichHandler) -> None:
         """Run the iterator."""
 
         with TemporaryDirectory() as tmpdir:
@@ -685,9 +662,10 @@ class SMCRunner:
             if self._config["global_settings"]["output_dir"] is None:
                 self._config["global_settings"]["output_dir"] = tmpdir
 
+            output_dir = self._config["global_settings"]["output_dir"]
             with open(
                 os.path.join(
-                    self._config["global_settings"]["output_dir"],
+                    output_dir,  # type: ignore
                     "queens_input.json",
                 ),
                 "w",

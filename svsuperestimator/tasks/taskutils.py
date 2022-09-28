@@ -1,12 +1,17 @@
+"""This module holds general task helper function."""
 import subprocess
 from time import sleep
-from typing import Callable
+from typing import Callable, Sequence, Tuple, Union
 
 import numpy as np
 from scipy.interpolate import CubicSpline
 
+from .. import reader
 
-def cgs_pressure_to_mmgh(cgs_pressure):
+
+def cgs_pressure_to_mmgh(
+    cgs_pressure: Union[Sequence, np.ndarray]
+) -> np.ndarray:
     """Convert pressure from g/(cm s^2) to mmHg.
 
     Args:
@@ -18,7 +23,7 @@ def cgs_pressure_to_mmgh(cgs_pressure):
     return np.array(np.array(cgs_pressure) * 0.00075006156130264)
 
 
-def cgs_flow_to_lh(cgs_flow):
+def cgs_flow_to_lh(cgs_flow: Union[Sequence, np.ndarray]) -> np.ndarray:
     """Convert flow from cm^3/s to l/h.
 
     Args:
@@ -30,7 +35,7 @@ def cgs_flow_to_lh(cgs_flow):
     return np.array(np.array(cgs_flow) * 3.6)
 
 
-def cgs_flow_to_lmin(cgs_flow):
+def cgs_flow_to_lmin(cgs_flow: Union[Sequence, np.ndarray]) -> np.ndarray:
     """Convert flow from cm^3/s to l/min.
 
     Args:
@@ -42,7 +47,7 @@ def cgs_flow_to_lmin(cgs_flow):
     return np.array(np.array(cgs_flow) * 60.0 / 1000.0)
 
 
-def refine_with_cubic_spline(y: np.ndarray, num: np.ndarray):
+def refine_with_cubic_spline(y: np.ndarray, num: int) -> np.ndarray:
     """Refine a curve using cubic spline interpolation.
 
     Args:
@@ -60,9 +65,9 @@ def refine_with_cubic_spline(y: np.ndarray, num: np.ndarray):
 def run_subprocess(
     args: list,
     logger: Callable,
-    refresh_rate=1.0,
+    refresh_rate: float = 1.0,
     logprefix: str = "",
-    cwd=None,
+    cwd: str = None,
 ) -> None:
     """Run a subprocess.
 
@@ -81,7 +86,7 @@ def run_subprocess(
         cwd=cwd,
     )
 
-    def check_io():
+    def check_io():  # type: ignore
         while True:
             output = process.stdout.readline().decode().strip()
             if output:
@@ -97,7 +102,11 @@ def run_subprocess(
         raise RuntimeError("Subprocess failed")
 
 
-def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
+def map_centerline_result_to_0d(
+    zerod_handler: reader.SvZeroDSolverInputHandler,
+    centerline_handler: reader.CenterlineHandler,
+    dt3d: float,
+) -> Tuple[dict, np.ndarray]:
     """Map centerine result onto 0d elements."""
 
     cl_handler = centerline_handler
@@ -116,13 +125,13 @@ def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
         np.abs(times - (times[-1] - cycle_period))
     ).argmin() - 1
 
-    def filter_last_cycle(data, seg_end_index):
+    def filter_last_cycle(data, seg_end_index):  # type: ignore
         if start_last_cycle == -1:
             return data[:, seg_end_index]
         return data[start_last_cycle:-1, seg_end_index]
 
     # Extract branch information of 0D config
-    branchdata = {}
+    branchdata: dict = {}
     for vessel_config in zerod_handler.vessels.values():
 
         # Extract branch and segment id from name
@@ -130,7 +139,7 @@ def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
         branch_id, seg_id = name.split("_")
         branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-        if not branch_id in branchdata:
+        if branch_id not in branchdata:
             branchdata[branch_id] = {}
 
         branchdata[branch_id][seg_id] = {}
@@ -186,8 +195,12 @@ def map_centerline_result_to_0d(zerod_handler, centerline_handler, dt3d):
 
 
 def map_centerline_result_to_0d_2(
-    zerod_handler, cl_handler, threed_handler, results_handler, padding=False
-):
+    zerod_handler: reader.SvZeroDSolverInputHandler,
+    cl_handler: reader.CenterlineHandler,
+    threed_handler: reader.SvSolverInputHandler,
+    results_handler: reader.CenterlineHandler,
+    padding: bool = False,
+) -> Tuple[dict, np.ndarray]:
     """Map centerine result onto 0d elements."""
 
     # calculate cycle period
@@ -204,13 +217,13 @@ def map_centerline_result_to_0d_2(
         np.abs(times - (times[-1] - cycle_period))
     ).argmin() - 1
 
-    def filter_last_cycle(data, seg_end_index):
+    def filter_last_cycle(data, seg_end_index):  # type: ignore
         if start_last_cycle == -1:
             return data[:, seg_end_index]
         return data[start_last_cycle:-1, seg_end_index]
 
     # Extract branch information of 0D config
-    branchdata = {}
+    branchdata: dict = {}
     for vessel_config in zerod_handler.vessels.values():
 
         # Extract branch and segment id from name
@@ -218,7 +231,7 @@ def map_centerline_result_to_0d_2(
         branch_id, seg_id = name.split("_")
         branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-        if not branch_id in branchdata:
+        if branch_id not in branchdata:
             branchdata[branch_id] = {}
 
         branchdata[branch_id][seg_id] = {}
@@ -293,7 +306,15 @@ def map_centerline_result_to_0d_2(
     return branchdata, times
 
 
-def set_initial_condition(zerod_handler, mapped_data):
+def set_initial_condition(
+    zerod_handler: reader.SvZeroDSolverInputHandler, mapped_data: dict
+) -> None:
+    """Set initial condition of 0D configuration based on mapped 0D results.
+
+    Args:
+        zerod_handler: 0D simulation input handler.
+        mapped_data: Mapped 3D result.
+    """
 
     nodes = zerod_handler.nodes
 
@@ -309,7 +330,7 @@ def set_initial_condition(zerod_handler, mapped_data):
             flow = mapped_data[branch_id][seg_id]["flow_out"][0]
             initial_condition[f"pressure:{ele1}:{ele2}"] = pressure
             initial_condition[f"flow:{ele1}:{ele2}"] = flow
-        except:
+        except ValueError:
             pass
 
         try:
@@ -319,7 +340,7 @@ def set_initial_condition(zerod_handler, mapped_data):
             flow = mapped_data[branch_id][seg_id]["flow_in"][0]
             initial_condition[f"pressure:{ele1}:{ele2}"] = pressure
             initial_condition[f"flow:{ele1}:{ele2}"] = flow
-        except:
+        except ValueError:
             pass
 
         if ele2.startswith("RCR"):

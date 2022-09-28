@@ -24,10 +24,9 @@ jobs:
         with:
           name: documentation
           path: public
-      # Has to remain deactivated until repo is public
-      # - name: Deploy documentation
-      #   if: github.ref == 'refs/heads/main'
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./public
+      - name: Deploy documentation
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public

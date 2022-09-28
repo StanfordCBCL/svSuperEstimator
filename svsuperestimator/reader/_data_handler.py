@@ -1,8 +1,10 @@
 """This module holds the DataHandler class."""
 from __future__ import annotations
 
-from abc import ABC, abstractclassmethod, abstractmethod
-from typing import Any
+from abc import ABC, abstractmethod
+from typing import Any, TypeVar
+
+T = TypeVar("T", bound="DataHandler")
 
 
 class DataHandler(ABC):
@@ -16,17 +18,8 @@ class DataHandler(ABC):
         """
         self.data = data
 
-    @abstractclassmethod
-    def from_file(cls, filename: str) -> DataHandler:
-        """Create a new DataHandler instance from file.
-
-        Args:
-            filename: Path to the file to read data from.
-        """
-        raise NotImplementedError
-
     @abstractmethod
-    def to_file(cls, filename: str):
+    def to_file(cls, filename: str) -> None:
         """Write the data to a file.
 
         Args:
