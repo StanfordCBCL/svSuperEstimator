@@ -40,7 +40,7 @@ The remaining dependencies have to be installed manually:
 * [svSolver](https://github.com/SimVascular/svSolver): Build release version and specify path to executable in config file.
 * **QUEENS** (currently not public)
 
-### For Contributers
+### For Contributors
 
 You can install svSuperEstimator **with development related dependencies**
 using:
@@ -76,7 +76,7 @@ global:
   num_procs: 48             # Number of processors
   overwrite: True           # Overwrite existing task results
   report_html: True         # Export task report as html
-  report_files: False       # Export task reports as seperate files
+  report_files: False       # Export task reports as separate files
   debug: False              # Generate debug output and files
   core_run: True            # Toggle core run
   post_proc: True           # Toggle post processing
