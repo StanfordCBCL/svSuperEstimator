@@ -1,0 +1,710 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>svsuperestimator.tasks.taskutils &#8212; svSuperEstimator v1.3 Manual</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/svsuperestimator/tasks/taskutils';</script>
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fas fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/logo.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../rst/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../modules.html">
+                        Documentation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../rst/bibliography.html">
+                        References
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fas fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../rst/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../modules.html">
+                        Documentation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../rst/bibliography.html">
+                        References
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for svsuperestimator.tasks.taskutils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This module holds general task helper function.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">CubicSpline</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">reader</span>
+
+
+<div class="viewcode-block" id="cgs_pressure_to_mmgh"><a class="viewcode-back" href="../../../svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.cgs_pressure_to_mmgh">[docs]</a><span class="k">def</span> <span class="nf">cgs_pressure_to_mmgh</span><span class="p">(</span>
+    <span class="n">cgs_pressure</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Convert pressure from g/(cm s^2) to mmHg.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cgs_pressure: Pressure in CGS format.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Pressure in mmHg.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cgs_pressure</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.00075006156130264</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cgs_flow_to_lh"><a class="viewcode-back" href="../../../svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.cgs_flow_to_lh">[docs]</a><span class="k">def</span> <span class="nf">cgs_flow_to_lh</span><span class="p">(</span><span class="n">cgs_flow</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Convert flow from cm^3/s to l/h.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cgs_flow: Flow in CGS format.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Flow in l/h.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cgs_flow</span><span class="p">)</span> <span class="o">*</span> <span class="mf">3.6</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cgs_flow_to_lmin"><a class="viewcode-back" href="../../../svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.cgs_flow_to_lmin">[docs]</a><span class="k">def</span> <span class="nf">cgs_flow_to_lmin</span><span class="p">(</span><span class="n">cgs_flow</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Convert flow from cm^3/s to l/min.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cgs_flow: Flow in CGS format.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Flow in l/h.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cgs_flow</span><span class="p">)</span> <span class="o">*</span> <span class="mf">60.0</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="refine_with_cubic_spline"><a class="viewcode-back" href="../../../svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.refine_with_cubic_spline">[docs]</a><span class="k">def</span> <span class="nf">refine_with_cubic_spline</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Refine a curve using cubic spline interpolation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        y: The data to refine.</span>
+<span class="sd">        num: New number of points of the refined data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">x_old</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+    <span class="n">x_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span>
+    <span class="n">y_new</span> <span class="o">=</span> <span class="n">CubicSpline</span><span class="p">(</span><span class="n">x_old</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">bc_type</span><span class="o">=</span><span class="s2">&quot;periodic&quot;</span><span class="p">)(</span><span class="n">x_new</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y_new</span></div>
+
+
+<div class="viewcode-block" id="run_subprocess"><a class="viewcode-back" href="../../../svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.run_subprocess">[docs]</a><span class="k">def</span> <span class="nf">run_subprocess</span><span class="p">(</span>
+    <span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">logger</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">refresh_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">logprefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">cwd</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Run a subprocess.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Arguments for the subprocess.</span>
+<span class="sd">        logger: Logger to use for logging.</span>
+<span class="sd">        refresh_rate: Rate to update logging (in seconds).</span>
+<span class="sd">        logprefix: Prefix to put in front of lines when logging.</span>
+<span class="sd">        cwd: Working directory of the subprocess.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+        <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">),</span>
+        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span>
+        <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">cwd</span><span class="o">=</span><span class="n">cwd</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">check_io</span><span class="p">():</span>  <span class="c1"># type: ignore</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">output</span><span class="p">:</span>
+                <span class="n">logger</span><span class="p">(</span><span class="n">logprefix</span> <span class="o">+</span> <span class="n">output</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+
+    <span class="k">while</span> <span class="n">process</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">check_io</span><span class="p">()</span>
+        <span class="n">sleep</span><span class="p">(</span><span class="n">refresh_rate</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Subprocess failed&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="map_centerline_result_to_0d"><a class="viewcode-back" href="../../../svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.map_centerline_result_to_0d">[docs]</a><span class="k">def</span> <span class="nf">map_centerline_result_to_0d</span><span class="p">(</span>
+    <span class="n">zerod_handler</span><span class="p">:</span> <span class="n">reader</span><span class="o">.</span><span class="n">SvZeroDSolverInputHandler</span><span class="p">,</span>
+    <span class="n">centerline_handler</span><span class="p">:</span> <span class="n">reader</span><span class="o">.</span><span class="n">CenterlineHandler</span><span class="p">,</span>
+    <span class="n">dt3d</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Map centerine result onto 0d elements.&quot;&quot;&quot;</span>
+
+    <span class="n">cl_handler</span> <span class="o">=</span> <span class="n">centerline_handler</span>
+
+    <span class="c1"># calculate cycle period</span>
+    <span class="n">cycle_period</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">zerod_handler</span><span class="o">.</span><span class="n">boundary_conditions</span><span class="p">[</span><span class="s2">&quot;INFLOW&quot;</span><span class="p">][</span><span class="s2">&quot;bc_values&quot;</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="o">-</span> <span class="n">zerod_handler</span><span class="o">.</span><span class="n">boundary_conditions</span><span class="p">[</span><span class="s2">&quot;INFLOW&quot;</span><span class="p">][</span><span class="s2">&quot;bc_values&quot;</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Extract time steps</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="n">centerline_handler</span><span class="o">.</span><span class="n">time_steps</span> <span class="o">*</span> <span class="n">dt3d</span>
+
+    <span class="c1"># Calculate start of last cycle</span>
+    <span class="n">start_last_cycle</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">times</span> <span class="o">-</span> <span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">cycle_period</span><span class="p">))</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">filter_last_cycle</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">seg_end_index</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="n">start_last_cycle</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">seg_end_index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">start_last_cycle</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">seg_end_index</span><span class="p">]</span>
+
+    <span class="c1"># Extract branch information of 0D config</span>
+    <span class="n">branchdata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">vessel_config</span> <span class="ow">in</span> <span class="n">zerod_handler</span><span class="o">.</span><span class="n">vessels</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+
+        <span class="c1"># Extract branch and segment id from name</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">vessel_config</span><span class="p">[</span><span class="s2">&quot;vessel_name&quot;</span><span class="p">]</span>
+        <span class="n">branch_id</span><span class="p">,</span> <span class="n">seg_id</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+        <span class="n">branch_id</span><span class="p">,</span> <span class="n">seg_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">branch_id</span><span class="p">[</span><span class="mi">6</span><span class="p">:]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">seg_id</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
+
+        <span class="k">if</span> <span class="n">branch_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">branchdata</span><span class="p">:</span>
+            <span class="n">branchdata</span><span class="p">[</span><span class="n">branch_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">branchdata</span><span class="p">[</span><span class="n">branch_id</span><span class="p">][</span><span class="n">seg_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">branchdata</span><span class="p">[</span><span class="n">branch_id</span><span class="p">][</span><span class="n">seg_id</span><span class="p">][</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vessel_config</span><span class="p">[</span>
+            <span class="s2">&quot;vessel_length&quot;</span>
+        <span class="p">]</span>
+        <span class="n">branchdata</span><span class="p">[</span><span class="n">branch_id</span><span class="p">][</span><span class="n">seg_id</span><span class="p">][</span><span class="s2">&quot;vessel_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vessel_config</span><span class="p">[</span><span class="s2">&quot;vessel_id&quot;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">branch_id</span><span class="p">,</span> <span class="n">branch</span> <span class="ow">in</span> <span class="n">branchdata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="n">branch_data</span> <span class="o">=</span> <span class="n">cl_handler</span><span class="o">.</span><span class="n">get_branch_data</span><span class="p">(</span><span class="n">branch_id</span><span class="p">)</span>
+
+        <span class="n">seg_start</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">seg_start_index</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">seg_id</span><span class="p">,</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">branch</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">segment</span> <span class="o">=</span> <span class="n">branch</span><span class="p">[</span><span class="n">seg_id</span><span class="p">]</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">segment</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span>
+
+            <span class="n">seg_end_index</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">length</span> <span class="o">-</span> <span class="n">seg_start</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+            <span class="n">seg_end</span> <span class="o">=</span> <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">][</span><span class="n">seg_end_index</span><span class="p">]</span>
+
+            <span class="n">segment</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;flow_in&quot;</span><span class="p">:</span> <span class="n">filter_last_cycle</span><span class="p">(</span>
+                        <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">],</span> <span class="n">seg_start_index</span>
+                    <span class="p">),</span>
+                    <span class="s2">&quot;flow_out&quot;</span><span class="p">:</span> <span class="n">filter_last_cycle</span><span class="p">(</span>
+                        <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">],</span> <span class="n">seg_end_index</span>
+                    <span class="p">),</span>
+                    <span class="s2">&quot;pressure_in&quot;</span><span class="p">:</span> <span class="n">filter_last_cycle</span><span class="p">(</span>
+                        <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;pressure&quot;</span><span class="p">],</span> <span class="n">seg_start_index</span>
+                    <span class="p">),</span>
+                    <span class="s2">&quot;pressure_out&quot;</span><span class="p">:</span> <span class="n">filter_last_cycle</span><span class="p">(</span>
+                        <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;pressure&quot;</span><span class="p">],</span> <span class="n">seg_end_index</span>
+                    <span class="p">),</span>
+                    <span class="s2">&quot;x0&quot;</span><span class="p">:</span> <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;points&quot;</span><span class="p">][</span><span class="n">seg_start_index</span><span class="p">],</span>
+                    <span class="s2">&quot;x1&quot;</span><span class="p">:</span> <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;points&quot;</span><span class="p">][</span><span class="n">seg_end_index</span><span class="p">],</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+            <span class="n">seg_start</span> <span class="o">=</span> <span class="n">seg_end</span>
+            <span class="n">seg_start_index</span> <span class="o">=</span> <span class="n">seg_end_index</span>
+
+    <span class="k">if</span> <span class="n">start_last_cycle</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">times</span> <span class="o">-=</span> <span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">times</span><span class="p">[</span><span class="n">start_last_cycle</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="n">start_last_cycle</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">branchdata</span><span class="p">,</span> <span class="n">times</span></div>
+
+
+<div class="viewcode-block" id="map_centerline_result_to_0d_2"><a class="viewcode-back" href="../../../svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.map_centerline_result_to_0d_2">[docs]</a><span class="k">def</span> <span class="nf">map_centerline_result_to_0d_2</span><span class="p">(</span>
+    <span class="n">zerod_handler</span><span class="p">:</span> <span class="n">reader</span><span class="o">.</span><span class="n">SvZeroDSolverInputHandler</span><span class="p">,</span>
+    <span class="n">cl_handler</span><span class="p">:</span> <span class="n">reader</span><span class="o">.</span><span class="n">CenterlineHandler</span><span class="p">,</span>
+    <span class="n">threed_handler</span><span class="p">:</span> <span class="n">reader</span><span class="o">.</span><span class="n">SvSolverInputHandler</span><span class="p">,</span>
+    <span class="n">results_handler</span><span class="p">:</span> <span class="n">reader</span><span class="o">.</span><span class="n">CenterlineHandler</span><span class="p">,</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Map centerine result onto 0d elements.&quot;&quot;&quot;</span>
+
+    <span class="c1"># calculate cycle period</span>
+    <span class="n">cycle_period</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">zerod_handler</span><span class="o">.</span><span class="n">boundary_conditions</span><span class="p">[</span><span class="s2">&quot;INFLOW&quot;</span><span class="p">][</span><span class="s2">&quot;bc_values&quot;</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="o">-</span> <span class="n">zerod_handler</span><span class="o">.</span><span class="n">boundary_conditions</span><span class="p">[</span><span class="s2">&quot;INFLOW&quot;</span><span class="p">][</span><span class="s2">&quot;bc_values&quot;</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Extract time steps</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="n">results_handler</span><span class="o">.</span><span class="n">time_steps</span> <span class="o">*</span> <span class="n">threed_handler</span><span class="o">.</span><span class="n">time_step_size</span>
+
+    <span class="c1"># Calculate start of last cycle</span>
+    <span class="n">start_last_cycle</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">times</span> <span class="o">-</span> <span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">cycle_period</span><span class="p">))</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">filter_last_cycle</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">seg_end_index</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="n">start_last_cycle</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">seg_end_index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">start_last_cycle</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">seg_end_index</span><span class="p">]</span>
+
+    <span class="c1"># Extract branch information of 0D config</span>
+    <span class="n">branchdata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">vessel_config</span> <span class="ow">in</span> <span class="n">zerod_handler</span><span class="o">.</span><span class="n">vessels</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+
+        <span class="c1"># Extract branch and segment id from name</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">vessel_config</span><span class="p">[</span><span class="s2">&quot;vessel_name&quot;</span><span class="p">]</span>
+        <span class="n">branch_id</span><span class="p">,</span> <span class="n">seg_id</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+        <span class="n">branch_id</span><span class="p">,</span> <span class="n">seg_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">branch_id</span><span class="p">[</span><span class="mi">6</span><span class="p">:]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">seg_id</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
+
+        <span class="k">if</span> <span class="n">branch_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">branchdata</span><span class="p">:</span>
+            <span class="n">branchdata</span><span class="p">[</span><span class="n">branch_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">branchdata</span><span class="p">[</span><span class="n">branch_id</span><span class="p">][</span><span class="n">seg_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">branchdata</span><span class="p">[</span><span class="n">branch_id</span><span class="p">][</span><span class="n">seg_id</span><span class="p">][</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vessel_config</span><span class="p">[</span>
+            <span class="s2">&quot;vessel_length&quot;</span>
+        <span class="p">]</span>
+        <span class="n">branchdata</span><span class="p">[</span><span class="n">branch_id</span><span class="p">][</span><span class="n">seg_id</span><span class="p">][</span><span class="s2">&quot;vessel_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vessel_config</span><span class="p">[</span><span class="s2">&quot;vessel_id&quot;</span><span class="p">]</span>
+
+    <span class="n">results_branch_starts</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">branch_id</span><span class="p">,</span> <span class="n">branch</span> <span class="ow">in</span> <span class="n">branchdata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">results_branch_starts</span><span class="p">[</span><span class="n">branch_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">results_handler</span><span class="o">.</span><span class="n">get_branch_data</span><span class="p">(</span>
+            <span class="n">branch_id</span>
+        <span class="p">)[</span><span class="s2">&quot;points&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results_branch_starts</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">results_branch_starts</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
+    <span class="k">for</span> <span class="n">branch_id</span><span class="p">,</span> <span class="n">branch</span> <span class="ow">in</span> <span class="n">branchdata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="n">cl_data</span> <span class="o">=</span> <span class="n">cl_handler</span><span class="o">.</span><span class="n">get_branch_data</span><span class="p">(</span><span class="n">branch_id</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">cl_data</span><span class="p">[</span><span class="s2">&quot;points&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">new_id</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">starts</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))]</span>
+
+        <span class="n">branch_data</span> <span class="o">=</span> <span class="n">results_handler</span><span class="o">.</span><span class="n">get_branch_data</span><span class="p">(</span><span class="n">new_id</span><span class="p">)</span>
+
+        <span class="n">seg_start</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">seg_start_index</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">padding</span><span class="p">:</span>
+            <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">][:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">][:,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;pressure&quot;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;pressure&quot;</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;pressure&quot;</span><span class="p">][:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;pressure&quot;</span><span class="p">][:,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">seg_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">branch</span><span class="p">)):</span>
+            <span class="n">segment</span> <span class="o">=</span> <span class="n">branch</span><span class="p">[</span><span class="n">seg_id</span><span class="p">]</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">segment</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span>
+
+            <span class="n">seg_end_index</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">length</span> <span class="o">-</span> <span class="n">seg_start</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+            <span class="n">seg_end</span> <span class="o">=</span> <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">][</span><span class="n">seg_end_index</span><span class="p">]</span>
+
+            <span class="n">segment</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;flow_in&quot;</span><span class="p">:</span> <span class="n">filter_last_cycle</span><span class="p">(</span>
+                        <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">],</span> <span class="n">seg_start_index</span>
+                    <span class="p">),</span>
+                    <span class="s2">&quot;flow_out&quot;</span><span class="p">:</span> <span class="n">filter_last_cycle</span><span class="p">(</span>
+                        <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">],</span> <span class="n">seg_end_index</span>
+                    <span class="p">),</span>
+                    <span class="s2">&quot;pressure_in&quot;</span><span class="p">:</span> <span class="n">filter_last_cycle</span><span class="p">(</span>
+                        <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;pressure&quot;</span><span class="p">],</span> <span class="n">seg_start_index</span>
+                    <span class="p">),</span>
+                    <span class="s2">&quot;pressure_out&quot;</span><span class="p">:</span> <span class="n">filter_last_cycle</span><span class="p">(</span>
+                        <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;pressure&quot;</span><span class="p">],</span> <span class="n">seg_end_index</span>
+                    <span class="p">),</span>
+                    <span class="s2">&quot;x0&quot;</span><span class="p">:</span> <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;points&quot;</span><span class="p">][</span><span class="n">seg_start_index</span><span class="p">],</span>
+                    <span class="s2">&quot;x1&quot;</span><span class="p">:</span> <span class="n">branch_data</span><span class="p">[</span><span class="s2">&quot;points&quot;</span><span class="p">][</span><span class="n">seg_end_index</span><span class="p">],</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+            <span class="n">seg_start</span> <span class="o">=</span> <span class="n">seg_end</span>
+            <span class="n">seg_start_index</span> <span class="o">=</span> <span class="n">seg_end_index</span>
+
+    <span class="k">if</span> <span class="n">start_last_cycle</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">times</span> <span class="o">-=</span> <span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">times</span><span class="p">[</span><span class="n">start_last_cycle</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="n">start_last_cycle</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">branchdata</span><span class="p">,</span> <span class="n">times</span></div>
+
+
+<div class="viewcode-block" id="set_initial_condition"><a class="viewcode-back" href="../../../svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.set_initial_condition">[docs]</a><span class="k">def</span> <span class="nf">set_initial_condition</span><span class="p">(</span>
+    <span class="n">zerod_handler</span><span class="p">:</span> <span class="n">reader</span><span class="o">.</span><span class="n">SvZeroDSolverInputHandler</span><span class="p">,</span> <span class="n">mapped_data</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Set initial condition of 0D configuration based on mapped 0D results.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        zerod_handler: 0D simulation input handler.</span>
+<span class="sd">        mapped_data: Mapped 3D result.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">zerod_handler</span><span class="o">.</span><span class="n">nodes</span>
+
+    <span class="n">bcs</span> <span class="o">=</span> <span class="n">zerod_handler</span><span class="o">.</span><span class="n">boundary_conditions</span>
+    <span class="n">vessels</span> <span class="o">=</span> <span class="n">zerod_handler</span><span class="o">.</span><span class="n">vessels</span>
+
+    <span class="n">initial_condition</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ele1</span><span class="p">,</span> <span class="n">ele2</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">branch_id</span><span class="p">,</span> <span class="n">seg_id</span> <span class="o">=</span> <span class="n">ele1</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+            <span class="n">branch_id</span><span class="p">,</span> <span class="n">seg_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">branch_id</span><span class="p">[</span><span class="mi">6</span><span class="p">:]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">seg_id</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
+            <span class="n">pressure</span> <span class="o">=</span> <span class="n">mapped_data</span><span class="p">[</span><span class="n">branch_id</span><span class="p">][</span><span class="n">seg_id</span><span class="p">][</span><span class="s2">&quot;pressure_out&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">flow</span> <span class="o">=</span> <span class="n">mapped_data</span><span class="p">[</span><span class="n">branch_id</span><span class="p">][</span><span class="n">seg_id</span><span class="p">][</span><span class="s2">&quot;flow_out&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">initial_condition</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;pressure:</span><span class="si">{</span><span class="n">ele1</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ele2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pressure</span>
+            <span class="n">initial_condition</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;flow:</span><span class="si">{</span><span class="n">ele1</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ele2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flow</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">branch_id</span><span class="p">,</span> <span class="n">seg_id</span> <span class="o">=</span> <span class="n">ele2</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+            <span class="n">branch_id</span><span class="p">,</span> <span class="n">seg_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">branch_id</span><span class="p">[</span><span class="mi">6</span><span class="p">:]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">seg_id</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
+            <span class="n">pressure</span> <span class="o">=</span> <span class="n">mapped_data</span><span class="p">[</span><span class="n">branch_id</span><span class="p">][</span><span class="n">seg_id</span><span class="p">][</span><span class="s2">&quot;pressure_in&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">flow</span> <span class="o">=</span> <span class="n">mapped_data</span><span class="p">[</span><span class="n">branch_id</span><span class="p">][</span><span class="n">seg_id</span><span class="p">][</span><span class="s2">&quot;flow_in&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">initial_condition</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;pressure:</span><span class="si">{</span><span class="n">ele1</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ele2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pressure</span>
+            <span class="n">initial_condition</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;flow:</span><span class="si">{</span><span class="n">ele1</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ele2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flow</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="n">ele2</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;RCR&quot;</span><span class="p">):</span>
+            <span class="n">initial_condition</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;pressure_c:</span><span class="si">{</span><span class="n">ele2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">initial_condition</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;pressure:</span><span class="si">{</span><span class="n">ele1</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ele2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">bcs</span><span class="p">[</span><span class="n">ele2</span><span class="p">][</span><span class="s2">&quot;bc_values&quot;</span><span class="p">][</span><span class="s2">&quot;Rp&quot;</span><span class="p">]</span>
+                <span class="o">*</span> <span class="n">initial_condition</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;flow:</span><span class="si">{</span><span class="n">ele1</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ele2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ele2</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;branch&quot;</span><span class="p">):</span>
+            <span class="n">vessel_params</span> <span class="o">=</span> <span class="n">vessels</span><span class="p">[</span><span class="n">ele2</span><span class="p">][</span><span class="s2">&quot;zero_d_element_values&quot;</span><span class="p">]</span>
+            <span class="n">initial_condition</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;pressure_c:</span><span class="si">{</span><span class="n">ele2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">initial_condition</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;pressure:</span><span class="si">{</span><span class="n">ele1</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ele2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+                <span class="o">-</span> <span class="p">(</span>
+                    <span class="n">vessel_params</span><span class="p">[</span><span class="s2">&quot;R_poiseuille&quot;</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="n">vessel_params</span><span class="p">[</span><span class="s2">&quot;stenosis_coefficient&quot;</span><span class="p">]</span>
+                    <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">initial_condition</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;flow:</span><span class="si">{</span><span class="n">ele1</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ele2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>
+                <span class="p">)</span>
+                <span class="o">*</span> <span class="n">initial_condition</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;flow:</span><span class="si">{</span><span class="n">ele1</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ele2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">junction_name</span><span class="p">,</span> <span class="n">junction</span> <span class="ow">in</span> <span class="n">zerod_handler</span><span class="o">.</span><span class="n">junctions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">junction</span><span class="p">[</span><span class="s2">&quot;junction_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;resistive_junction&quot;</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">junction_name</span><span class="p">:</span>
+                    <span class="n">branch_id</span><span class="p">,</span> <span class="n">seg_id</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                    <span class="n">branch_id</span><span class="p">,</span> <span class="n">seg_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">branch_id</span><span class="p">[</span><span class="mi">6</span><span class="p">:]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">seg_id</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
+                    <span class="n">initial_condition</span><span class="p">[</span>
+                        <span class="sa">f</span><span class="s2">&quot;pressure_c:</span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="n">initial_condition</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;pressure:</span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+
+    <span class="n">zerod_handler</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;initial_condition&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_condition</span></div>
+</pre></div>
+
+            </article>
+            
+            
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright Stanford University, The Regents of the University of California, and others..<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

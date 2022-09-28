@@ -1,0 +1,1247 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>svsuperestimator.tasks package &#8212; svSuperEstimator v1.3 Manual</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'svsuperestimator.tasks';</script>
+    <link rel="shortcut icon" href="_static/favicon.png"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="svsuperestimator.visualizer package" href="svsuperestimator.visualizer.html" />
+    <link rel="prev" title="svsuperestimator.reader package" href="svsuperestimator.reader.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fas fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="_static/logo.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="rst/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="modules.html">
+                        Documentation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="rst/bibliography.html">
+                        References
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fas fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="rst/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="modules.html">
+                        Documentation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="rst/bibliography.html">
+                        References
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="svsuperestimator.html">
+   svsuperestimator package
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label class="toctree-toggle" for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2">
+    <a class="reference internal" href="svsuperestimator.reader.html">
+     svsuperestimator.reader package
+    </a>
+   </li>
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     svsuperestimator.tasks package
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="svsuperestimator.visualizer.html">
+     svsuperestimator.visualizer package
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="svsuperestimator-tasks-package">
+<h1>svsuperestimator.tasks package<a class="headerlink" href="#svsuperestimator-tasks-package" title="Permalink to this heading">#</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="svsuperestimator-tasks-blood-vessel-tuning-module">
+<h2>svsuperestimator.tasks.blood_vessel_tuning module<a class="headerlink" href="#svsuperestimator-tasks-blood-vessel-tuning-module" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-svsuperestimator.tasks.map_three_d_result_on_centerline">
+<span id="svsuperestimator-tasks-map-three-d-result-on-centerline-module"></span><h2>svsuperestimator.tasks.map_three_d_result_on_centerline module<a class="headerlink" href="#module-svsuperestimator.tasks.map_three_d_result_on_centerline" title="Permalink to this heading">#</a></h2>
+<p>This module holds the MapThreeDResultOnCenterline task.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.map_three_d_result_on_centerline.</span></span><span class="sig-name descname"><span class="pre">MapThreeDResultOnCenterline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/map_three_d_result_on_centerline.html#MapThreeDResultOnCenterline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svsuperestimator.tasks.task.Task" title="svsuperestimator.tasks.task.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a></p>
+<p>Map 3D result on centerline task.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.DEFAULTS">
+<span class="sig-name descname"><span class="pre">DEFAULTS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'debug':</span> <span class="pre">False,</span> <span class="pre">'name':</span> <span class="pre">None,</span> <span class="pre">'num_procs':</span> <span class="pre">1,</span> <span class="pre">'overwrite':</span> <span class="pre">False,</span> <span class="pre">'post_proc_only':</span> <span class="pre">False,</span> <span class="pre">'report_files':</span> <span class="pre">False,</span> <span class="pre">'report_html':</span> <span class="pre">True,</span> <span class="pre">'slicer_executable':</span> <span class="pre">None,</span> <span class="pre">'threed_result_file':</span> <span class="pre">None}</span></em><a class="headerlink" href="#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.DEFAULTS" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.TASKNAME">
+<span class="sig-name descname"><span class="pre">TASKNAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'map_three_d_result_on_centerline'</span></em><a class="headerlink" href="#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.TASKNAME" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.core_run">
+<span class="sig-name descname"><span class="pre">core_run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/map_three_d_result_on_centerline.html#MapThreeDResultOnCenterline.core_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.core_run" title="Permalink to this definition">#</a></dt>
+<dd><p>Core routine of the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.generate_report">
+<span class="sig-name descname"><span class="pre">generate_report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/map_three_d_result_on_centerline.html#MapThreeDResultOnCenterline.generate_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.generate_report" title="Permalink to this definition">#</a></dt>
+<dd><p>Generate the task report.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Report" title="svsuperestimator.visualizer._report.Report"><code class="xref py py-class docutils literal notranslate"><span class="pre">Report</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.post_run">
+<span class="sig-name descname"><span class="pre">post_run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/map_three_d_result_on_centerline.html#MapThreeDResultOnCenterline.post_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.post_run" title="Permalink to this definition">#</a></dt>
+<dd><p>Postprocessing routine of the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="svsuperestimator-tasks-map-zero-d-result-to-three-d-module">
+<h2>svsuperestimator.tasks.map_zero_d_result_to_three_d module<a class="headerlink" href="#svsuperestimator-tasks-map-zero-d-result-to-three-d-module" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="svsuperestimator-tasks-multi-fidelity-tuning-module">
+<h2>svsuperestimator.tasks.multi_fidelity_tuning module<a class="headerlink" href="#svsuperestimator-tasks-multi-fidelity-tuning-module" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-svsuperestimator.tasks.plotutils">
+<span id="svsuperestimator-tasks-plotutils-module"></span><h2>svsuperestimator.tasks.plotutils module<a class="headerlink" href="#module-svsuperestimator.tasks.plotutils" title="Permalink to this heading">#</a></h2>
+<p>This module holds task helper function related to plotting.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.plotutils.create_3d_geometry_plot_with_vessels">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.plotutils.</span></span><span class="sig-name descname"><span class="pre">create_3d_geometry_plot_with_vessels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/plotutils.html#create_3d_geometry_plot_with_vessels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.plotutils.create_3d_geometry_plot_with_vessels" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a 3D plot with mesh and 0D element traces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project</strong> (<a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SimVascularProject" title="svsuperestimator.reader._svproject.SimVascularProject"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimVascularProject</span></code></a>) – The project.</p></li>
+<li><p><strong>branch_data</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>) – branch_data with 0D element coordinates.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot3D" title="svsuperestimator.visualizer._plot_3d.Plot3D"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plot3D</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="svsuperestimator-tasks-statutils-module">
+<h2>svsuperestimator.tasks.statutils module<a class="headerlink" href="#svsuperestimator-tasks-statutils-module" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-svsuperestimator.tasks.task">
+<span id="svsuperestimator-tasks-task-module"></span><h2>svsuperestimator.tasks.task module<a class="headerlink" href="#module-svsuperestimator.tasks.task" title="Permalink to this heading">#</a></h2>
+<p>This module holds the Task base class.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.task.Task">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.task.</span></span><span class="sig-name descname"><span class="pre">Task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/task.html#Task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.task.Task" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for svSuper Estimator task.</p>
+<p>A task is a set of actions to be performed on a SimVascular project. Each
+task defines 3 routines. A core_run routine in which the main calculation
+of the task is performed, a post_run routine where the data is
+postprocessed and a generate_report routine, where the postprocessed
+results are visualized.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.task.Task.TASKNAME">
+<span class="sig-name descname"><span class="pre">TASKNAME</span></span><a class="headerlink" href="#svsuperestimator.tasks.task.Task.TASKNAME" title="Permalink to this definition">#</a></dt>
+<dd><p>Name of the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.task.Task.DEFAULTS">
+<span class="sig-name descname"><span class="pre">DEFAULTS</span></span><a class="headerlink" href="#svsuperestimator.tasks.task.Task.DEFAULTS" title="Permalink to this definition">#</a></dt>
+<dd><p>DEFAULT settings for the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">DEFAULTS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'debug':</span> <span class="pre">False,</span> <span class="pre">'name':</span> <span class="pre">None,</span> <span class="pre">'overwrite':</span> <span class="pre">False,</span> <span class="pre">'post_proc_only':</span> <span class="pre">False,</span> <span class="pre">'report_files':</span> <span class="pre">False,</span> <span class="pre">'report_html':</span> <span class="pre">True}</span></em><a class="headerlink" href="#id0" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">TASKNAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id1" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.task.Task.core_run">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">core_run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/task.html#Task.core_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.task.Task.core_run" title="Permalink to this definition">#</a></dt>
+<dd><p>Core routine of the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.task.Task.generate_report">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/task.html#Task.generate_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.task.Task.generate_report" title="Permalink to this definition">#</a></dt>
+<dd><p>Visualization routine of the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Report" title="svsuperestimator.visualizer._report.Report"><code class="xref py py-class docutils literal notranslate"><span class="pre">Report</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.task.Task.is_completed">
+<span class="sig-name descname"><span class="pre">is_completed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/task.html#Task.is_completed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.task.Task.is_completed" title="Permalink to this definition">#</a></dt>
+<dd><p>Check if task is already completed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.task.Task.load_database">
+<span class="sig-name descname"><span class="pre">load_database</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/task.html#Task.load_database"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.task.Task.load_database" title="Permalink to this definition">#</a></dt>
+<dd><p>Return problem parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Parameters of the problem.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.task.Task.log">
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/task.html#Task.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.task.Task.log" title="Permalink to this definition">#</a></dt>
+<dd><p>Log to the task console.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.task.Task.post_run">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">post_run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/task.html#Task.post_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.task.Task.post_run" title="Permalink to this definition">#</a></dt>
+<dd><p>Postprocessing routine of the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.task.Task.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/task.html#Task.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.task.Task.run" title="Permalink to this definition">#</a></dt>
+<dd><p>Run the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.task.Task.save_database">
+<span class="sig-name descname"><span class="pre">save_database</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/task.html#Task.save_database"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.task.Task.save_database" title="Permalink to this definition">#</a></dt>
+<dd><p>Set problem parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parameters</strong> – Parameters of the problem.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-svsuperestimator.tasks.taskutils">
+<span id="svsuperestimator-tasks-taskutils-module"></span><h2>svsuperestimator.tasks.taskutils module<a class="headerlink" href="#module-svsuperestimator.tasks.taskutils" title="Permalink to this heading">#</a></h2>
+<p>This module holds general task helper function.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.taskutils.cgs_flow_to_lh">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.taskutils.</span></span><span class="sig-name descname"><span class="pre">cgs_flow_to_lh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cgs_flow</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/taskutils.html#cgs_flow_to_lh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.taskutils.cgs_flow_to_lh" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert flow from cm^3/s to l/h.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cgs_flow</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]) – Flow in CGS format.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Flow in l/h.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.taskutils.cgs_flow_to_lmin">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.taskutils.</span></span><span class="sig-name descname"><span class="pre">cgs_flow_to_lmin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cgs_flow</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/taskutils.html#cgs_flow_to_lmin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.taskutils.cgs_flow_to_lmin" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert flow from cm^3/s to l/min.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cgs_flow</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]) – Flow in CGS format.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Flow in l/h.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.taskutils.cgs_pressure_to_mmgh">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.taskutils.</span></span><span class="sig-name descname"><span class="pre">cgs_pressure_to_mmgh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cgs_pressure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/taskutils.html#cgs_pressure_to_mmgh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.taskutils.cgs_pressure_to_mmgh" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert pressure from g/(cm s^2) to mmHg.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cgs_pressure</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]) – Pressure in CGS format.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pressure in mmHg.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.taskutils.map_centerline_result_to_0d">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.taskutils.</span></span><span class="sig-name descname"><span class="pre">map_centerline_result_to_0d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zerod_handler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centerline_handler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt3d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/taskutils.html#map_centerline_result_to_0d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.taskutils.map_centerline_result_to_0d" title="Permalink to this definition">#</a></dt>
+<dd><p>Map centerine result onto 0d elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.taskutils.map_centerline_result_to_0d_2">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.taskutils.</span></span><span class="sig-name descname"><span class="pre">map_centerline_result_to_0d_2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zerod_handler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cl_handler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threed_handler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_handler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/taskutils.html#map_centerline_result_to_0d_2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.taskutils.map_centerline_result_to_0d_2" title="Permalink to this definition">#</a></dt>
+<dd><p>Map centerine result onto 0d elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.taskutils.refine_with_cubic_spline">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.taskutils.</span></span><span class="sig-name descname"><span class="pre">refine_with_cubic_spline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/taskutils.html#refine_with_cubic_spline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.taskutils.refine_with_cubic_spline" title="Permalink to this definition">#</a></dt>
+<dd><p>Refine a curve using cubic spline interpolation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – The data to refine.</p></li>
+<li><p><strong>num</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – New number of points of the refined data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.taskutils.run_subprocess">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.taskutils.</span></span><span class="sig-name descname"><span class="pre">run_subprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logprefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cwd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/taskutils.html#run_subprocess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.taskutils.run_subprocess" title="Permalink to this definition">#</a></dt>
+<dd><p>Run a subprocess.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – Arguments for the subprocess.</p></li>
+<li><p><strong>logger</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>) – Logger to use for logging.</p></li>
+<li><p><strong>refresh_rate</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Rate to update logging (in seconds).</p></li>
+<li><p><strong>logprefix</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Prefix to put in front of lines when logging.</p></li>
+<li><p><strong>cwd</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Working directory of the subprocess.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.taskutils.set_initial_condition">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.taskutils.</span></span><span class="sig-name descname"><span class="pre">set_initial_condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zerod_handler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapped_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/taskutils.html#set_initial_condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.taskutils.set_initial_condition" title="Permalink to this definition">#</a></dt>
+<dd><p>Set initial condition of 0D configuration based on mapped 0D results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zerod_handler</strong> (<a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler" title="svsuperestimator.reader._svzerodsolver_input_handler.SvZeroDSolverInputHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler</span></code></a>) – 0D simulation input handler.</p></li>
+<li><p><strong>mapped_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Mapped 3D result.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-svsuperestimator.tasks.three_d_simulation">
+<span id="svsuperestimator-tasks-three-d-simulation-module"></span><h2>svsuperestimator.tasks.three_d_simulation module<a class="headerlink" href="#module-svsuperestimator.tasks.three_d_simulation" title="Permalink to this heading">#</a></h2>
+<p>This module holds the ThreeDSimulation task.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.three_d_simulation.ThreeDSimulation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.three_d_simulation.</span></span><span class="sig-name descname"><span class="pre">ThreeDSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/three_d_simulation.html#ThreeDSimulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svsuperestimator.tasks.task.Task" title="svsuperestimator.tasks.task.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a></p>
+<p>3D Simulation task.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.DEFAULTS">
+<span class="sig-name descname"><span class="pre">DEFAULTS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'debug':</span> <span class="pre">False,</span> <span class="pre">'initial_vtu_path':</span> <span class="pre">None,</span> <span class="pre">'name':</span> <span class="pre">None,</span> <span class="pre">'num_cardiac_cycles':</span> <span class="pre">2,</span> <span class="pre">'num_procs':</span> <span class="pre">1,</span> <span class="pre">'overwrite':</span> <span class="pre">False,</span> <span class="pre">'post_proc_only':</span> <span class="pre">False,</span> <span class="pre">'rcrt_dat_path':</span> <span class="pre">None,</span> <span class="pre">'report_files':</span> <span class="pre">False,</span> <span class="pre">'report_html':</span> <span class="pre">True,</span> <span class="pre">'svpost_executable':</span> <span class="pre">None,</span> <span class="pre">'svpre_executable':</span> <span class="pre">None,</span> <span class="pre">'svsolver_executable':</span> <span class="pre">None}</span></em><a class="headerlink" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.DEFAULTS" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.TASKNAME">
+<span class="sig-name descname"><span class="pre">TASKNAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'three_d_simulation'</span></em><a class="headerlink" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.TASKNAME" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.core_run">
+<span class="sig-name descname"><span class="pre">core_run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/three_d_simulation.html#ThreeDSimulation.core_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.core_run" title="Permalink to this definition">#</a></dt>
+<dd><p>Core routine of the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.database">
+<span class="sig-name descname"><span class="pre">database</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.database" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.generate_report">
+<span class="sig-name descname"><span class="pre">generate_report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/three_d_simulation.html#ThreeDSimulation.generate_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.generate_report" title="Permalink to this definition">#</a></dt>
+<dd><p>Generate the task report.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Report" title="svsuperestimator.visualizer._report.Report"><code class="xref py py-class docutils literal notranslate"><span class="pre">Report</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.post_run">
+<span class="sig-name descname"><span class="pre">post_run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/three_d_simulation.html#ThreeDSimulation.post_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.post_run" title="Permalink to this definition">#</a></dt>
+<dd><p>Postprocessing routine of the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="svsuperestimator-tasks-windkessel-tuning-module">
+<h2>svsuperestimator.tasks.windkessel_tuning module<a class="headerlink" href="#svsuperestimator-tasks-windkessel-tuning-module" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-svsuperestimator.tasks">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-svsuperestimator.tasks" title="Permalink to this heading">#</a></h2>
+<p>svSuperEstimator’s task subpackage.</p>
+<p>Contains all the tasks for performing multi-fidelity parameter estimation.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.get_task_by_name">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.</span></span><span class="sig-name descname"><span class="pre">get_task_by_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks.html#get_task_by_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.get_task_by_name" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the task class by it’s name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of the task.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Class of the task.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>cls</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+            </article>
+            
+            
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fas fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#submodules">
+   Submodules
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#svsuperestimator-tasks-blood-vessel-tuning-module">
+   svsuperestimator.tasks.blood_vessel_tuning module
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-svsuperestimator.tasks.map_three_d_result_on_centerline">
+   svsuperestimator.tasks.map_three_d_result_on_centerline module
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       MapThreeDResultOnCenterline
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.DEFAULTS">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         MapThreeDResultOnCenterline.DEFAULTS
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.TASKNAME">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         MapThreeDResultOnCenterline.TASKNAME
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.core_run">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         MapThreeDResultOnCenterline.core_run()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.generate_report">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         MapThreeDResultOnCenterline.generate_report()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.post_run">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         MapThreeDResultOnCenterline.post_run()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#svsuperestimator-tasks-map-zero-d-result-to-three-d-module">
+   svsuperestimator.tasks.map_zero_d_result_to_three_d module
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#svsuperestimator-tasks-multi-fidelity-tuning-module">
+   svsuperestimator.tasks.multi_fidelity_tuning module
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-svsuperestimator.tasks.plotutils">
+   svsuperestimator.tasks.plotutils module
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.plotutils.create_3d_geometry_plot_with_vessels">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       create_3d_geometry_plot_with_vessels()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#svsuperestimator-tasks-statutils-module">
+   svsuperestimator.tasks.statutils module
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-svsuperestimator.tasks.task">
+   svsuperestimator.tasks.task module
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       Task
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task.TASKNAME">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Task.TASKNAME
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task.DEFAULTS">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Task.DEFAULTS
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#id0">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Task.DEFAULTS
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#id1">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Task.TASKNAME
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task.core_run">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Task.core_run()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task.generate_report">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Task.generate_report()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task.is_completed">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Task.is_completed()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task.load_database">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Task.load_database()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task.log">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Task.log()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task.post_run">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Task.post_run()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task.run">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Task.run()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task.save_database">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Task.save_database()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-svsuperestimator.tasks.taskutils">
+   svsuperestimator.tasks.taskutils module
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.taskutils.cgs_flow_to_lh">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       cgs_flow_to_lh()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.taskutils.cgs_flow_to_lmin">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       cgs_flow_to_lmin()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.taskutils.cgs_pressure_to_mmgh">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       cgs_pressure_to_mmgh()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.taskutils.map_centerline_result_to_0d">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       map_centerline_result_to_0d()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.taskutils.map_centerline_result_to_0d_2">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       map_centerline_result_to_0d_2()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.taskutils.refine_with_cubic_spline">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       refine_with_cubic_spline()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.taskutils.run_subprocess">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       run_subprocess()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.taskutils.set_initial_condition">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       set_initial_condition()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-svsuperestimator.tasks.three_d_simulation">
+   svsuperestimator.tasks.three_d_simulation module
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       ThreeDSimulation
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.DEFAULTS">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ThreeDSimulation.DEFAULTS
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.TASKNAME">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ThreeDSimulation.TASKNAME
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.core_run">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ThreeDSimulation.core_run()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.database">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ThreeDSimulation.database
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.generate_report">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ThreeDSimulation.generate_report()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.post_run">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ThreeDSimulation.post_run()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#svsuperestimator-tasks-windkessel-tuning-module">
+   svsuperestimator.tasks.windkessel_tuning module
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-svsuperestimator.tasks">
+   Module contents
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.get_task_by_name">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       get_task_by_name()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="_sources/svsuperestimator.tasks.rst.txt">
+        <i class="fas fa-file-alt"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright Stanford University, The Regents of the University of California, and others..<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

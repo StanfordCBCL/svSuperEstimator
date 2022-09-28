@@ -1,0 +1,549 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>svsuperestimator.main &#8212; svSuperEstimator v1.3 Manual</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/svsuperestimator/main';</script>
+    <link rel="shortcut icon" href="../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fas fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/logo.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../rst/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../modules.html">
+                        Documentation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../rst/bibliography.html">
+                        References
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fas fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../rst/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../modules.html">
+                        Documentation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../rst/bibliography.html">
+                        References
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for svsuperestimator.main</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Main routine of svSuperEstimator.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+
+<span class="kn">import</span> <span class="nn">click</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">rich</span> <span class="kn">import</span> <span class="n">box</span>
+<span class="kn">from</span> <span class="nn">rich.console</span> <span class="kn">import</span> <span class="n">Console</span>
+<span class="kn">from</span> <span class="nn">rich.table</span> <span class="kn">import</span> <span class="n">Table</span>
+
+<span class="kn">from</span> <span class="nn">.reader</span> <span class="kn">import</span> <span class="n">SimVascularProject</span>
+<span class="kn">from</span> <span class="nn">.tasks.taskutils</span> <span class="kn">import</span> <span class="n">run_subprocess</span>
+
+<span class="n">MAIN_CONSOLE</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">log_time_format</span><span class="o">=</span><span class="s2">&quot;[%m/</span><span class="si">%d</span><span class="s2">/%y %H:%M:%S]&quot;</span><span class="p">)</span>
+
+<span class="n">slurm_base</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;#!/bin/bash</span>
+
+<span class="s2">#SBATCH --job-name=estimator</span>
+<span class="s2">#SBATCH --partition=</span><span class="si">{partition}</span><span class="s2"></span>
+<span class="s2">#SBATCH --output=</span><span class="si">{logfile}</span><span class="s2"></span>
+<span class="s2">#SBATCH --error=</span><span class="si">{logfile}</span><span class="s2"></span>
+<span class="s2">#SBATCH --time=</span><span class="si">{walltime}</span><span class="s2"></span>
+<span class="s2">#SBATCH --qos=</span><span class="si">{qos}</span><span class="s2"></span>
+<span class="s2">#SBATCH --nodes=</span><span class="si">{nodes}</span><span class="s2"></span>
+<span class="s2">#SBATCH --mem=</span><span class="si">{mem}</span><span class="s2"></span>
+<span class="s2">#SBATCH --ntasks-per-node=</span><span class="si">{ntasks_per_node}</span><span class="s2"></span>
+
+<span class="s2">module purge</span>
+<span class="s2">module load system</span>
+<span class="s2">module load binutils/2.38</span>
+<span class="s2">module load qt</span>
+<span class="s2">module load openmpi</span>
+<span class="s2">module load mesa</span>
+<span class="s2">module load cmake/3.23.1</span>
+<span class="s2">module load gcc/12.1.0</span>
+<span class="s2">module load x11</span>
+<span class="s2">module load sqlite/3.37.2</span>
+
+<span class="s2"># Command</span>
+<span class="s2">echo &quot;$(date): Job $SLURM_JOBID starting on $SLURM_NODELIST&quot;</span>
+<span class="si">{python_path}</span><span class="s2"> </span><span class="si">{estimator_path}</span><span class="s2"> </span><span class="si">{config_file}</span><span class="s2"></span>
+<span class="s2">echo &quot;$(date): Job $SLURM_JOBID finished on $SLURM_NODELIST&quot;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">slurm_default</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;partition&quot;</span><span class="p">:</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;walltime&quot;</span><span class="p">:</span> <span class="s2">&quot;48:00:00&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;qos&quot;</span><span class="p">:</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nodes&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">&quot;mem&quot;</span><span class="p">:</span> <span class="s2">&quot;32GB&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ntasks-per-node&quot;</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+    <span class="s2">&quot;python-path&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="run_file"><a class="viewcode-back" href="../../svsuperestimator.html#svsuperestimator.main.run_file">[docs]</a><span class="k">def</span> <span class="nf">run_file</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Run svSuperEstimator from a configuration file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path: Path to configuration file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MAIN_CONSOLE</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Loading configuration [bold magenta]</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">[/bold magenta]&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">ff</span><span class="p">:</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">ff</span><span class="p">)</span>
+
+    <span class="c1"># Loading the SimVascular project</span>
+    <span class="n">project_folder</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;project&quot;</span><span class="p">]</span>
+    <span class="n">MAIN_CONSOLE</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Loading project [bold magenta]</span><span class="si">{</span><span class="n">project_folder</span><span class="si">}</span><span class="s2">[/bold magenta]&quot;</span>
+    <span class="p">)</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">SimVascularProject</span><span class="p">(</span><span class="n">project_folder</span><span class="p">)</span>
+
+    <span class="n">global_setting</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;global&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="k">for</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_config</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="k">if</span> <span class="s2">&quot;slurm&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+
+            <span class="n">parent_folder</span> <span class="o">=</span> <span class="n">project</span><span class="p">[</span><span class="s2">&quot;parameter_estimation_folder&quot;</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">task_name</span>
+            <span class="n">task_output_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parent_folder</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+            <span class="n">slurm_config</span> <span class="o">=</span> <span class="n">slurm_default</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">slurm_config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;slurm&quot;</span><span class="p">])</span>
+
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">slurm_config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Required option </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not specified for slurm &quot;</span>
+                        <span class="s2">&quot;configuration&quot;</span>
+                    <span class="p">)</span>
+            <span class="n">MAIN_CONSOLE</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Scheduling task [bold cyan]</span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">[/bold cyan] as &quot;</span>
+                <span class="s2">&quot;[#ff9100]slurm[/#ff9100] job with the following &quot;</span>
+                <span class="s2">&quot;configuration:&quot;</span>
+            <span class="p">)</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">box</span><span class="o">=</span><span class="n">box</span><span class="o">.</span><span class="n">HORIZONTALS</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;Configuration&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bold cyan&quot;</span><span class="p">)</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="n">justify</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">slurm_config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="n">MAIN_CONSOLE</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+
+            <span class="n">logfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">task_output_folder</span><span class="p">,</span> <span class="s2">&quot;slurm.log&quot;</span><span class="p">)</span>
+            <span class="n">this_file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+            <span class="n">estimator_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">this_file_dir</span><span class="p">,</span> <span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;main.py&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">slurm_config</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="s2">&quot;-&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                    <span class="n">slurm_config</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">slurm_config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                    <span class="k">del</span> <span class="n">slurm_config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+            <span class="n">new_config_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">task_output_folder</span><span class="p">,</span> <span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>
+            <span class="n">new_config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="k">del</span> <span class="n">new_config</span><span class="p">[</span><span class="s2">&quot;slurm&quot;</span><span class="p">]</span>
+            <span class="n">new_config</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">task_name</span><span class="p">:</span> <span class="n">task_config</span><span class="p">}</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">new_config_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ff</span><span class="p">:</span>
+                <span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">new_config</span><span class="p">,</span> <span class="n">ff</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+            <span class="n">slurm_config_text</span> <span class="o">=</span> <span class="n">slurm_base</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">logfile</span><span class="o">=</span><span class="n">logfile</span><span class="p">,</span>
+                <span class="n">estimator_path</span><span class="o">=</span><span class="n">estimator_path</span><span class="p">,</span>
+                <span class="n">config_file</span><span class="o">=</span><span class="n">new_config_file</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">slurm_config</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">slurm_config_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">task_output_folder</span><span class="p">,</span> <span class="s2">&quot;slurm_script.sh&quot;</span>
+            <span class="p">)</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">slurm_config_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ff</span><span class="p">:</span>
+                <span class="n">ff</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">slurm_config_text</span><span class="p">)</span>
+
+            <span class="n">run_subprocess</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;sbatch&quot;</span><span class="p">,</span> <span class="n">slurm_config_file</span><span class="p">],</span> <span class="n">logger</span><span class="o">=</span><span class="n">MAIN_CONSOLE</span><span class="o">.</span><span class="n">log</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">tasks</span>
+
+            <span class="n">task_class</span> <span class="o">=</span> <span class="n">tasks</span><span class="o">.</span><span class="n">get_task_by_name</span><span class="p">(</span><span class="n">task_name</span><span class="p">)</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="n">task_class</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="p">{</span><span class="o">**</span><span class="n">global_setting</span><span class="p">,</span> <span class="o">**</span><span class="n">task_config</span><span class="p">})</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="run_from_config"><a class="viewcode-back" href="../../svsuperestimator.html#svsuperestimator.main.run_from_config">[docs]</a><span class="k">def</span> <span class="nf">run_from_config</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Run svSuperEstimator from a config dictionary.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config: Configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Loading the SimVascular project</span>
+    <span class="n">project_folder</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;project&quot;</span><span class="p">]</span>
+    <span class="n">MAIN_CONSOLE</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Loading project [bold magenta]</span><span class="si">{</span><span class="n">project_folder</span><span class="si">}</span><span class="s2">[/bold magenta]&quot;</span>
+    <span class="p">)</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">SimVascularProject</span><span class="p">(</span><span class="n">project_folder</span><span class="p">)</span>
+
+    <span class="n">global_setting</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;global&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="k">for</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_config</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">tasks</span>
+
+        <span class="n">task_class</span> <span class="o">=</span> <span class="n">tasks</span><span class="o">.</span><span class="n">get_task_by_name</span><span class="p">(</span><span class="n">task_name</span><span class="p">)</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="n">task_class</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="p">{</span><span class="o">**</span><span class="n">global_setting</span><span class="p">,</span> <span class="o">**</span><span class="n">task_config</span><span class="p">})</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="run_folder"><a class="viewcode-back" href="../../svsuperestimator.html#svsuperestimator.main.run_folder">[docs]</a><span class="k">def</span> <span class="nf">run_folder</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Run all configuration files in a folder.&quot;&quot;&quot;</span>
+
+    <span class="n">config_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.yaml&quot;</span><span class="p">)]</span>
+
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">config_files</span><span class="p">:</span>
+        <span class="n">run_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span></div>
+
+
+<span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">estimate</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Run svSuperEstimator.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path: Path to the config file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">MAIN_CONSOLE</span><span class="o">.</span><span class="n">rule</span><span class="p">(</span>
+        <span class="s2">&quot;[#ff9100]svSuperEstimator&quot;</span><span class="p">,</span>
+        <span class="n">characters</span><span class="o">=</span><span class="s2">&quot;=&quot;</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="s2">&quot;#ff9100&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">uname</span><span class="p">()</span>
+    <span class="n">MAIN_CONSOLE</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;platform [bold cyan]</span><span class="si">{</span><span class="n">system</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">[/bold cyan] | python &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> at [bold cyan]</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="si">}</span><span class="s2">[/bold cyan]&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">run_folder</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">run_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;The specified path does not exist.&quot;</span><span class="p">)</span>
+
+    <span class="n">MAIN_CONSOLE</span><span class="o">.</span><span class="n">rule</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed in </span><span class="si">{</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">start</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+</pre></div>
+
+            </article>
+            
+            
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright Stanford University, The Regents of the University of California, and others..<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

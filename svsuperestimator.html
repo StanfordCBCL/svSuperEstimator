@@ -1,0 +1,670 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>svsuperestimator package &#8212; svSuperEstimator v1.3 Manual</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'svsuperestimator';</script>
+    <link rel="shortcut icon" href="_static/favicon.png"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="svsuperestimator.reader package" href="svsuperestimator.reader.html" />
+    <link rel="prev" title="Documentation" href="modules.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fas fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="_static/logo.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="rst/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="modules.html">
+                        Documentation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="rst/bibliography.html">
+                        References
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fas fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="rst/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="modules.html">
+                        Documentation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="rst/bibliography.html">
+                        References
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active has-children">
+  <a class="current reference internal" href="#">
+   svsuperestimator package
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label class="toctree-toggle" for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="svsuperestimator.reader.html">
+     svsuperestimator.reader package
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="svsuperestimator.tasks.html">
+     svsuperestimator.tasks package
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="svsuperestimator.visualizer.html">
+     svsuperestimator.visualizer package
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="svsuperestimator-package">
+<h1>svsuperestimator package<a class="headerlink" href="#svsuperestimator-package" title="Permalink to this heading">#</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="svsuperestimator.reader.html">svsuperestimator.reader package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.reader.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.reader.html#module-svsuperestimator.reader.utils">svsuperestimator.reader.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.utils.get_0d_element_coordinates"><code class="docutils literal notranslate"><span class="pre">get_0d_element_coordinates()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.reader.html#module-svsuperestimator.reader">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.CenterlineHandler"><code class="docutils literal notranslate"><span class="pre">CenterlineHandler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.CenterlineHandler.get_branch_data"><code class="docutils literal notranslate"><span class="pre">CenterlineHandler.get_branch_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.MeshHandler"><code class="docutils literal notranslate"><span class="pre">MeshHandler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.MeshHandler.boundary_centers"><code class="docutils literal notranslate"><span class="pre">MeshHandler.boundary_centers</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SimVascularProject"><code class="docutils literal notranslate"><span class="pre">SimVascularProject</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvSolverInflowHandler"><code class="docutils literal notranslate"><span class="pre">SvSolverInflowHandler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvSolverInflowHandler.get_inflow_data"><code class="docutils literal notranslate"><span class="pre">SvSolverInflowHandler.get_inflow_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvSolverInputHandler"><code class="docutils literal notranslate"><span class="pre">SvSolverInputHandler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvSolverInputHandler.num_time_steps"><code class="docutils literal notranslate"><span class="pre">SvSolverInputHandler.num_time_steps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvSolverInputHandler.rcr_surface_ids"><code class="docutils literal notranslate"><span class="pre">SvSolverInputHandler.rcr_surface_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvSolverInputHandler.time_step_size"><code class="docutils literal notranslate"><span class="pre">SvSolverInputHandler.time_step_size</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvSolverRcrHandler"><code class="docutils literal notranslate"><span class="pre">SvSolverRcrHandler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvSolverRcrHandler.get_rcr_data"><code class="docutils literal notranslate"><span class="pre">SvSolverRcrHandler.get_rcr_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvSolverRcrHandler.set_rcr_data"><code class="docutils literal notranslate"><span class="pre">SvSolverRcrHandler.set_rcr_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler.boundary_conditions"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler.boundary_conditions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler.copy"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler.from_file"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler.from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler.junctions"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler.junctions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler.nodes"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler.nodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler.num_pts_per_cycle"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler.num_pts_per_cycle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler.outlet_boundary_conditions"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler.outlet_boundary_conditions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler.to_file"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler.to_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler.update_simparams"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler.update_simparams()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler.vessel_id_to_name_map"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler.vessel_id_to_name_map</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler.vessel_to_bc_map"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler.vessel_to_bc_map</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.SvZeroDSolverInputHandler.vessels"><code class="docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler.vessels</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler"><code class="docutils literal notranslate"><span class="pre">VtkHandler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler.bounds"><code class="docutils literal notranslate"><span class="pre">VtkHandler.bounds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler.decimate"><code class="docutils literal notranslate"><span class="pre">VtkHandler.decimate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler.from_file"><code class="docutils literal notranslate"><span class="pre">VtkHandler.from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler.get_cell_data_array"><code class="docutils literal notranslate"><span class="pre">VtkHandler.get_cell_data_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler.get_point_data_array"><code class="docutils literal notranslate"><span class="pre">VtkHandler.get_point_data_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler.point_data_array_names"><code class="docutils literal notranslate"><span class="pre">VtkHandler.point_data_array_names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler.point_data_array_num"><code class="docutils literal notranslate"><span class="pre">VtkHandler.point_data_array_num</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler.points"><code class="docutils literal notranslate"><span class="pre">VtkHandler.points</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler.polys"><code class="docutils literal notranslate"><span class="pre">VtkHandler.polys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler.set_point_data_array"><code class="docutils literal notranslate"><span class="pre">VtkHandler.set_point_data_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler.threshold"><code class="docutils literal notranslate"><span class="pre">VtkHandler.threshold()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.reader.html#svsuperestimator.reader.VtkHandler.to_file"><code class="docutils literal notranslate"><span class="pre">VtkHandler.to_file()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="svsuperestimator.tasks.html">svsuperestimator.tasks package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.tasks.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator-tasks-blood-vessel-tuning-module">svsuperestimator.tasks.blood_vessel_tuning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.tasks.html#module-svsuperestimator.tasks.map_three_d_result_on_centerline">svsuperestimator.tasks.map_three_d_result_on_centerline module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline"><code class="docutils literal notranslate"><span class="pre">MapThreeDResultOnCenterline</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.DEFAULTS"><code class="docutils literal notranslate"><span class="pre">MapThreeDResultOnCenterline.DEFAULTS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.TASKNAME"><code class="docutils literal notranslate"><span class="pre">MapThreeDResultOnCenterline.TASKNAME</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.core_run"><code class="docutils literal notranslate"><span class="pre">MapThreeDResultOnCenterline.core_run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.generate_report"><code class="docutils literal notranslate"><span class="pre">MapThreeDResultOnCenterline.generate_report()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.map_three_d_result_on_centerline.MapThreeDResultOnCenterline.post_run"><code class="docutils literal notranslate"><span class="pre">MapThreeDResultOnCenterline.post_run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator-tasks-map-zero-d-result-to-three-d-module">svsuperestimator.tasks.map_zero_d_result_to_three_d module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator-tasks-multi-fidelity-tuning-module">svsuperestimator.tasks.multi_fidelity_tuning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.tasks.html#module-svsuperestimator.tasks.plotutils">svsuperestimator.tasks.plotutils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.plotutils.create_3d_geometry_plot_with_vessels"><code class="docutils literal notranslate"><span class="pre">create_3d_geometry_plot_with_vessels()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator-tasks-statutils-module">svsuperestimator.tasks.statutils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.tasks.html#module-svsuperestimator.tasks.task">svsuperestimator.tasks.task module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.task.Task"><code class="docutils literal notranslate"><span class="pre">Task</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.task.Task.TASKNAME"><code class="docutils literal notranslate"><span class="pre">Task.TASKNAME</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.task.Task.DEFAULTS"><code class="docutils literal notranslate"><span class="pre">Task.DEFAULTS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#id0"><code class="docutils literal notranslate"><span class="pre">Task.DEFAULTS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#id1"><code class="docutils literal notranslate"><span class="pre">Task.TASKNAME</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.task.Task.core_run"><code class="docutils literal notranslate"><span class="pre">Task.core_run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.task.Task.generate_report"><code class="docutils literal notranslate"><span class="pre">Task.generate_report()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.task.Task.is_completed"><code class="docutils literal notranslate"><span class="pre">Task.is_completed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.task.Task.load_database"><code class="docutils literal notranslate"><span class="pre">Task.load_database()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.task.Task.log"><code class="docutils literal notranslate"><span class="pre">Task.log()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.task.Task.post_run"><code class="docutils literal notranslate"><span class="pre">Task.post_run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.task.Task.run"><code class="docutils literal notranslate"><span class="pre">Task.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.task.Task.save_database"><code class="docutils literal notranslate"><span class="pre">Task.save_database()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.tasks.html#module-svsuperestimator.tasks.taskutils">svsuperestimator.tasks.taskutils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.cgs_flow_to_lh"><code class="docutils literal notranslate"><span class="pre">cgs_flow_to_lh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.cgs_flow_to_lmin"><code class="docutils literal notranslate"><span class="pre">cgs_flow_to_lmin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.cgs_pressure_to_mmgh"><code class="docutils literal notranslate"><span class="pre">cgs_pressure_to_mmgh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.map_centerline_result_to_0d"><code class="docutils literal notranslate"><span class="pre">map_centerline_result_to_0d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.map_centerline_result_to_0d_2"><code class="docutils literal notranslate"><span class="pre">map_centerline_result_to_0d_2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.refine_with_cubic_spline"><code class="docutils literal notranslate"><span class="pre">refine_with_cubic_spline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.run_subprocess"><code class="docutils literal notranslate"><span class="pre">run_subprocess()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.taskutils.set_initial_condition"><code class="docutils literal notranslate"><span class="pre">set_initial_condition()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.tasks.html#module-svsuperestimator.tasks.three_d_simulation">svsuperestimator.tasks.three_d_simulation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation"><code class="docutils literal notranslate"><span class="pre">ThreeDSimulation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.DEFAULTS"><code class="docutils literal notranslate"><span class="pre">ThreeDSimulation.DEFAULTS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.TASKNAME"><code class="docutils literal notranslate"><span class="pre">ThreeDSimulation.TASKNAME</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.core_run"><code class="docutils literal notranslate"><span class="pre">ThreeDSimulation.core_run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.database"><code class="docutils literal notranslate"><span class="pre">ThreeDSimulation.database</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.generate_report"><code class="docutils literal notranslate"><span class="pre">ThreeDSimulation.generate_report()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.three_d_simulation.ThreeDSimulation.post_run"><code class="docutils literal notranslate"><span class="pre">ThreeDSimulation.post_run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator-tasks-windkessel-tuning-module">svsuperestimator.tasks.windkessel_tuning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.tasks.html#module-svsuperestimator.tasks">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.tasks.html#svsuperestimator.tasks.get_task_by_name"><code class="docutils literal notranslate"><span class="pre">get_task_by_name()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="svsuperestimator.visualizer.html">svsuperestimator.visualizer package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="svsuperestimator.visualizer.html#module-svsuperestimator.visualizer">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot2D"><code class="docutils literal notranslate"><span class="pre">Plot2D</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot2D.add_annotated_point_trace"><code class="docutils literal notranslate"><span class="pre">Plot2D.add_annotated_point_trace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot2D.add_bar_trace"><code class="docutils literal notranslate"><span class="pre">Plot2D.add_bar_trace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot2D.add_heatmap_trace"><code class="docutils literal notranslate"><span class="pre">Plot2D.add_heatmap_trace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot2D.add_line_trace"><code class="docutils literal notranslate"><span class="pre">Plot2D.add_line_trace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot2D.add_line_with_confidence_interval_trace"><code class="docutils literal notranslate"><span class="pre">Plot2D.add_line_with_confidence_interval_trace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot2D.add_parallel_coordinates_plots"><code class="docutils literal notranslate"><span class="pre">Plot2D.add_parallel_coordinates_plots()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot2D.add_point_trace"><code class="docutils literal notranslate"><span class="pre">Plot2D.add_point_trace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot2D.add_vline_trace"><code class="docutils literal notranslate"><span class="pre">Plot2D.add_vline_trace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot2D.add_xy_bar_trace"><code class="docutils literal notranslate"><span class="pre">Plot2D.add_xy_bar_trace()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot3D"><code class="docutils literal notranslate"><span class="pre">Plot3D</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot3D.add_annotated_point_trace"><code class="docutils literal notranslate"><span class="pre">Plot3D.add_annotated_point_trace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot3D.add_line_trace"><code class="docutils literal notranslate"><span class="pre">Plot3D.add_line_trace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot3D.add_mesh_trace_from_vtk"><code class="docutils literal notranslate"><span class="pre">Plot3D.add_mesh_trace_from_vtk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot3D.add_point_trace"><code class="docutils literal notranslate"><span class="pre">Plot3D.add_point_trace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Plot3D.add_surface_trace"><code class="docutils literal notranslate"><span class="pre">Plot3D.add_surface_trace()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Report"><code class="docutils literal notranslate"><span class="pre">Report</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Report.add"><code class="docutils literal notranslate"><span class="pre">Report.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Report.to_files"><code class="docutils literal notranslate"><span class="pre">Report.to_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="svsuperestimator.visualizer.html#svsuperestimator.visualizer.Report.to_html"><code class="docutils literal notranslate"><span class="pre">Report.to_html()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-svsuperestimator.main">
+<span id="svsuperestimator-main-module"></span><h2>svsuperestimator.main module<a class="headerlink" href="#module-svsuperestimator.main" title="Permalink to this heading">#</a></h2>
+<p>Main routine of svSuperEstimator.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.main.run_file">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.main.</span></span><span class="sig-name descname"><span class="pre">run_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/main.html#run_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.main.run_file" title="Permalink to this definition">#</a></dt>
+<dd><p>Run svSuperEstimator from a configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Path to configuration file.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.main.run_folder">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.main.</span></span><span class="sig-name descname"><span class="pre">run_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/main.html#run_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.main.run_folder" title="Permalink to this definition">#</a></dt>
+<dd><p>Run all configuration files in a folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.main.run_from_config">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.main.</span></span><span class="sig-name descname"><span class="pre">run_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/main.html#run_from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.main.run_from_config" title="Permalink to this definition">#</a></dt>
+<dd><p>Run svSuperEstimator from a config dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Configuration.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-svsuperestimator">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-svsuperestimator" title="Permalink to this heading">#</a></h2>
+<p>SimVascular’s SuperEstimator package.</p>
+</section>
+</section>
+
+
+            </article>
+            
+            
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fas fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#subpackages">
+   Subpackages
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#submodules">
+   Submodules
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-svsuperestimator.main">
+   svsuperestimator.main module
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.main.run_file">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       run_file()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.main.run_folder">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       run_folder()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.main.run_from_config">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       run_from_config()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-svsuperestimator">
+   Module contents
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="_sources/svsuperestimator.rst.txt">
+        <i class="fas fa-file-alt"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright Stanford University, The Regents of the University of California, and others..<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

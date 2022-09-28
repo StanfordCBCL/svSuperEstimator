@@ -1,0 +1,21 @@
+svsuperestimator.reader package
+===============================
+
+Submodules
+----------
+
+svsuperestimator.reader.utils module
+------------------------------------
+
+.. automodule:: svsuperestimator.reader.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: svsuperestimator.reader
+   :members:
+   :undoc-members:
+   :show-inheritance:

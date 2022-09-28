@@ -1,0 +1,31 @@
+svsuperestimator package
+========================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   svsuperestimator.reader
+   svsuperestimator.tasks
+   svsuperestimator.visualizer
+
+Submodules
+----------
+
+svsuperestimator.main module
+----------------------------
+
+.. automodule:: svsuperestimator.main
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: svsuperestimator
+   :members:
+   :undoc-members:
+   :show-inheritance:

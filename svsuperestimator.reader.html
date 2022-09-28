@@ -1,0 +1,1313 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>svsuperestimator.reader package &#8212; svSuperEstimator v1.3 Manual</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'svsuperestimator.reader';</script>
+    <link rel="shortcut icon" href="_static/favicon.png"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="svsuperestimator.tasks package" href="svsuperestimator.tasks.html" />
+    <link rel="prev" title="svsuperestimator package" href="svsuperestimator.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fas fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="_static/logo.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="rst/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="modules.html">
+                        Documentation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="rst/bibliography.html">
+                        References
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fas fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="rst/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="modules.html">
+                        Documentation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="rst/bibliography.html">
+                        References
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="svsuperestimator.html">
+   svsuperestimator package
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label class="toctree-toggle" for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     svsuperestimator.reader package
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="svsuperestimator.tasks.html">
+     svsuperestimator.tasks package
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="svsuperestimator.visualizer.html">
+     svsuperestimator.visualizer package
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="svsuperestimator-reader-package">
+<h1>svsuperestimator.reader package<a class="headerlink" href="#svsuperestimator-reader-package" title="Permalink to this heading">#</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="module-svsuperestimator.reader.utils">
+<span id="svsuperestimator-reader-utils-module"></span><h2>svsuperestimator.reader.utils module<a class="headerlink" href="#module-svsuperestimator.reader.utils" title="Permalink to this heading">#</a></h2>
+<p>This module contains input/output utils.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.reader.utils.get_0d_element_coordinates">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.reader.utils.</span></span><span class="sig-name descname"><span class="pre">get_0d_element_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/utils.html#get_0d_element_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.utils.get_0d_element_coordinates" title="Permalink to this definition">#</a></dt>
+<dd><p>Extract 0D elements with coordinates from a project.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>project</strong> (<a class="reference internal" href="#svsuperestimator.reader.SimVascularProject" title="svsuperestimator.reader._svproject.SimVascularProject"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimVascularProject</span></code></a>) – SimVascular project.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-svsuperestimator.reader">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-svsuperestimator.reader" title="Permalink to this heading">#</a></h2>
+<p>svSuperEstimator’s reader subpackage.</p>
+<p>Contains everything related to reading of data.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="svsuperestimator.reader.CenterlineHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svsuperestimator.reader.</span></span><span class="sig-name descname"><span class="pre">CenterlineHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_centerline_handler.html#CenterlineHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.CenterlineHandler" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svsuperestimator.reader.VtkHandler" title="svsuperestimator.reader._vtk_handler.VtkHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtkHandler</span></code></a></p>
+<p>Handler for SimVascular centerline data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.CenterlineHandler.get_branch_data">
+<span class="sig-name descname"><span class="pre">get_branch_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">branch_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_centerline_handler.html#CenterlineHandler.get_branch_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.CenterlineHandler.get_branch_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Get branch data by branch id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>branch_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The ID of the branch.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The data of the branch saved in the centerline file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>branch_data</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svsuperestimator.reader.MeshHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svsuperestimator.reader.</span></span><span class="sig-name descname"><span class="pre">MeshHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_mesh_handler.html#MeshHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.MeshHandler" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svsuperestimator.reader.VtkHandler" title="svsuperestimator.reader._vtk_handler.VtkHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtkHandler</span></code></a></p>
+<p>Handler for SimVascular 3D mesh data.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.MeshHandler.boundary_centers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_centers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svsuperestimator.reader.MeshHandler.boundary_centers" title="Permalink to this definition">#</a></dt>
+<dd><p>Center coordinates of the different boundaries in the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SimVascularProject">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svsuperestimator.reader.</span></span><span class="sig-name descname"><span class="pre">SimVascularProject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_svproject.html#SimVascularProject"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.SimVascularProject" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class handling the SimVascular project folder.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvSolverInflowHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svsuperestimator.reader.</span></span><span class="sig-name descname"><span class="pre">SvSolverInflowHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_svsolver_inflow_handler.html#SvSolverInflowHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.SvSolverInflowHandler" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PlainHandler</span></code></p>
+<p>Handler for svSolver inflow BC data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvSolverInflowHandler.get_inflow_data">
+<span class="sig-name descname"><span class="pre">get_inflow_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_svsolver_inflow_handler.html#SvSolverInflowHandler.get_inflow_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.SvSolverInflowHandler.get_inflow_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the inflow data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Dict with arrays t and Q for time step and flow,</dt><dd><p>respectively.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>inflow_data</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvSolverInputHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svsuperestimator.reader.</span></span><span class="sig-name descname"><span class="pre">SvSolverInputHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_svsolver_input_handler.html#SvSolverInputHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.SvSolverInputHandler" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PlainHandler</span></code></p>
+<p>Handler for svSolver input data.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvSolverInputHandler.num_time_steps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_time_steps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#svsuperestimator.reader.SvSolverInputHandler.num_time_steps" title="Permalink to this definition">#</a></dt>
+<dd><p>Number of time steps of the simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvSolverInputHandler.rcr_surface_ids">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rcr_surface_ids</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svsuperestimator.reader.SvSolverInputHandler.rcr_surface_ids" title="Permalink to this definition">#</a></dt>
+<dd><p>Surface ID sequence of the RCR boundary surfaces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvSolverInputHandler.time_step_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_step_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#svsuperestimator.reader.SvSolverInputHandler.time_step_size" title="Permalink to this definition">#</a></dt>
+<dd><p>Time step size of the simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvSolverRcrHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svsuperestimator.reader.</span></span><span class="sig-name descname"><span class="pre">SvSolverRcrHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_svsolver_rcr_handler.html#SvSolverRcrHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.SvSolverRcrHandler" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PlainHandler</span></code></p>
+<p>Handler for svSolver RCR BC data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvSolverRcrHandler.get_rcr_data">
+<span class="sig-name descname"><span class="pre">get_rcr_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_svsolver_rcr_handler.html#SvSolverRcrHandler.get_rcr_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.SvSolverRcrHandler.get_rcr_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the RCR data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Dict with Rp, C, Rd, Pd and t for all RCR boundary</dt><dd><p>conditions.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>rcr_data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvSolverRcrHandler.set_rcr_data">
+<span class="sig-name descname"><span class="pre">set_rcr_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rcr_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_svsolver_rcr_handler.html#SvSolverRcrHandler.set_rcr_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.SvSolverRcrHandler.set_rcr_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Set the RCR data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rcr_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Dict with Rp, C, Rd, Pd and t for all RCR boundary
+conditions.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svsuperestimator.reader.</span></span><span class="sig-name descname"><span class="pre">SvZeroDSolverInputHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_svzerodsolver_input_handler.html#SvZeroDSolverInputHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DataHandler</span></code></p>
+<p>Handler for svZeroDSolver input data.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler.boundary_conditions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_conditions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.boundary_conditions" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the boundary conditions of the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_svzerodsolver_input_handler.html#SvZeroDSolverInputHandler.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.copy" title="Permalink to this definition">#</a></dt>
+<dd><p>Create and return a copy of the handler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Copy of the data handler.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>handler</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler.from_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_svzerodsolver_input_handler.html#SvZeroDSolverInputHandler.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.from_file" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a new SvZeroDSolverInputHandler instance from file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Path to the file to read data from.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#svsuperestimator.reader.SvZeroDSolverInputHandler" title="svsuperestimator.reader._svzerodsolver_input_handler.SvZeroDSolverInputHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">SvZeroDSolverInputHandler</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler.junctions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">junctions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.junctions" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the vessels of the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler.nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.nodes" title="Permalink to this definition">#</a></dt>
+<dd><p>Nodes of the 0D model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler.num_pts_per_cycle">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_pts_per_cycle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.num_pts_per_cycle" title="Permalink to this definition">#</a></dt>
+<dd><p>Number of time steps per cardiac cycle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler.outlet_boundary_conditions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">outlet_boundary_conditions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.outlet_boundary_conditions" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the outlet boundary conditions of the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler.to_file">
+<span class="sig-name descname"><span class="pre">to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_svzerodsolver_input_handler.html#SvZeroDSolverInputHandler.to_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.to_file" title="Permalink to this definition">#</a></dt>
+<dd><p>Write the data to a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Path to the file to read data from.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler.update_simparams">
+<span class="sig-name descname"><span class="pre">update_simparams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">abs_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_nliter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cycles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steady_initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_cycle_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_based</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_svzerodsolver_input_handler.html#SvZeroDSolverInputHandler.update_simparams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.update_simparams" title="Permalink to this definition">#</a></dt>
+<dd><p>Update the simulation parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>abs_tol</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Absolute tolerance for simulation.</p></li>
+<li><p><strong>max_nliter</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Maximum number of non-linear iterations per time step
+in time integration.</p></li>
+<li><p><strong>num_cycles</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Number of cardiac cycles to simulate.</p></li>
+<li><p><strong>steady_initial</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]) – Solve steady solution first and use as intitial
+condition.</p></li>
+<li><p><strong>mean_only</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]) – Return only mean values over time steps.</p></li>
+<li><p><strong>output_interval</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]) – Interval for writing a timestep to the output.</p></li>
+<li><p><strong>last_cycle_only</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]) – Output only last cycle.</p></li>
+<li><p><strong>variable_based</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]) – Node based output.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler.vessel_id_to_name_map">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vessel_id_to_name_map</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.vessel_id_to_name_map" title="Permalink to this definition">#</a></dt>
+<dd><p>Vessel ID to vessel name map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler.vessel_to_bc_map">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vessel_to_bc_map</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.vessel_to_bc_map" title="Permalink to this definition">#</a></dt>
+<dd><p>Boundary condition to vessel name map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.SvZeroDSolverInputHandler.vessels">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vessels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.vessels" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the vessels of the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svsuperestimator.reader.</span></span><span class="sig-name descname"><span class="pre">VtkHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_vtk_handler.html#VtkHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.VtkHandler" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DataHandler</span></code></p>
+<p>Handler for vtk based data.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler.bounds">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bounds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#svsuperestimator.reader.VtkHandler.bounds" title="Permalink to this definition">#</a></dt>
+<dd><p>Bounds of the data (xmin, xmax, ymin, ymax, zmin, zmax).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler.decimate">
+<span class="sig-name descname"><span class="pre">decimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_vtk_handler.html#VtkHandler.decimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.VtkHandler.decimate" title="Permalink to this definition">#</a></dt>
+<dd><p>Reduce the number of polygons in the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>factor</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Factor between 0.0 and 1.0 that specifies the percentage
+of polygons to reduce by.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>VTK handler for the decimated data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>handler</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler.from_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_vtk_handler.html#VtkHandler.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.VtkHandler.from_file" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a new VtkHandler instance from file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Path to the file to read data from.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">T</span></code>, bound= VtkHandler)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler.get_cell_data_array">
+<span class="sig-name descname"><span class="pre">get_cell_data_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_vtk_handler.html#VtkHandler.get_cell_data_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.VtkHandler.get_cell_data_array" title="Permalink to this definition">#</a></dt>
+<dd><p>Return a cell data array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cell data array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>data_array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler.get_point_data_array">
+<span class="sig-name descname"><span class="pre">get_point_data_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_vtk_handler.html#VtkHandler.get_point_data_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.VtkHandler.get_point_data_array" title="Permalink to this definition">#</a></dt>
+<dd><p>Return a point data array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Point data array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>data_array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler.point_data_array_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">point_data_array_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svsuperestimator.reader.VtkHandler.point_data_array_names" title="Permalink to this definition">#</a></dt>
+<dd><p>Names of point data arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler.point_data_array_num">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">point_data_array_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#svsuperestimator.reader.VtkHandler.point_data_array_num" title="Permalink to this definition">#</a></dt>
+<dd><p>Number of point data arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler.points">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#svsuperestimator.reader.VtkHandler.points" title="Permalink to this definition">#</a></dt>
+<dd><p>Point coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler.polys">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">polys</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#svsuperestimator.reader.VtkHandler.polys" title="Permalink to this definition">#</a></dt>
+<dd><p>Poly indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler.set_point_data_array">
+<span class="sig-name descname"><span class="pre">set_point_data_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_vtk_handler.html#VtkHandler.set_point_data_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.VtkHandler.set_point_data_array" title="Permalink to this definition">#</a></dt>
+<dd><p>Set a point data array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Label of the point data array.</p></li>
+<li><p><strong>array</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Point data array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler.threshold">
+<span class="sig-name descname"><span class="pre">threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_vtk_handler.html#VtkHandler.threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.VtkHandler.threshold" title="Permalink to this definition">#</a></dt>
+<dd><p>Apply a threshold to the data and return thresholded data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Label of the array to use for thresholding.</p></li>
+<li><p><strong>lower</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Lower bound of the threshold.</p></li>
+<li><p><strong>upper</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Upper bound of the threshold.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#svsuperestimator.reader.VtkHandler" title="svsuperestimator.reader._vtk_handler.VtkHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtkHandler</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svsuperestimator.reader.VtkHandler.to_file">
+<span class="sig-name descname"><span class="pre">to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/reader/_vtk_handler.html#VtkHandler.to_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.reader.VtkHandler.to_file" title="Permalink to this definition">#</a></dt>
+<dd><p>Write the data to a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Path to the file to read data from.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+            </article>
+            
+            
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fas fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#submodules">
+   Submodules
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-svsuperestimator.reader.utils">
+   svsuperestimator.reader.utils module
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.reader.utils.get_0d_element_coordinates">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       get_0d_element_coordinates()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-svsuperestimator.reader">
+   Module contents
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.reader.CenterlineHandler">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       CenterlineHandler
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.CenterlineHandler.get_branch_data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         CenterlineHandler.get_branch_data()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.reader.MeshHandler">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       MeshHandler
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.MeshHandler.boundary_centers">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         MeshHandler.boundary_centers
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.reader.SimVascularProject">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       SimVascularProject
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.reader.SvSolverInflowHandler">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       SvSolverInflowHandler
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvSolverInflowHandler.get_inflow_data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvSolverInflowHandler.get_inflow_data()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.reader.SvSolverInputHandler">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       SvSolverInputHandler
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvSolverInputHandler.num_time_steps">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvSolverInputHandler.num_time_steps
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvSolverInputHandler.rcr_surface_ids">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvSolverInputHandler.rcr_surface_ids
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvSolverInputHandler.time_step_size">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvSolverInputHandler.time_step_size
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.reader.SvSolverRcrHandler">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       SvSolverRcrHandler
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvSolverRcrHandler.get_rcr_data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvSolverRcrHandler.get_rcr_data()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvSolverRcrHandler.set_rcr_data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvSolverRcrHandler.set_rcr_data()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       SvZeroDSolverInputHandler
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.boundary_conditions">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvZeroDSolverInputHandler.boundary_conditions
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.copy">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvZeroDSolverInputHandler.copy()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.from_file">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvZeroDSolverInputHandler.from_file()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.junctions">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvZeroDSolverInputHandler.junctions
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.nodes">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvZeroDSolverInputHandler.nodes
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.num_pts_per_cycle">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvZeroDSolverInputHandler.num_pts_per_cycle
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.outlet_boundary_conditions">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvZeroDSolverInputHandler.outlet_boundary_conditions
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.to_file">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvZeroDSolverInputHandler.to_file()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.update_simparams">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvZeroDSolverInputHandler.update_simparams()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.vessel_id_to_name_map">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvZeroDSolverInputHandler.vessel_id_to_name_map
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.vessel_to_bc_map">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvZeroDSolverInputHandler.vessel_to_bc_map
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.SvZeroDSolverInputHandler.vessels">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         SvZeroDSolverInputHandler.vessels
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       VtkHandler
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler.bounds">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         VtkHandler.bounds
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler.decimate">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         VtkHandler.decimate()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler.from_file">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         VtkHandler.from_file()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler.get_cell_data_array">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         VtkHandler.get_cell_data_array()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler.get_point_data_array">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         VtkHandler.get_point_data_array()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler.point_data_array_names">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         VtkHandler.point_data_array_names
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler.point_data_array_num">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         VtkHandler.point_data_array_num
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler.points">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         VtkHandler.points
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler.polys">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         VtkHandler.polys
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler.set_point_data_array">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         VtkHandler.set_point_data_array()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler.threshold">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         VtkHandler.threshold()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#svsuperestimator.reader.VtkHandler.to_file">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         VtkHandler.to_file()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="_sources/svsuperestimator.reader.rst.txt">
+        <i class="fas fa-file-alt"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright Stanford University, The Regents of the University of California, and others..<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

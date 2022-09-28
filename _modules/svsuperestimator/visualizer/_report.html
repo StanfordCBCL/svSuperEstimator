@@ -1,0 +1,594 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>svsuperestimator.visualizer._report &#8212; svSuperEstimator v1.3 Manual</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/svsuperestimator/visualizer/_report';</script>
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fas fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/logo.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../rst/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../modules.html">
+                        Documentation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../rst/bibliography.html">
+                        References
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fas fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../rst/installation.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../modules.html">
+                        Documentation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../rst/bibliography.html">
+                        References
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for svsuperestimator.visualizer._report</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This module holds the Report class.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">base64</span> <span class="kn">import</span> <span class="n">b64encode</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="Report"><a class="viewcode-back" href="../../../svsuperestimator.visualizer.html#svsuperestimator.visualizer.Report">[docs]</a><span class="k">class</span> <span class="nc">Report</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class for formatting results.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a new report.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="Report.add"><a class="viewcode-back" href="../../../svsuperestimator.visualizer.html#svsuperestimator.visualizer.Report.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Add new content to the report.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">content</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Report.to_html"><a class="viewcode-back" href="../../../svsuperestimator.visualizer.html#svsuperestimator.visualizer.Report.to_html">[docs]</a>    <span class="k">def</span> <span class="nf">to_html</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert the report to a static html website in the folder.</span>
+
+<span class="sd">        The main page can be accessed by opening the `index.html` file in the</span>
+<span class="sd">        folder.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename: Target folder for the webpage.</span>
+<span class="sd">            title: Title of the webpage.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">formatted_content</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">formatted_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_HtmlHeading</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">formatted_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_HtmlItem</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">formatted_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_HtmlFlexbox</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+
+        <span class="c1"># Attach logging output if existend</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s2">&quot;log.svg&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">log_file</span><span class="p">):</span>
+            <span class="n">formatted_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_HtmlHeading</span><span class="p">(</span><span class="s2">&quot;Log output&quot;</span><span class="p">))</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ff</span><span class="p">:</span>
+                <span class="n">encoding</span> <span class="o">=</span> <span class="n">b64encode</span><span class="p">(</span><span class="n">ff</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+                <span class="n">img_b64</span> <span class="o">=</span> <span class="s2">&quot;data:image/svg+xml;base64,&quot;</span> <span class="o">+</span> <span class="n">encoding</span>
+                <span class="n">formatted_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_HtmlItem</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;img src=&quot;</span><span class="si">{</span><span class="n">img_b64</span><span class="si">}</span><span class="s1">&quot;&gt;&#39;</span><span class="p">))</span>
+
+        <span class="n">sceleton</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;&lt;!DOCTYPE html&gt;</span>
+<span class="s2">&lt;html lang=&quot;en&quot;&gt;</span>
+<span class="s2">&lt;meta charset=&quot;UTF-8&quot;&gt;</span>
+<span class="s2">&lt;title&gt;</span><span class="si">{title}</span><span class="s2">&lt;/title&gt;</span>
+<span class="s2">&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;</span>
+<span class="s2">&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt; </span>
+<span class="s2">&lt;style&gt;</span><span class="si">{style}</span><span class="s2">&lt;/style&gt;</span>
+<span class="s2">&lt;script src=&quot;&quot;&gt;&lt;/script&gt;</span>
+<span class="s2">&lt;body&gt;</span>
+<span class="s2">&lt;div class=&quot;topbar&quot;&gt;&lt;h1&gt;svSuperEstimator Dashboard&lt;/h1&gt;&lt;/div&gt;</span>
+<span class="si">{body}</span><span class="s2"></span>
+<span class="s2">&lt;/body&gt;</span>
+<span class="s2">&lt;/html&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+        <span class="n">stylesheet</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;body {</span>
+<span class="s2">    margin: 0;</span>
+<span class="s2">    font-family: &#39;Open Sans&#39;, sans-serif;</span>
+<span class="s2">    background-color: #121212;</span>
+<span class="s2">    color: #ffffffe8;</span>
+<span class="s2">  }</span>
+
+<span class="s2">  table {</span>
+<span class="s2">    width: 100%;</span>
+<span class="s2">    font-family: monospace, monospace;</span>
+<span class="s2">    font-size: 10pt;</span>
+<span class="s2">    font-weight: lighter;</span>
+<span class="s2">    text-align: left;</span>
+<span class="s2">  }</span>
+
+<span class="s2">  th,</span>
+<span class="s2">  td {</span>
+<span class="s2">    text-align: left;</span>
+<span class="s2">    padding: 5px;</span>
+<span class="s2">  }</span>
+
+<span class="s2">  .topbar {</span>
+<span class="s2">    overflow: hidden;</span>
+<span class="s2">    background-color: #212121;</span>
+<span class="s2">    text-align: center;</span>
+<span class="s2">    margin-bottom: 30px;</span>
+<span class="s2">    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.07), 0 4px 8px rgba(0, 0, 0, 0.07), 0 8px 16px rgba(0, 0, 0, 0.07), 0 16px 32px rgba(0, 0, 0, 0.07), 0 32px 64px rgba(0, 0, 0, 0.07);</span>
+<span class="s2">  }</span>
+
+<span class="s2">  .element {</span>
+<span class="s2">    display: inline-block;</span>
+<span class="s2">    width: 33%;</span>
+<span class="s2">  }</span>
+
+<span class="s2">  .timestamp {</span>
+<span class="s2">    text-align: right;</span>
+<span class="s2">    color: #ffffffb5;</span>
+<span class="s2">    padding-right: 20px;</span>
+<span class="s2">    font-size: 10pt;</span>
+<span class="s2">  }</span>
+
+<span class="s2">  .topbar h1 {</span>
+<span class="s2">    margin-top: 10px;</span>
+<span class="s2">    margin-bottom: 10px;</span>
+<span class="s2">    font-weight: lighter;</span>
+<span class="s2">  }</span>
+
+<span class="s2">  .container {</span>
+<span class="s2">    display: flex;</span>
+<span class="s2">    flex-wrap: wrap;</span>
+<span class="s2">    justify-content: flex-start;</span>
+<span class="s2">    padding: 10px;</span>
+<span class="s2">    align-items: flex-start;</span>
+<span class="s2">  }</span>
+
+<span class="s2">  .item {</span>
+<span class="s2">    flex: 0 calc(50% - 40px);</span>
+<span class="s2">    background-color: #212121;</span>
+<span class="s2">    border-radius: 10px;</span>
+<span class="s2">    padding: 10px;</span>
+<span class="s2">    margin-left: 10px;</span>
+<span class="s2">    margin-right: 10px;</span>
+<span class="s2">    margin-bottom: 10px;</span>
+<span class="s2">    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.07), 0 4px 8px rgba(0, 0, 0, 0.07), 0 8px 16px rgba(0, 0, 0, 0.07), 0 16px 32px rgba(0, 0, 0, 0.07), 0 32px 64px rgba(0, 0, 0, 0.07);</span>
+<span class="s2">  }</span>
+
+<span class="s2">  h1 {</span>
+<span class="s2">    font-size: 16pt;</span>
+<span class="s2">    margin-left: 20px;</span>
+<span class="s2">    margin-top: 10px;</span>
+<span class="s2">    margin-bottom: 10px;</span>
+<span class="s2">  }</span>
+
+<span class="s2">  h2 {</span>
+<span class="s2">    font-size: 14pt;</span>
+<span class="s2">  }</span>
+<span class="s2">&quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+        <span class="c1"># Build and write html page</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ff</span><span class="p">:</span>
+            <span class="n">ff</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="n">sceleton</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                    <span class="n">style</span><span class="o">=</span><span class="n">stylesheet</span><span class="p">,</span>
+                    <span class="n">timestamp</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%m/</span><span class="si">%d</span><span class="s2">/%Y, %H:%M:%S&quot;</span><span class="p">),</span>
+                    <span class="n">body</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">to_html</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">formatted_content</span><span class="p">]),</span>
+                <span class="p">)</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Report.to_files"><a class="viewcode-back" href="../../../svsuperestimator.visualizer.html#svsuperestimator.visualizer.Report.to_files">[docs]</a>    <span class="k">def</span> <span class="nf">to_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert to report to seperate files.</span>
+
+<span class="sd">        Image will be saved as png files and tables as csv file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            folder: Folder to save the files in.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">current_heading</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">item_in_section_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">current_heading</span> <span class="o">=</span> <span class="n">item</span>
+                <span class="n">item_in_section_counter</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">iitem</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">iitem</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+                        <span class="n">iitem</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                                <span class="n">folder</span><span class="p">,</span>
+                                <span class="n">current_heading</span>
+                                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">item_in_section_counter</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">iitem</span><span class="o">.</span><span class="n">to_image</span><span class="p">(</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                                <span class="n">folder</span><span class="p">,</span>
+                                <span class="n">current_heading</span>
+                                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">item_in_section_counter</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">,</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="n">item_in_section_counter</span> <span class="o">+=</span> <span class="mi">1</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">_HtmlHeading</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Auxiliary class for generating html heading.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a new instance of _HtmlHeading.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text: The text of the heading.</span>
+<span class="sd">            level: The level of the heading from 1-6.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text</span> <span class="o">=</span> <span class="n">text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_level</span> <span class="o">=</span> <span class="n">level</span>
+
+    <span class="k">def</span> <span class="nf">to_html</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get html string respresentation of content.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;h</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_level</span><span class="si">}</span><span class="s2">&gt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_text</span><span class="si">}</span><span class="s2">&lt;/h</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_level</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">_HtmlFlexbox</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Auxiliary class for generating html flexboxes.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a new instance of _HtmlFlexbox.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            items: Items for the flexbox.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="o">=</span> <span class="n">items</span>
+
+    <span class="k">def</span> <span class="nf">to_html</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get html string respresentation of content.&quot;&quot;&quot;</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="s2">&quot;&lt;div class=&#39;container&#39;&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_items</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+                    <span class="n">html</span> <span class="o">+=</span> <span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;&lt;div class=&#39;item&#39;&gt;</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="s2">&quot;&lt;/div&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">html</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;&lt;div class=&#39;item&#39;&gt;</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">to_html</span><span class="p">()</span><span class="si">}</span><span class="s2">&lt;/div&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">html</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;&lt;div class=&#39;item&#39;&gt;</span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&lt;/div&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">html</span> <span class="o">+=</span> <span class="s2">&quot;&lt;/div&gt;&quot;</span>
+        <span class="k">return</span> <span class="n">html</span>
+
+
+<span class="k">class</span> <span class="nc">_HtmlItem</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Auxiliary class for generating html item.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a new instance of _HtmlItem.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            item: The item.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_item</span> <span class="o">=</span> <span class="n">item</span>
+
+    <span class="k">def</span> <span class="nf">to_html</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get html string respresentation of content.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">to_html</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="s2">&quot;&lt;div class=&#39;item&#39; style=&#39;margin-left:20px;margin-right:20px;&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;margin-bottom:30px&#39;&gt;</span><span class="si">{</span><span class="n">content</span><span class="si">}</span><span class="s2">&lt;/div&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+</pre></div>
+
+            </article>
+            
+            
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright Stanford University, The Regents of the University of California, and others..<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

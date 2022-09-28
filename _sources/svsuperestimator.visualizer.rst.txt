@@ -1,0 +1,10 @@
+svsuperestimator.visualizer package
+===================================
+
+Module contents
+---------------
+
+.. automodule:: svsuperestimator.visualizer
+   :members:
+   :undoc-members:
+   :show-inheritance:
