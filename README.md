@@ -3,9 +3,9 @@
 </h1>
 
 <p align="center">
-<img src="https://github.com/SimVascular/svSuperEstimator/actions/workflows/codechecks.yml/badge.svg"/>
-<img src="https://github.com/SimVascular/svSuperEstimator/actions/workflows/test.yml/badge.svg"/>
-<img src="https://github.com/SimVascular/svSuperEstimator/actions/workflows/documentation.yml/badge.svg"/>
+<img src="https://github.com/StanfordCBCL/svSuperEstimator/actions/workflows/codechecks.yml/badge.svg"/>
+<img src="https://github.com/StanfordCBCL/svSuperEstimator/actions/workflows/test.yml/badge.svg"/>
+<img src="https://github.com/StanfordCBCL/svSuperEstimator/actions/workflows/documentation.yml/badge.svg"/>
 </p>
 
 Sequential multi-fidelity parameter estimation and model calibration in
@@ -30,7 +30,7 @@ conda activate estimator
 svSuperEstimator and most of the dependencies can be installed via pip:
 
 ```bash
-pip install git+https://github.com/SimVascular/svSuperEstimator.git
+pip install git+https://github.com/StanfordCBCL/svSuperEstimator.git
 ```
 
 The remaining dependencies have to be installed manually:
