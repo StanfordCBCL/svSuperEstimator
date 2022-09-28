@@ -89,6 +89,7 @@ def run_file(path: str) -> None:
             if name is None:
                 name = task_name
             task_output_folder = os.path.join(parent_folder, name)
+            os.makedirs(task_output_folder, exist_ok=True)
 
             slurm_config = slurm_default.copy()
             slurm_config.update(config["slurm"])
