@@ -85,17 +85,42 @@ class ThreeDSimulation(Task):
             cwd=self.output_folder,
         )
 
-        self.log("Calling svsolver")
-        run_subprocess(
-            [
-                "UCX_POSIX_USE_PROC_LINK=n srun",
-                self.config["svsolver_executable"],
-                "solver.inp",
-            ],
-            logger=self.log,
-            logprefix=r"\[svsolver]: ",
-            cwd=self.output_folder,
+        proc_folder = os.path.join(
+            self.output_folder, f"{self.config['num_procs']}-procs_case"
         )
+
+        self.log("Calling svsolver")
+        try:
+            run_subprocess(
+                [
+                    "UCX_POSIX_USE_PROC_LINK=n srun",
+                    self.config["svsolver_executable"],
+                    "solver.inp",
+                ],
+                logger=self.log,
+                logprefix=r"\[svsolver]: ",
+                cwd=self.output_folder,
+            )
+        except RuntimeError as err:
+            if os.path.isdir(proc_folder):
+                self.log(
+                    "Existing proc folder caused problem. Folder "
+                    "will be removed and simulation restarted."
+                )
+                rmtree(proc_folder)
+                self.log("Calling svsolver")
+                run_subprocess(
+                    [
+                        "UCX_POSIX_USE_PROC_LINK=n srun",
+                        self.config["svsolver_executable"],
+                        "solver.inp",
+                    ],
+                    logger=self.log,
+                    logprefix=r"\[svsolver]: ",
+                    cwd=self.output_folder,
+                )
+            else:
+                raise err
 
         self.log("Calling svpost")
         run_subprocess(
@@ -109,17 +134,11 @@ class ThreeDSimulation(Task):
             ],
             logger=self.log,
             logprefix=r"\[svpost]: ",
-            cwd=os.path.join(
-                self.output_folder, f"{self.config['num_procs']}-procs_case"
-            ),
+            cwd=proc_folder,
         )
 
         self.log("Cleaning up")
-        rmtree(
-            os.path.join(
-                self.output_folder, f"{self.config['num_procs']}-procs_case"
-            )
-        )
+        rmtree(proc_folder)
 
     def post_run(self) -> None:
         """Postprocessing routine of the task."""
