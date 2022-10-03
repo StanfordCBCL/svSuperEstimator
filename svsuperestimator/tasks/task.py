@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from time import perf_counter as time
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
 
 import orjson
 from rich import box
@@ -12,6 +12,7 @@ from rich.table import Table
 
 from svsuperestimator import visualizer
 
+from .. import VERSION
 from ..reader import SimVascularProject
 
 
@@ -128,7 +129,9 @@ class Task(ABC):
 
         start_task = time()
 
+        self.log(f"Running on version [bold magenta]{VERSION}[/bold magenta]")
         self.log(f"Starting task [bold cyan]{type(self).__name__}[/bold cyan]")
+        self.database["version"] = VERSION
 
         # Make task output directory
         os.makedirs(self.output_folder, exist_ok=True)

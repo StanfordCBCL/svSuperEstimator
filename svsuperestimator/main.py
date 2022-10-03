@@ -10,6 +10,7 @@ from rich import box
 from rich.console import Console
 from rich.table import Table
 
+from . import VERSION
 from .reader import SimVascularProject
 from .tasks.taskutils import run_subprocess
 
@@ -203,9 +204,14 @@ def estimate(path: str) -> None:
         style="#ff9100",
     )
     system = platform.uname()
-    MAIN_CONSOLE.print(
+    MAIN_CONSOLE.log(
         f"platform [bold cyan]{system.system.lower()}[/bold cyan] | python "
         f"{sys.version.split()[0]} at [bold cyan]{sys.executable}[/bold cyan]"
+    )
+    MAIN_CONSOLE.log(
+        f"estimator [bold cyan]{VERSION}[/bold cyan] at [bold cyan]"
+        f"{os.path.abspath(os.path.dirname(os.path.dirname(__file__)))}"
+        "[/bold cyan]"
     )
 
     if os.path.isdir(path):
