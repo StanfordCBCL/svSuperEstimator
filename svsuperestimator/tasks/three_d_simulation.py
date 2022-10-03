@@ -26,6 +26,12 @@ class ThreeDSimulation(Task):
         **Task.DEFAULTS,
     }
 
+    MUST_EXIST_AT_INIT = [
+        "svpre_executable",
+        "svsolver_executable",
+        "svpost_executable",
+    ]
+
     def core_run(self) -> None:
         """Core routine of the task."""
 

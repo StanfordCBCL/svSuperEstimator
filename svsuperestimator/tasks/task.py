@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from time import perf_counter as time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 import orjson
 from rich import box
@@ -39,6 +39,8 @@ class Task(ABC):
         "core_run": True,
         "post_proc": True,
     }
+
+    MUST_EXIST_AT_INIT: List[str] = []
 
     def __init__(
         self,
@@ -88,6 +90,12 @@ class Task(ABC):
                 raise RuntimeError(
                     f"Required option {key} for task "
                     f"{type(self).__name__} not specified."
+                )
+            if key in self.MUST_EXIST_AT_INIT and not os.path.exists(
+                self.config[key]
+            ):
+                raise FileNotFoundError(
+                    f"File {self.config[key]} does not exist."
                 )
 
     @abstractmethod
