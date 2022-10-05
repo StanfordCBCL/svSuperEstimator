@@ -557,6 +557,7 @@ class _Forward_Model:
         try:
             result = runnercpp.run_from_config(self.base_config.data)
         except RuntimeError:
+            print("WARNING: Forward model evaluation failed.")
             return np.expand_dims(
                 np.array([9e99] * (len(self.bc_names) + 2)), axis=0
             )
