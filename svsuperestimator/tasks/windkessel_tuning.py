@@ -557,7 +557,9 @@ class _Forward_Model:
         try:
             result = runnercpp.run_from_config(self.base_config.data)
         except RuntimeError:
-            return np.array([9e99] * (len(self.bc_names) + 2))
+            return np.expand_dims(
+                np.array([9e99] * (len(self.bc_names) + 2)), axis=0
+            )
 
         # Extract minimum and maximum inlet pressure for last cardiac cycle
         p_inlet = result[result.name == self.inflow_name][self.inflow_pressure]
