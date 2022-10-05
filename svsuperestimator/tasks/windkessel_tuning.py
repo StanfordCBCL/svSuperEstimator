@@ -40,6 +40,7 @@ class WindkesselTuning(Task):
         "resampling_threshold": 0.5,
         "noise_factor": 0.05,
         "waste_free": True,
+        "kernel_density_estimation": False,
         **Task.DEFAULTS,
     }
 
@@ -84,7 +85,7 @@ class WindkesselTuning(Task):
         self.log("Setting covariance to:", noise_vector)
         self.database["noise"] = noise_vector.tolist()
 
-        # Setup the iteratior
+        # Setup the iterator
         self.log("Setup tuning process")
         smc_runner = SMCRunner(
             forward_model=forward_model,
@@ -185,24 +186,27 @@ class WindkesselTuning(Task):
         )
 
         # Calculate 1D marginal kernel density estimate
-        kernel_densities = []
-        for i in range(particles.shape[1]):
-            self.log(f"Calculate kernel density estimates for parameter {i}")
-            x, kde, bandwidth = statutils.gaussian_kde_1d(
-                x=particles[:, i],
-                weights=weights,
-                bounds=self._THETA_RANGE,
-                num=1000,
-            )
-            kernel_densities.append(
-                {
-                    "x": x,
-                    "kernel_density": kde,
-                    "bandwidth": bandwidth,
-                    "opt_method": "30-fold cross-validation",
-                }
-            )
-        results["kernel_density"] = kernel_densities
+        if self.config["kernel_density_estimation"]:
+            kernel_densities = []
+            for i in range(particles.shape[1]):
+                self.log(
+                    f"Calculate kernel density estimates for parameter {i}"
+                )
+                x, kde, bandwidth = statutils.gaussian_kde_1d(
+                    x=particles[:, i],
+                    weights=weights,
+                    bounds=self._THETA_RANGE,
+                    num=1000,
+                )
+                kernel_densities.append(
+                    {
+                        "x": x,
+                        "kernel_density": kde,
+                        "bandwidth": bandwidth,
+                        "opt_method": "30-fold cross-validation",
+                    }
+                )
+            results["kernel_density"] = kernel_densities
 
         # Save the postprocessed result to a file
         self.log("Save postprocessed results")
@@ -324,7 +328,10 @@ class WindkesselTuning(Task):
             report.add(f"Results for {bc_name}")
 
             # Calculate histogram data
-            bandwidth = results["kernel_density"][i]["bandwidth"]
+            if self.config["kernel_density_estimation"]:
+                bandwidth = results["kernel_density"][i]["bandwidth"]
+            else:
+                bandwidth = 0.02
             bins = int(
                 (self._THETA_RANGE[1] - self._THETA_RANGE[0]) / bandwidth
             )
@@ -348,11 +355,12 @@ class WindkesselTuning(Task):
                 y=counts,
                 name="Weighted histogram",
             )
-            distplot.add_line_trace(
-                x=results["kernel_density"][i]["x"],
-                y=results["kernel_density"][i]["kernel_density"],
-                name="Kernel density estimate",
-            )
+            if self.config["kernel_density_estimation"]:
+                distplot.add_line_trace(
+                    x=results["kernel_density"][i]["x"],
+                    y=results["kernel_density"][i]["kernel_density"],
+                    name="Kernel density estimate",
+                )
             distplot.add_vline_trace(
                 x=results["metrics"]["ground_truth"][i], text="Ground Truth"
             )
@@ -549,7 +557,10 @@ class _Forward_Model:
         try:
             result = runnercpp.run_from_config(self.base_config.data)
         except RuntimeError:
-            return np.array([9e99] * (len(self.bc_names) + 2))
+            print("WARNING: Forward model evaluation failed.")
+            return np.expand_dims(
+                np.array([9e99] * (len(self.bc_names) + 2)), axis=0
+            )
 
         # Extract minimum and maximum inlet pressure for last cardiac cycle
         p_inlet = result[result.name == self.inflow_name][self.inflow_pressure]

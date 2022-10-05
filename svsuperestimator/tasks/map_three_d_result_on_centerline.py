@@ -19,6 +19,8 @@ class MapThreeDResultOnCenterline(Task):
         **Task.DEFAULTS,
     }
 
+    MUST_EXIST_AT_INIT = ["slicer_executable"]
+
     def core_run(self) -> None:
         """Core routine of the task."""
 
