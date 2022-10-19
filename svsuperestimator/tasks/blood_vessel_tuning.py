@@ -110,7 +110,9 @@ class BloodVesselTuning(Task):
                         "num_pts_per_cycle": num_pts,
                         "theta_start": np.array(segment["theta_start"]),
                         "debug": self.config["debug"],
-                        "debug_folder": os.path.join(self.output_folder, "debug"),
+                        "debug_folder": os.path.join(
+                            self.output_folder, "debug"
+                        ),
                         **results_data,
                     }
                     self.log(
@@ -124,16 +126,18 @@ class BloodVesselTuning(Task):
                     )
                     results.append(r)
 
-        # Collect results when processes are complete
-        for r in results:
-            r.wait()
+            # Collect results when processes are complete
+            for r in results:
+                r.wait()
 
-        # Write results to respective branch in branch data
-        for result in [r.get() for r in results]:
-            branch_data[result["branch_id"]][result["seg_id"]]["theta_opt"] = {
-                n: result["theta_opt"][j]
-                for j, n in enumerate(self._PARAMETER_SEQUENCE)
-            }
+            # Write results to respective branch in branch data
+            for result in [r.get() for r in results]:
+                branch_data[result["branch_id"]][result["seg_id"]][
+                    "theta_opt"
+                ] = {
+                    n: result["theta_opt"][j]
+                    for j, n in enumerate(self._PARAMETER_SEQUENCE)
+                }
 
         # Update 0D simulation config with optimized parameters
         for vessel_config in zerod_config_handler.vessels.values():
