@@ -86,43 +86,43 @@ class BloodVesselTuning(Task):
             ]
 
         # Start optimizing the branches
-        pool = Pool(processes=self.config["num_procs"])
         results = []
         num_pts = zerod_config_handler.num_pts_per_cycle
         result_labels = ["pressure_in", "pressure_out", "flow_in", "flow_out"]
-        for branch_id, branch in branch_data.items():
-            for seg_id, segment in branch.items():
+        with Pool(processes=self.config["num_procs"]) as pool:
+            for branch_id, branch in branch_data.items():
+                for seg_id, segment in branch.items():
 
-                results_data: dict[str, np.ndarray] = {
-                    n: taskutils.refine_with_cubic_spline(
-                        segment[n], num_pts
-                    ).tolist()
-                    for n in result_labels
-                }
+                    results_data: dict[str, np.ndarray] = {
+                        n: taskutils.refine_with_cubic_spline(
+                            segment[n], num_pts
+                        ).tolist()
+                        for n in result_labels
+                    }
 
-                segment_data = {
-                    "branch_id": branch_id,
-                    "seg_id": seg_id,
-                    "times": np.linspace(
-                        times[0], times[-1], num_pts
-                    ).tolist(),
-                    "maxfev": 2000,
-                    "num_pts_per_cycle": num_pts,
-                    "theta_start": np.array(segment["theta_start"]),
-                    "debug": self.config["debug"],
-                    "debug_folder": os.path.join(self.output_folder, "debug"),
-                    **results_data,
-                }
-                self.log(
-                    f"Optimization for branch {branch_id} segment "
-                    f"{seg_id} [bold #ff9100]started[/bold #ff9100]"
-                )
-                r = pool.apply_async(
-                    self._optimize_blood_vessel,
-                    (segment_data,),
-                    callback=self._optimize_blood_vessel_callback,
-                )
-                results.append(r)
+                    segment_data = {
+                        "branch_id": branch_id,
+                        "seg_id": seg_id,
+                        "times": np.linspace(
+                            times[0], times[-1], num_pts
+                        ).tolist(),
+                        "maxfev": 2000,
+                        "num_pts_per_cycle": num_pts,
+                        "theta_start": np.array(segment["theta_start"]),
+                        "debug": self.config["debug"],
+                        "debug_folder": os.path.join(self.output_folder, "debug"),
+                        **results_data,
+                    }
+                    self.log(
+                        f"Optimization for branch {branch_id} segment "
+                        f"{seg_id} [bold #ff9100]started[/bold #ff9100]"
+                    )
+                    r = pool.apply_async(
+                        self._optimize_blood_vessel,
+                        (segment_data,),
+                        callback=self._optimize_blood_vessel_callback,
+                    )
+                    results.append(r)
 
         # Collect results when processes are complete
         for r in results:
