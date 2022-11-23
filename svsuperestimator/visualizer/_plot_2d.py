@@ -1,7 +1,7 @@
 """This module holds the Plot2D class."""
 from __future__ import annotations
 
-from typing import Any, Sequence, Union
+from typing import Any, Optional, Sequence, Union
 
 import numpy as np
 import plotly.graph_objects as go
@@ -20,7 +20,7 @@ class Plot2D(PlotBase):
         x: Union[Sequence, np.ndarray],
         y: Union[Sequence, np.ndarray],
         name: str,
-        color: Union[str, Union[Sequence, np.ndarray]] = None,
+        color: Optional[Union[str, Union[Sequence, np.ndarray]]] = None,
         size: int = 4,
         opacity: float = 1.0,
         colorscale: str = "viridis",
@@ -62,11 +62,11 @@ class Plot2D(PlotBase):
         x: Union[Sequence, np.ndarray],
         y: Union[Sequence, np.ndarray],
         name: str,
-        color: str = None,
+        color: Optional[str] = None,
         width: int = 2,
         opacity: float = 1.0,
         showlegend: bool = False,
-        dash: str = None,
+        dash: Optional[str] = None,
     ) -> None:
         """Add a line scatter trace.
 
@@ -97,7 +97,7 @@ class Plot2D(PlotBase):
         x: Union[Sequence, np.ndarray],
         y: Union[Sequence, np.ndarray],
         name: str,
-        color: str = None,
+        color: Optional[str] = None,
         opacity: float = 1.0,
         showlegend: bool = False,
     ) -> None:
@@ -125,7 +125,11 @@ class Plot2D(PlotBase):
         )
 
     def add_vline_trace(
-        self, x: float, text: str = None, width: int = 3, color: str = "orange"
+        self,
+        x: float,
+        text: Optional[str] = None,
+        width: int = 3,
+        color: str = "orange",
     ) -> None:
         """Add vertical line marker trace.
 
@@ -177,8 +181,8 @@ class Plot2D(PlotBase):
         self,
         z: Union[Sequence, np.ndarray],
         name: str,
-        x: Union[Sequence, np.ndarray] = None,
-        y: Union[Sequence, np.ndarray] = None,
+        x: Optional[Union[Sequence, np.ndarray]] = None,
+        y: Optional[Union[Sequence, np.ndarray]] = None,
         colorscale: str = "viridis",
         showscale: bool = False,
     ) -> None:
@@ -211,7 +215,7 @@ class Plot2D(PlotBase):
         z_y: Union[Sequence, np.ndarray],
         name_x: str,
         name_y: str,
-        color: str = None,
+        color: Optional[str] = None,
     ) -> None:
         """Add bar traces to the borders of the x and y axis.
 
@@ -330,8 +334,8 @@ class Plot2D(PlotBase):
         self,
         values: Union[Sequence, np.ndarray],
         names: list[str],
-        color_by: Union[Sequence, np.ndarray] = None,
-        plotrange: tuple[float, float] = None,
+        color_by: Optional[Union[Sequence, np.ndarray]] = None,
+        plotrange: Optional[tuple[float, float]] = None,
     ) -> None:
         """Add a parallel coordinates trace to the plot.
 

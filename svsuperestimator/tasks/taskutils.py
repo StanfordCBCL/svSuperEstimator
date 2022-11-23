@@ -1,7 +1,7 @@
 """This module holds general task helper function."""
 import subprocess
 from time import sleep
-from typing import Callable, Sequence, Tuple, Union
+from typing import Callable, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from scipy.interpolate import CubicSpline
@@ -67,7 +67,7 @@ def run_subprocess(
     logger: Callable,
     refresh_rate: float = 1.0,
     logprefix: str = "",
-    cwd: str = None,
+    cwd: Optional[str] = None,
 ) -> None:
     """Run a subprocess.
 

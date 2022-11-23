@@ -6,7 +6,7 @@ import os
 import pickle
 from datetime import datetime
 from tempfile import TemporaryDirectory
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import numpy as np
 import orjson
@@ -464,7 +464,7 @@ class WindkesselTuning(Task):
         return report
 
     def _get_raw_results(
-        self, frame: int = None
+        self, frame: Optional[int] = None
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return raw queens result.
 

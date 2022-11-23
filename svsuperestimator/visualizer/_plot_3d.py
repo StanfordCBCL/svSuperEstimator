@@ -1,7 +1,7 @@
 """This module holds various plotting classes."""
 from __future__ import annotations
 
-from typing import Any, Sequence, Union
+from typing import Any, Optional, Sequence, Union
 
 import numpy as np
 import plotly.graph_objects as go
@@ -22,11 +22,11 @@ class Plot3D(PlotBase):
         y: np.ndarray,
         z: np.ndarray,
         name: str,
-        color: Union[str, np.ndarray] = None,
+        color: Optional[Union[str, np.ndarray]] = None,
         size: int = 3,
         opacity: float = 1.0,
         colorscale: str = "viridis",
-        text: Union[Sequence, np.ndarray] = None,
+        text: Optional[Union[Sequence, np.ndarray]] = None,
         showlegend: bool = False,
         **kwargs: Any,
     ) -> None:
@@ -73,7 +73,7 @@ class Plot3D(PlotBase):
         y: np.ndarray,
         z: np.ndarray,
         name: str,
-        color: Union[str, np.ndarray] = None,
+        color: Optional[Union[str, np.ndarray]] = None,
         width: int = 3,
         opacity: float = 1.0,
         colorscale: str = "viridis",
@@ -150,10 +150,10 @@ class Plot3D(PlotBase):
         self,
         mesh_handler: MeshHandler,
         name: str,
-        color: str = None,
+        color: Optional[str] = None,
         opacity: float = 1.0,
         showlegend: bool = False,
-        decimate: float = None,
+        decimate: Optional[float] = None,
     ) -> None:
         """Add a mesh trace from a vtk file.
 

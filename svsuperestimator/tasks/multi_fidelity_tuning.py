@@ -4,7 +4,6 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from .. import visualizer
 from .blood_vessel_tuning import BloodVesselTuning
 from .map_three_d_result_on_centerline import MapThreeDResultOnCenterline
 from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
@@ -157,11 +156,3 @@ class MultiFidelityTuning(Task):
 
         for task in task_sequence:
             task.run()
-
-    def post_run(self) -> None:
-        """Postprocessing routine of the task."""
-        pass
-
-    def generate_report(self) -> visualizer.Report:
-        """Generate the task report."""
-        pass

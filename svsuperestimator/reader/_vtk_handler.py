@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from typing import Type, TypeVar
+from typing import Optional, Type, TypeVar
 
 import numpy as np
 import vtk
@@ -96,7 +96,10 @@ class VtkHandler(DataHandler):
         ]
 
     def threshold(
-        self, label: str, lower: float = None, upper: float = None
+        self,
+        label: str,
+        lower: Optional[float] = None,
+        upper: Optional[float] = None,
     ) -> "VtkHandler":
         """Apply a threshold to the data and return thresholded data.
 

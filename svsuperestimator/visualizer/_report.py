@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from base64 import b64encode
 from datetime import datetime
-from typing import Any, List
+from typing import Any, List, Optional
 
 import pandas as pd
 
@@ -20,7 +20,7 @@ class Report:
         """Add new content to the report."""
         self._content.append(content)
 
-    def to_html(self, filename: str, title: str = None) -> None:
+    def to_html(self, filename: str, title: Optional[str] = None) -> None:
         """Convert the report to a static html website in the folder.
 
         The main page can be accessed by opening the `index.html` file in the
