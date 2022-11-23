@@ -24,7 +24,7 @@ from .task import Task
 class BloodVesselTuning(Task):
     """Blood vessel tuning task.
 
-    Tunes all blood vessels in a 0D simulation file to a 3D simualtion result.
+    Tunes all blood vessels in a 0D simulation file to a 3D simulation result.
     """
 
     TASKNAME = "blood_vessel_tuning"
@@ -113,6 +113,7 @@ class BloodVesselTuning(Task):
                         "debug_folder": os.path.join(
                             self.output_folder, "debug"
                         ),
+                        "name": f"branch{branch_id}_seg{seg_id}",
                         **results_data,
                     }
                     self.log(
@@ -150,7 +151,7 @@ class BloodVesselTuning(Task):
             ]["theta_opt"]
 
         # Improve junctions
-        self._make_resistive_junctions(zerod_config_handler, branch_data)
+        self._make_resistive_junctions(zerod_config_handler, branch_data, times)
 
         # Writing data to project
         self.log("Save optimized 0D simulation file")
@@ -372,7 +373,9 @@ class BloodVesselTuning(Task):
         """Optimization routine for one blood vessel."""
 
         # Determine normalization factor for pressure and flow
-        pres_norm_factor = np.mean(segment_data["pressure_in"])
+        pres_norm_factor = np.amax(segment_data["pressure_in"]) - np.amin(
+            segment_data["pressure_in"]
+        )
         flow_norm_factor = np.amax(segment_data["flow_out"]) - np.amin(
             segment_data["flow_out"]
         )
@@ -399,8 +402,8 @@ class BloodVesselTuning(Task):
                 num_pts_per_cycle=num_pts_per_cycle,
             )
 
-            offset_pres = np.abs(inpres_sim - inpres) / pres_norm_factor
-            offset_flow = np.abs(outflow_sim - outflow) / flow_norm_factor
+            offset_pres = (np.abs(inpres_sim - inpres) / pres_norm_factor) ** 2
+            offset_flow = (np.abs(outflow_sim - outflow) / flow_norm_factor) ** 2
 
             return np.mean(np.concatenate([offset_pres, offset_flow]))
 
@@ -440,8 +443,7 @@ class BloodVesselTuning(Task):
             plot1.write_image(
                 os.path.join(
                     segment_data["debug_folder"],
-                    f"pres_branch_{segment_data['branch_id']}_"
-                    f"seg{segment_data['seg_id']}.png",
+                    f"pres_{segment_data['name']}.png"
                 )
             )
             plot2 = px.line({"Result": outflow_sim, "Target": outflow})
@@ -451,8 +453,7 @@ class BloodVesselTuning(Task):
             plot2.write_image(
                 os.path.join(
                     segment_data["debug_folder"],
-                    f"flow_branch_{segment_data['branch_id']}_"
-                    f"seg{segment_data['seg_id']}.png",
+                    f"flow_{segment_data['name']}.png"
                 )
             )
 
@@ -599,12 +600,15 @@ class BloodVesselTuning(Task):
         self,
         zerod_handler: reader.SvZeroDSolverInputHandler,
         mapped_data: dict,
+        times
     ) -> None:
         """Convert normal junctions to resistive junctions."""
 
         vessel_id_map = zerod_handler.vessel_id_to_name_map
 
         nodes = zerod_handler.nodes
+
+        num_pts = zerod_handler.num_pts_per_cycle
 
         junction_nodes = {
             n for n in nodes if n[0].startswith("J") or n[1].startswith("J")
@@ -628,15 +632,14 @@ class BloodVesselTuning(Task):
                     "Multiple inlets are currently not supported."
                 )
 
-            rs = [0.0]
+            junction_values = {n: [] for n in self._PARAMETER_SEQUENCE}
 
             inlet_branch_name = vessel_id_map[inlet_vessels[0]]
             branch_id, seg_id = inlet_branch_name.split("_")
             branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-            pressure_in = np.amax(
-                mapped_data[branch_id][seg_id]["pressure_out"]
-            )
+            pressure_in = taskutils.refine_with_cubic_spline(mapped_data[branch_id][seg_id]["pressure_out"], num_pts).tolist()
+            flow_in = taskutils.refine_with_cubic_spline(mapped_data[branch_id][seg_id]["flow_out"], num_pts).tolist()
 
             for ovessel in outlet_vessels:
 
@@ -644,16 +647,40 @@ class BloodVesselTuning(Task):
                 branch_id, seg_id = outlet_branch_name.split("_")
                 branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-                pressure_out = np.amax(
-                    mapped_data[branch_id][seg_id]["pressure_in"]
-                )
-                flow_out = np.amax(mapped_data[branch_id][seg_id]["flow_in"])
+                pressure_out = taskutils.refine_with_cubic_spline(mapped_data[branch_id][seg_id]["pressure_in"], num_pts).tolist()
+                flow_out = taskutils.refine_with_cubic_spline(mapped_data[branch_id][seg_id]["flow_in"], num_pts).tolist()
 
-                rs.append((pressure_in - pressure_out) / flow_out)
+                segment_data = {
+                        "times": np.linspace(
+                            times[0], times[-1], num_pts
+                        ).tolist(),
+                        "maxfev": 2000,
+                        "num_pts_per_cycle": num_pts,
+                        "theta_start": np.array([0.0, 1e-8, 1e-12, 0.0]),
+                        "debug": self.config["debug"],
+                        "debug_folder": os.path.join(
+                            self.output_folder, "debug"
+                        ),
+                        "pressure_in": pressure_in,
+                        "pressure_out": pressure_out,
+                        "flow_in": flow_out,
+                        "flow_out": flow_out,
+                        "name": f"{inlet_branch_name}_{vessel_id_map[ovessel]}",
+                    }
 
-            junction_data["junction_type"] = "resistive_junction"
+                result = self._optimize_blood_vessel(segment_data)
+
+                result = {
+                    n: result["theta_opt"][j]
+                    for j, n in enumerate(self._PARAMETER_SEQUENCE)
+                }
+
+                for key, value in result.items():
+                    junction_values[key].append(value)
+
+            junction_data["junction_type"] = "BloodVesselJunction"
             junction_values_bef = junction_data.get("junction_values", {})
-            junction_data["junction_values"] = {"R": rs}
+            junction_data["junction_values"] = junction_values
 
             self.log(
                 f"Optimization for junction [cyan]{junction_name}[/cyan] "
@@ -669,15 +696,48 @@ class BloodVesselTuning(Task):
                     table.add_row(
                         f"resistance {inlet_branch_name} -> "
                         f"{vessel_id_map[ovessel]}",
-                        f"{junction_values_bef['R'][i+1]:.1e} -> "
-                        f"{rs[i+1]:.1e}",
+                        f"{junction_values_bef['R_poiseuille'][i]:.1e} -> "
+                        f"{junction_values['R_poiseuille'][i]:.1e}",
+                    )
+                    table.add_row(
+                        f"capacitance {inlet_branch_name} -> "
+                        f"{vessel_id_map[ovessel]}",
+                        f"{junction_values_bef['C'][i]:.1e} -> "
+                        f"{junction_values['C'][i]:.1e}",
+                    )
+                    table.add_row(
+                        f"inductance {inlet_branch_name} -> "
+                        f"{vessel_id_map[ovessel]}",
+                        f"{junction_values_bef['L'][i]:.1e} -> "
+                        f"{junction_values['L'][i]:.1e}",
+                    )
+                    table.add_row(
+                        f"stenosis_coefficient {inlet_branch_name} -> "
+                        f"{vessel_id_map[ovessel]}",
+                        f"{junction_values_bef['stenosis_coefficient'][i]:.1e} -> "
+                        f"{junction_values['stenosis_coefficient'][i]:.1e}",
                     )
             else:
                 for i, ovessel in enumerate(outlet_vessels):
                     table.add_row(
                         f"resistance {inlet_branch_name} -> "
                         f"{vessel_id_map[ovessel]}",
-                        f"0.0 -> {rs[i+1]:.1e}",
+                        f"0.0 -> {junction_values['R_poiseuille'][i]:.1e}",
+                    )
+                    table.add_row(
+                        f"capacitance {inlet_branch_name} -> "
+                        f"{vessel_id_map[ovessel]}",
+                        f"0.0 -> {junction_values['C'][i]:.1e}",
+                    )
+                    table.add_row(
+                        f"inductance {inlet_branch_name} -> "
+                        f"{vessel_id_map[ovessel]}",
+                        f"0.0 -> {junction_values['L'][i]:.1e}",
+                    )
+                    table.add_row(
+                        f"stenosis_coefficient {inlet_branch_name} -> "
+                        f"{vessel_id_map[ovessel]}",
+                        f"0.0 -> {junction_values['stenosis_coefficient'][i]:.1e}",
                     )
 
             self.log(table)
