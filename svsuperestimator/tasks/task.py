@@ -104,15 +104,13 @@ class Task(ABC):
         """Core routine of the task."""
         raise NotImplementedError
 
-    @abstractmethod
     def post_run(self) -> None:
         """Postprocessing routine of the task."""
-        raise NotImplementedError
+        pass
 
-    @abstractmethod
     def generate_report(self) -> visualizer.Report:
         """Visualization routine of the task."""
-        raise NotImplementedError
+        return visualizer.Report()
 
     def log(self, *args: Any, **kwargs: Any) -> None:
         """Log to the task console."""

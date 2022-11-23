@@ -154,4 +154,4 @@ class ThreeDSimulation(Task):
     def generate_report(self) -> visualizer.Report:
         """Generate the task report."""
 
-        pass
+        return visualizer.Report()

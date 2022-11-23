@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import os
 
-from .. import visualizer
 from .task import Task
 from .taskutils import run_subprocess
 
@@ -43,11 +42,3 @@ class MapThreeDResultOnCenterline(Task):
             logprefix=r"\[slicer] ",
             cwd=self.output_folder,
         )
-
-    def post_run(self) -> None:
-        """Postprocessing routine of the task."""
-        pass
-
-    def generate_report(self) -> visualizer.Report:
-        """Generate the task report."""
-        pass

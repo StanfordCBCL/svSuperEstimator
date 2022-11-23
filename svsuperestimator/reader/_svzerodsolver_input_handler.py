@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+from typing import Optional
 
 from ._data_handler import DataHandler
 
@@ -140,14 +141,14 @@ class SvZeroDSolverInputHandler(DataHandler):
 
     def update_simparams(
         self,
-        abs_tol: float = None,
-        max_nliter: int = None,
-        num_cycles: int = None,
-        steady_initial: bool = None,
-        mean_only: bool = None,
-        output_interval: bool = None,
-        last_cycle_only: bool = None,
-        variable_based: bool = None,
+        abs_tol: Optional[float] = None,
+        max_nliter: Optional[int] = None,
+        num_cycles: Optional[float] = None,
+        steady_initial: Optional[bool] = None,
+        mean_only: Optional[bool] = None,
+        output_interval: Optional[bool] = None,
+        last_cycle_only: Optional[bool] = None,
+        variable_based: Optional[bool] = None,
     ) -> None:
         """Update the simulation parameters.
 

@@ -14,8 +14,6 @@ from scipy.interpolate import interp1d
 from svzerodsolver import runnercpp
 from vtk.util.numpy_support import numpy_to_vtk
 
-from svsuperestimator import visualizer
-
 from .. import reader
 from .task import Task
 
@@ -35,16 +33,6 @@ class MapZeroDResultToThreeD(Task):
         self._map_0d_on_centerline()
         self._map_centerline_on_3d()
         self._map_boundary_conditions()
-
-    def post_run(self) -> None:
-        """Postprocessing routine of the task."""
-
-        pass
-
-    def generate_report(self) -> visualizer.Report:
-        """Generate the task report."""
-
-        pass
 
     def _map_0d_on_centerline(self) -> None:
         """Map 0D result on centerline.

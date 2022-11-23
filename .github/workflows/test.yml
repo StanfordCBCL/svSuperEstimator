@@ -12,6 +12,7 @@ jobs:
       - name: Install dependencies
         run: |
           conda install pip
+          pip install --upgrade pip
           pip install -e .
           pip install pytest>=3.8.0 pytest-cov>=2.3.1 pytest-mock
       - name: Run pytest
