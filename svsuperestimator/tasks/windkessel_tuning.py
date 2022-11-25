@@ -41,7 +41,6 @@ class WindkesselTuning(Task):
         "num_rejuvenation_steps": 2,
         "resampling_threshold": 0.5,
         "noise_factor": 0.05,
-        "waste_free": True,
         **Task.DEFAULTS,
     }
 
@@ -82,9 +81,9 @@ class WindkesselTuning(Task):
         self.database["y_obs"] = y_obs.tolist()
 
         # Determine noise covariance
-        noise_vector = (self.config["noise_factor"] * y_obs) ** 2.0
-        self.log("Setting covariance to:", noise_vector)
-        self.database["noise"] = noise_vector.tolist()
+        std_vector = self.config["noise_factor"] * y_obs
+        self.log("Setting std vector to:", std_vector)
+        self.database["y_obs_std"] = std_vector.tolist()
 
         # Setup the iterator
         self.log("Setup tuning process")
@@ -92,7 +91,7 @@ class WindkesselTuning(Task):
             forward_model=forward_model,
             y_obs=y_obs,
             len_theta=len(theta_obs),
-            likelihood_cov=np.diag(noise_vector),
+            likelihood_std_vector=std_vector,
             prior_bounds=self._THETA_RANGE,
             num_procs=self.config["num_procs"],
             num_particles=self.config["num_particles"],
@@ -519,7 +518,7 @@ class _Forward_Model:
         for i, bc in enumerate(
             self.base_config.outlet_boundary_conditions.values()
         ):
-            ki = np.exp(sample[i])
+            ki = np.exp(sample[f"k{i}"])
             bc["bc_values"]["Rp"] = ki / (1.0 + self._distal_to_proximal[i])
             bc["bc_values"]["Rd"] = ki - bc["bc_values"]["Rp"]
             bc["bc_values"]["C"] = (
@@ -551,7 +550,7 @@ class _SMCRunner:
         forward_model: _Forward_Model,
         y_obs: np.ndarray,
         len_theta: int,
-        likelihood_cov: np.ndarray,
+        likelihood_std_vector: np.ndarray,
         prior_bounds: tuple,
         num_particles: int,
         resampling_strategy: str,
@@ -560,9 +559,8 @@ class _SMCRunner:
         num_procs: int,
         console: Any,
     ):
-        likelihood = stats.multivariate_normal(
-            mean=y_obs, cov=likelihood_cov, allow_singular=True
-        )
+        likelihood = stats.multivariate_normal(mean=np.zeros(len(y_obs)))    
+
         prior = dists.StructDist(
             {
                 f"k{i}": dists.Uniform(a=prior_bounds[0], b=prior_bounds[1])
@@ -581,10 +579,6 @@ class _SMCRunner:
                 self, theta: np.ndarray, t: Optional[int] = None
             ) -> np.ndarray:
 
-                particles = np.array(
-                    [theta[f"k{i}"].flatten() for i in range(self.len_theta)]
-                ).T
-
                 results = []
                 with get_context("fork").Pool(num_procs) as pool:
                     with Progress(
@@ -595,11 +589,11 @@ class _SMCRunner:
                         console=console,
                     ) as progress:
                         for res in progress.track(
-                            pool.imap(forward_model.evaluate, particles, 1),
-                            total=len(particles),
+                            pool.imap(forward_model.evaluate, theta, 1),
+                            total=len(theta),
                         ):
-                            results.append(likelihood.logpdf(res))
-                return np.array(results)
+                            results.append(res)
+                return likelihood.logpdf((np.array(results)-y_obs) / likelihood_std_vector)
 
         static_model = StaticModel(prior, self.len_theta)
 
