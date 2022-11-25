@@ -559,7 +559,7 @@ class _SMCRunner:
         num_procs: int,
         console: Any,
     ):
-        likelihood = stats.multivariate_normal(mean=np.zeros(len(y_obs)))    
+        likelihood = stats.multivariate_normal(mean=np.zeros(len(y_obs)))
 
         prior = dists.StructDist(
             {
@@ -571,7 +571,9 @@ class _SMCRunner:
         self.len_theta = len_theta
 
         class StaticModel(ssp.StaticModel):
-            def __init__(self, prior, len_theta):
+            def __init__(
+                self, prior: dists.StructDist, len_theta: int
+            ) -> None:
                 super().__init__(None, prior)
                 self.len_theta = len_theta
 
@@ -593,7 +595,9 @@ class _SMCRunner:
                             total=len(theta),
                         ):
                             results.append(res)
-                return likelihood.logpdf((np.array(results)-y_obs) / likelihood_std_vector)
+                return likelihood.logpdf(
+                    (np.array(results) - y_obs) / likelihood_std_vector
+                )
 
         static_model = StaticModel(prior, self.len_theta)
 
