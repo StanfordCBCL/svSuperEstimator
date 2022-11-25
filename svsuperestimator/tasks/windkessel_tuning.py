@@ -390,7 +390,9 @@ class WindkesselTuning(Task):
             pressure_plot.add_line_trace(
                 x=times,
                 y=taskutils.cgs_pressure_to_mmgh(
-                    bc_result[bc_map[bc_name]["pressure"]][-num_pts_per_cycle:]
+                    bc_result[bc_map[bc_name]["pressure"]].iloc[
+                        -num_pts_per_cycle:
+                    ]
                 ),
                 **map_opts,
             )
@@ -398,7 +400,9 @@ class WindkesselTuning(Task):
             pressure_plot.add_line_trace(
                 x=times,
                 y=taskutils.cgs_pressure_to_mmgh(
-                    bc_result[bc_map[bc_name]["pressure"]][-num_pts_per_cycle:]
+                    bc_result[bc_map[bc_name]["pressure"]].iloc[
+                        -num_pts_per_cycle:
+                    ]
                 ),
                 **mean_opts,
             )
@@ -412,7 +416,9 @@ class WindkesselTuning(Task):
             flow_plot.add_line_trace(
                 x=times,
                 y=taskutils.cgs_flow_to_lh(
-                    bc_result[bc_map[bc_name]["flow"]][-num_pts_per_cycle:]
+                    bc_result[bc_map[bc_name]["flow"]].iloc[
+                        -num_pts_per_cycle:
+                    ]
                 ),
                 **map_opts,
             )
@@ -420,7 +426,9 @@ class WindkesselTuning(Task):
             flow_plot.add_line_trace(
                 x=times,
                 y=taskutils.cgs_flow_to_lh(
-                    bc_result[bc_map[bc_name]["flow"]][-num_pts_per_cycle:]
+                    bc_result[bc_map[bc_name]["flow"]].iloc[
+                        -num_pts_per_cycle:
+                    ]
                 ),
                 **mean_opts,
             )
