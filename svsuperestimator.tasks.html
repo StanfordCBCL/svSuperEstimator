@@ -379,8 +379,60 @@
 </dd></dl>
 
 </section>
-<section id="svsuperestimator-tasks-statutils-module">
-<h2>svsuperestimator.tasks.statutils module<a class="headerlink" href="#svsuperestimator-tasks-statutils-module" title="Permalink to this heading">#</a></h2>
+<section id="module-svsuperestimator.tasks.statutils">
+<span id="svsuperestimator-tasks-statutils-module"></span><h2>svsuperestimator.tasks.statutils module<a class="headerlink" href="#module-svsuperestimator.tasks.statutils" title="Permalink to this heading">#</a></h2>
+<p>This module holds task helper function related to statistics.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.statutils.particle_covmat">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.statutils.</span></span><span class="sig-name descname"><span class="pre">particle_covmat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/statutils.html#particle_covmat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.statutils.particle_covmat" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate covariance matrix of particles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>particles</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Coordinates of particles.</p></li>
+<li><p><strong>weights</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Weights of particles.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.statutils.particle_map">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.statutils.</span></span><span class="sig-name descname"><span class="pre">particle_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">posterior</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/statutils.html#particle_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.statutils.particle_map" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate maximum a posteriori (MAP) of particles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>particles</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Coordinates of particles.</p></li>
+<li><p><strong>posterior</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Posterior or log-posterior of particles.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svsuperestimator.tasks.statutils.particle_wmean">
+<span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.statutils.</span></span><span class="sig-name descname"><span class="pre">particle_wmean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/statutils.html#particle_wmean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.statutils.particle_wmean" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate weighted mean of particles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>particles</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Coordinates of particles.</p></li>
+<li><p><strong>weights</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Weights of particles.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-svsuperestimator.tasks.task">
 <span id="svsuperestimator-tasks-task-module"></span><h2>svsuperestimator.tasks.task module<a class="headerlink" href="#module-svsuperestimator.tasks.task" title="Permalink to this heading">#</a></h2>
@@ -860,9 +912,38 @@ results are visualized.</p>
   </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#svsuperestimator-tasks-statutils-module">
+  <a class="reference internal nav-link" href="#module-svsuperestimator.tasks.statutils">
    svsuperestimator.tasks.statutils module
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.statutils.particle_covmat">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       particle_covmat()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.statutils.particle_map">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       particle_map()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#svsuperestimator.tasks.statutils.particle_wmean">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       particle_wmean()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#module-svsuperestimator.tasks.task">
