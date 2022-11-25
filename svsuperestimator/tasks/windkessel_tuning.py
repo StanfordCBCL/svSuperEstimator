@@ -94,7 +94,6 @@ class WindkesselTuning(Task):
             len_theta=len(theta_obs),
             likelihood_cov=np.diag(noise_vector),
             prior_bounds=self._THETA_RANGE,
-            # output_dir=self.output_folder,
             num_procs=self.config["num_procs"],
             num_particles=self.config["num_particles"],
             resampling_strategy="systematic",
@@ -532,9 +531,7 @@ class _Forward_Model:
             result = runnercpp.run_from_config(self.base_config.data)
         except RuntimeError:
             print("WARNING: Forward model evaluation failed.")
-            return np.expand_dims(
-                np.array([9e99] * (len(self.bc_names) + 2)), axis=0
-            )
+            return np.array([9e99] * (len(self.bc_names) + 2))
 
         # Extract minimum and maximum inlet pressure for last cardiac cycle
         p_inlet = result[result.name == self.inflow_name][self.inflow_pressure]
@@ -546,52 +543,6 @@ class _Forward_Model:
         ]
 
         return np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean])
-
-
-class MultivariateUniform(dists.ProbDist):
-    """Multivariate uniform distribution."""
-
-    def __init__(self, low: float, high: float, dim: int):
-        """Create a new distribution.
-
-        Args:
-            low: Lower bound.
-            high: Higher bound.
-            dim: Dimension of distribution.
-        """
-        self.low = low
-        self.high = high
-        self.dim = dim
-
-        self._logpdf = np.log(1 / (high - low) ** dim)
-
-    def rvs(self, size: int = 1) -> np.ndarray:
-        """Get random variates.
-
-        Args:
-            size: Number of samples.
-
-        Returns:
-            Samples.
-        """
-        return np.random.uniform(
-            low=self.low, high=self.high, size=(size, self.dim)
-        )
-
-    def logpdf(self, x: np.ndarray) -> np.ndarray:
-        """Logarithmic probability density function.
-
-        Args:
-            x: Samples.
-
-        Returns:
-            Probability density for samples.
-        """
-        return np.where(
-            np.all((self.low <= x) & (x <= self.high), axis=1),
-            self._logpdf,
-            -np.inf,
-        )
 
 
 class _SMCRunner:
@@ -612,15 +563,27 @@ class _SMCRunner:
         likelihood = stats.multivariate_normal(
             mean=y_obs, cov=likelihood_cov, allow_singular=True
         )
-        prior = MultivariateUniform(
-            low=prior_bounds[0], high=prior_bounds[1], dim=len_theta
+        prior = dists.StructDist(
+            {
+                f"k{i}": dists.Uniform(a=prior_bounds[0], b=prior_bounds[1])
+                for i in range(len_theta)
+            }
         )
         self.console = console
+        self.len_theta = len_theta
 
         class StaticModel(ssp.StaticModel):
+            def __init__(self, prior, len_theta):
+                super().__init__(None, prior)
+                self.len_theta = len_theta
+
             def loglik(
                 self, theta: np.ndarray, t: Optional[int] = None
             ) -> np.ndarray:
+
+                particles = np.array(
+                    [theta[f"k{i}"].flatten() for i in range(self.len_theta)]
+                ).T
 
                 results = []
                 with get_context("fork").Pool(num_procs) as pool:
@@ -632,15 +595,13 @@ class _SMCRunner:
                         console=console,
                     ) as progress:
                         for res in progress.track(
-                            pool.imap(forward_model.evaluate, theta, 1),
-                            total=len(theta),
+                            pool.imap(forward_model.evaluate, particles, 1),
+                            total=len(particles),
                         ):
-                            results.append(res)
+                            results.append(likelihood.logpdf(res))
+                return np.array(results)
 
-                loglik = likelihood.logpdf(results)
-                return loglik
-
-        static_model = StaticModel(prior=prior)
+        static_model = StaticModel(prior, self.len_theta)
 
         fk_model = ssp.AdaptiveTempering(
             model=static_model, len_chain=1 + num_rejuvenation_steps
@@ -660,10 +621,15 @@ class _SMCRunner:
         all_weights = []
         all_logpost = []
 
-        for i, _ in enumerate(self.runner):
-            particles = self.runner.X.theta
-            weights = self.runner.W
-            logpost = self.runner.X.lpost
+        for _ in self.runner:
+            particles = np.array(
+                [
+                    self.runner.X.theta[f"k{i}"].flatten()
+                    for i in range(self.len_theta)
+                ]
+            ).T.tolist()
+            weights = np.array(self.runner.W).tolist()
+            logpost = np.array(self.runner.X.lpost).tolist()
             self.console.log(
                 f"Completed SMC step {self.runner.t} | "
                 f"[yellow]ESS[/yellow]: {self.runner.wgts.ESS:.2f} | "
