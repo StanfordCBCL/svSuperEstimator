@@ -1,18 +1,20 @@
 """This module holds the WindkesselTuning task."""
 from __future__ import annotations
 
-import json
 import os
 import pickle
 from datetime import datetime
-from tempfile import TemporaryDirectory
+from multiprocessing import get_context
 from typing import Any, Dict, Optional
 
 import numpy as np
 import orjson
 import pandas as pd
-from pqueens.main import run
-from rich.logging import RichHandler
+import particles
+from particles import distributions as dists
+from particles import smc_samplers as ssp
+from rich.progress import BarColumn, Progress
+from scipy import stats
 from svzerodsolver import runnercpp
 
 from .. import reader, visualizer
@@ -39,8 +41,6 @@ class WindkesselTuning(Task):
         "num_rejuvenation_steps": 2,
         "resampling_threshold": 0.5,
         "noise_factor": 0.05,
-        "waste_free": True,
-        "kernel_density_estimation": False,
         **Task.DEFAULTS,
     }
 
@@ -81,39 +81,32 @@ class WindkesselTuning(Task):
         self.database["y_obs"] = y_obs.tolist()
 
         # Determine noise covariance
-        noise_vector = (self.config["noise_factor"] * y_obs) ** 2.0
-        self.log("Setting covariance to:", noise_vector)
-        self.database["noise"] = noise_vector.tolist()
+        std_vector = self.config["noise_factor"] * y_obs
+        self.log("Setting std vector to:", std_vector)
+        self.database["y_obs_std"] = std_vector.tolist()
 
         # Setup the iterator
         self.log("Setup tuning process")
-        smc_runner = SMCRunner(
+        smc_runner = _SMCRunner(
             forward_model=forward_model,
             y_obs=y_obs,
-            output_dir=self.output_folder,
+            len_theta=len(theta_obs),
+            likelihood_std_vector=std_vector,
+            prior_bounds=self._THETA_RANGE,
             num_procs=self.config["num_procs"],
             num_particles=self.config["num_particles"],
-            num_rejuvenation_steps=self.config["num_rejuvenation_steps"],
+            resampling_strategy="systematic",
             resampling_threshold=self.config["resampling_threshold"],
-            noise_value=noise_vector,
-            noise_type="fixed_variance_vector",
-            waste_free=self.config["waste_free"],
+            num_rejuvenation_steps=self.config["num_rejuvenation_steps"],
+            console=self.console,
         )
-
-        # Add random variables for each parameter
-        for i in range(len(theta_obs)):
-            smc_runner.add_random_variable(
-                f"k{i}",
-                "uniform",
-                lower_bound=self._THETA_RANGE[0],
-                upper_bound=self._THETA_RANGE[1],
-            )
 
         # Run the iterator
         self.log("Starting tuning process")
-        smc_runner.run(
-            loghandler=RichHandler(console=self.console, show_level=False)
-        )
+        all_particles, all_weights, all_logpost = smc_runner.run()
+        self.database["particles"] = all_particles
+        self.database["weights"] = all_weights
+        self.database["logpost"] = all_logpost
 
         # Save parameters to file
         self.database["timestamp"] = datetime.now().strftime(
@@ -127,7 +120,9 @@ class WindkesselTuning(Task):
 
         # Read raw results
         self.log("Read raw result")
-        particles, weights, log_post = self._get_raw_results()
+        particles = np.array(self.database["particles"][-1])
+        weights = np.array(self.database["weights"][-1])
+        log_post = np.array(self.database["logpost"][-1])
         zerod_config_handler = reader.SvZeroDSolverInputHandler.from_file(
             self.config["zerod_config_file"]
         )
@@ -184,29 +179,6 @@ class WindkesselTuning(Task):
                 "exp_covariance_matrix": cov_exp,
             }
         )
-
-        # Calculate 1D marginal kernel density estimate
-        if self.config["kernel_density_estimation"]:
-            kernel_densities = []
-            for i in range(particles.shape[1]):
-                self.log(
-                    f"Calculate kernel density estimates for parameter {i}"
-                )
-                x, kde, bandwidth = statutils.gaussian_kde_1d(
-                    x=particles[:, i],
-                    weights=weights,
-                    bounds=self._THETA_RANGE,
-                    num=1000,
-                )
-                kernel_densities.append(
-                    {
-                        "x": x,
-                        "kernel_density": kde,
-                        "bandwidth": bandwidth,
-                        "opt_method": "30-fold cross-validation",
-                    }
-                )
-            results["kernel_density"] = kernel_densities
 
         # Save the postprocessed result to a file
         self.log("Save postprocessed results")
@@ -279,7 +251,8 @@ class WindkesselTuning(Task):
             os.path.join(self.output_folder, "results.json"), "rb"
         ) as ff:
             results = orjson.loads(ff.read())
-        particles, weights, _ = self._get_raw_results()
+        particles = np.array(self.database["particles"][-1])
+        weights = np.array(self.database["weights"][-1])
         zerod_config = reader.SvZeroDSolverInputHandler.from_file(
             self.config["zerod_config_file"]
         )
@@ -328,10 +301,7 @@ class WindkesselTuning(Task):
             report.add(f"Results for {bc_name}")
 
             # Calculate histogram data
-            if self.config["kernel_density_estimation"]:
-                bandwidth = results["kernel_density"][i]["bandwidth"]
-            else:
-                bandwidth = 0.02
+            bandwidth = 0.02
             bins = int(
                 (self._THETA_RANGE[1] - self._THETA_RANGE[0]) / bandwidth
             )
@@ -355,12 +325,6 @@ class WindkesselTuning(Task):
                 y=counts,
                 name="Weighted histogram",
             )
-            if self.config["kernel_density_estimation"]:
-                distplot.add_line_trace(
-                    x=results["kernel_density"][i]["x"],
-                    y=results["kernel_density"][i]["kernel_density"],
-                    name="Kernel density estimate",
-                )
             distplot.add_vline_trace(
                 x=results["metrics"]["ground_truth"][i], text="Ground Truth"
             )
@@ -424,7 +388,9 @@ class WindkesselTuning(Task):
             pressure_plot.add_line_trace(
                 x=times,
                 y=taskutils.cgs_pressure_to_mmgh(
-                    bc_result[bc_map[bc_name]["pressure"]][-num_pts_per_cycle:]
+                    bc_result[bc_map[bc_name]["pressure"]].iloc[
+                        -num_pts_per_cycle:
+                    ]
                 ),
                 **map_opts,
             )
@@ -432,7 +398,9 @@ class WindkesselTuning(Task):
             pressure_plot.add_line_trace(
                 x=times,
                 y=taskutils.cgs_pressure_to_mmgh(
-                    bc_result[bc_map[bc_name]["pressure"]][-num_pts_per_cycle:]
+                    bc_result[bc_map[bc_name]["pressure"]].iloc[
+                        -num_pts_per_cycle:
+                    ]
                 ),
                 **mean_opts,
             )
@@ -446,7 +414,9 @@ class WindkesselTuning(Task):
             flow_plot.add_line_trace(
                 x=times,
                 y=taskutils.cgs_flow_to_lh(
-                    bc_result[bc_map[bc_name]["flow"]][-num_pts_per_cycle:]
+                    bc_result[bc_map[bc_name]["flow"]].iloc[
+                        -num_pts_per_cycle:
+                    ]
                 ),
                 **map_opts,
             )
@@ -454,7 +424,9 @@ class WindkesselTuning(Task):
             flow_plot.add_line_trace(
                 x=times,
                 y=taskutils.cgs_flow_to_lh(
-                    bc_result[bc_map[bc_name]["flow"]][-num_pts_per_cycle:]
+                    bc_result[bc_map[bc_name]["flow"]].iloc[
+                        -num_pts_per_cycle:
+                    ]
                 ),
                 **mean_opts,
             )
@@ -535,7 +507,7 @@ class _Forward_Model:
         self.inflow_name = bc_map["INFLOW"]["name"]
         self.inflow_pressure = bc_map["INFLOW"]["pressure"]
 
-    def evaluate(self, sample_dict: Dict[str, float]) -> np.ndarray:
+    def evaluate(self, sample: np.ndarray) -> np.ndarray:
         """Objective function for the optimization.
 
         Evaluates the sum of the offsets for the input output pressure relation
@@ -546,7 +518,7 @@ class _Forward_Model:
         for i, bc in enumerate(
             self.base_config.outlet_boundary_conditions.values()
         ):
-            ki = np.exp(sample_dict[f"k{i}"])
+            ki = np.exp(sample[f"k{i}"])
             bc["bc_values"]["Rp"] = ki / (1.0 + self._distal_to_proximal[i])
             bc["bc_values"]["Rd"] = ki - bc["bc_values"]["Rp"]
             bc["bc_values"]["C"] = (
@@ -558,9 +530,7 @@ class _Forward_Model:
             result = runnercpp.run_from_config(self.base_config.data)
         except RuntimeError:
             print("WARNING: Forward model evaluation failed.")
-            return np.expand_dims(
-                np.array([9e99] * (len(self.bc_names) + 2)), axis=0
-            )
+            return np.array([9e99] * (len(self.bc_names) + 2))
 
         # Extract minimum and maximum inlet pressure for last cardiac cycle
         p_inlet = result[result.name == self.inflow_name][self.inflow_pressure]
@@ -571,182 +541,101 @@ class _Forward_Model:
             for name, flow_id in zip(self.bc_names, self.bc_flow)
         ]
 
-        return np.expand_dims(
-            np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean]), axis=0
-        )
+        return np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean])
 
 
-class SMCRunner:
-    """Sequentia-Monte-Carlo iterator for static models."""
-
+class _SMCRunner:
     def __init__(
         self,
         forward_model: _Forward_Model,
         y_obs: np.ndarray,
-        output_dir: str,
+        len_theta: int,
+        likelihood_std_vector: np.ndarray,
+        prior_bounds: tuple,
+        num_particles: int,
+        resampling_strategy: str,
+        resampling_threshold: float,
+        num_rejuvenation_steps: int,
         num_procs: int,
-        **kwargs: Any,
-    ) -> None:
-        """Create a new SmcIterator instance.
+        console: Any,
+    ):
+        likelihood = stats.multivariate_normal(mean=np.zeros(len(y_obs)))
 
-        Args:
-            forward_model: Forward model.
-            y_obs: Matrix with row-wise observation vectors.
-            output_dir: Output directory.
-            num_procs: Number of parallel processes.
-            kwargs: Optional parameters
-                * `database_address`: Address to the database for QUEENS.
-                * `num_particles`: Number of particles for SMC.
-                * `resampling_threshold`: Resampling threshold for SMC.
-                * `num_rejuvenation_steps`: Number of rejuvenation steps SMC.
+        prior = dists.StructDist(
+            {
+                f"k{i}": dists.Uniform(a=prior_bounds[0], b=prior_bounds[1])
+                for i in range(len_theta)
+            }
+        )
+        self.console = console
+        self.len_theta = len_theta
 
-        """
-        self._y_obs = y_obs
-        self._config: Dict[str, Any] = {
-            "global_settings": {
-                "output_dir": output_dir,
-                "experiment_name": "results",
-            },
-            "database": {
-                "name": "database",
-                "type": "sqlite",
-            },
-            "forward_model": {
-                "type": "simulation_model",
-                "interface": "interface",
-                "parameters": "parameters",
-            },
-            "interface": {
-                "type": "direct_python_interface",
-                "external_python_module_function": forward_model.evaluate,
-                "num_workers": num_procs,
-            },
-            "parameters": {"random_variables": {}},
-            "method": {
-                "method_name": "smc_chopin",
-                "method_options": {
-                    "seed": 42,
-                    "num_particles": kwargs["num_particles"],
-                    "resampling_threshold": kwargs["resampling_threshold"],
-                    "resampling_method": "systematic",
-                    "feynman_kac_model": "adaptive_tempering",
-                    "waste_free": kwargs["waste_free"],
-                    "num_rejuvenation_steps": kwargs["num_rejuvenation_steps"],
-                    "model": "model",
-                    "max_feval": 9e99,
-                    "result_description": {
-                        "write_results": True,
-                        "plot_results": False,
-                    },
-                },
-            },
-            "model": {
-                "type": "gaussian",
-                "forward_model": "forward_model",
-                "output_label": "y_obs",
-                "coordinate_labels": [],
-                "noise_type": kwargs["noise_type"],
-                "noise_value": kwargs["noise_value"],
-                "experimental_file_name_identifier": "*.csv",
-                "experimental_csv_data_base_dir": None,
-                "parameters": "parameters",
-            },
-        }
+        class StaticModel(ssp.StaticModel):
+            def __init__(
+                self, prior: dists.StructDist, len_theta: int
+            ) -> None:
+                super().__init__(None, prior)
+                self.len_theta = len_theta
 
-    def add_random_variable(
-        self,
-        name: str,
-        dist_type: str,
-        **kwargs: Any,
-    ) -> None:
-        """Add a new random variable to the iterator configuration.
+            def loglik(
+                self, theta: np.ndarray, t: Optional[int] = None
+            ) -> np.ndarray:
 
-        Args:
-            name: Name of the variable.
-            dist_type: Distribution type of the variable (`normal`, `uniform`,
-                `lognormal`, `beta`)
-            options: Parameters of the distribution. For `uniform` distribution
-                specify `lower_bound` and `upper_bound`. For `normal
-                distribution specify `mean` and `covariance`. For `beta`
-                distribution specify `lower_bound`, `upper_bound`, `a`, and
-                `b`. For `lognormal` specify `normal_mean` and
-                `normal_covariance`.
-        """
-        var_config = {
-            "distribution": dist_type,
-            "type": "FLOAT",
-            "size": 1,
-            "dimension": 1,
-        }
-
-        if dist_type == "uniform":
-            var_config.update(
-                {
-                    "lower_bound": kwargs["lower_bound"],
-                    "upper_bound": kwargs["upper_bound"],
-                }
-            )
-        elif dist_type == "normal":
-            var_config.update(
-                {
-                    "mean": kwargs["mean"],
-                    "covariance": kwargs["covariance"],
-                }
-            )
-        elif dist_type == "beta":
-            var_config.update(
-                {
-                    "lower_bound": kwargs["lower_bound"],
-                    "upper_bound": kwargs["upper_bound"],
-                    "a": kwargs["a"],
-                    "b": kwargs["b"],
-                }
-            )
-        elif dist_type == "lognormal":
-            var_config.update(
-                {
-                    "normal_mean": kwargs["normal_mean"],
-                    "normal_covariance": kwargs["normal_covariance"],
-                }
-            )
-        else:
-            raise ValueError(f"Unknown distribution type {dist_type}")
-
-        self._config["parameters"]["random_variables"][name] = var_config
-
-    def run(self, loghandler: RichHandler) -> None:
-        """Run the iterator."""
-
-        with TemporaryDirectory() as tmpdir:
-
-            # Make file for y_obs
-            target_file = os.path.join(tmpdir, "targets.csv")
-            with open(target_file, "w") as ff:
-                ff.write("y_obs\n" + "\n".join([str(t) for t in self._y_obs]))
-            self._config["model"]["experimental_csv_data_base_dir"] = tmpdir
-
-            # Set output directory to temporary directory if not set
-            if self._config["global_settings"]["output_dir"] is None:
-                self._config["global_settings"]["output_dir"] = tmpdir
-
-            output_dir = self._config["global_settings"]["output_dir"]
-            with open(
-                os.path.join(
-                    output_dir,  # type: ignore
-                    "queens_input.json",
-                ),
-                "w",
-            ) as ff:
-                json.dump(
-                    self._config,
-                    ff,
-                    indent=4,
-                    default=lambda o: "<not serializable>",
+                results = []
+                with get_context("fork").Pool(num_procs) as pool:
+                    with Progress(
+                        " " * 20 + "Evaluating samples... ",
+                        BarColumn(),
+                        "{task.completed}/{task.total} completed | "
+                        "{task.speed} samples/s",
+                        console=console,
+                    ) as progress:
+                        for res in progress.track(
+                            pool.imap(forward_model.evaluate, theta, 1),
+                            total=len(theta),
+                        ):
+                            results.append(res)
+                return likelihood.logpdf(
+                    (np.array(results) - y_obs) / likelihood_std_vector
                 )
 
-            # Run queens
-            run(
-                self._config,
-                self._config["global_settings"]["output_dir"],
-                handler=loghandler,
+        static_model = StaticModel(prior, self.len_theta)
+
+        fk_model = ssp.AdaptiveTempering(
+            model=static_model, len_chain=1 + num_rejuvenation_steps
+        )
+
+        self.runner = particles.SMC(
+            fk=fk_model,
+            N=num_particles,
+            resampling=resampling_strategy,
+            ESSrmin=resampling_threshold,
+            verbose=False,
+        )
+
+    def run(self) -> tuple[list, list, list]:
+
+        all_particles = []
+        all_weights = []
+        all_logpost = []
+
+        for _ in self.runner:
+            particles = np.array(
+                [
+                    self.runner.X.theta[f"k{i}"].flatten()
+                    for i in range(self.len_theta)
+                ]
+            ).T.tolist()
+            weights = np.array(self.runner.W).tolist()
+            logpost = np.array(self.runner.X.lpost).tolist()
+            self.console.log(
+                f"Completed SMC step {self.runner.t} | "
+                f"[yellow]ESS[/yellow]: {self.runner.wgts.ESS:.2f} | "
+                "[yellow]tempering exponent[/yellow]: "
+                f"{self.runner.X.shared['exponents'][-1]:.2e}"
             )
+            all_particles.append(particles)
+            all_weights.append(weights)
+            all_logpost.append(logpost)
+
+        return all_particles, all_weights, all_logpost
