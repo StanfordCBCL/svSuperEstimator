@@ -102,98 +102,6 @@ def run_subprocess(
         raise RuntimeError("Subprocess failed")
 
 
-def map_centerline_result_to_0d(
-    zerod_handler: reader.SvZeroDSolverInputHandler,
-    centerline_handler: reader.CenterlineHandler,
-    dt3d: float,
-) -> Tuple[dict, np.ndarray]:
-    """Map centerine result onto 0d elements."""
-
-    cl_handler = centerline_handler
-
-    # calculate cycle period
-    cycle_period = (
-        zerod_handler.boundary_conditions["INFLOW"]["bc_values"]["t"][-1]
-        - zerod_handler.boundary_conditions["INFLOW"]["bc_values"]["t"][0]
-    )
-
-    # Extract time steps
-    times = centerline_handler.time_steps * dt3d
-
-    # Calculate start of last cycle
-    start_last_cycle = (
-        np.abs(times - (times[-1] - cycle_period))
-    ).argmin() - 1
-
-    def filter_last_cycle(data, seg_end_index):  # type: ignore
-        if start_last_cycle == -1:
-            return data[:, seg_end_index]
-        return data[start_last_cycle:-1, seg_end_index]
-
-    # Extract branch information of 0D config
-    branchdata: dict = {}
-    for vessel_config in zerod_handler.vessels.values():
-
-        # Extract branch and segment id from name
-        name = vessel_config["vessel_name"]
-        branch_id, seg_id = name.split("_")
-        branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
-
-        if branch_id not in branchdata:
-            branchdata[branch_id] = {}
-
-        branchdata[branch_id][seg_id] = {}
-        branchdata[branch_id][seg_id]["length"] = vessel_config[
-            "vessel_length"
-        ]
-        branchdata[branch_id][seg_id]["vessel_id"] = vessel_config["vessel_id"]
-
-    for branch_id, branch in branchdata.items():
-
-        branch_data = cl_handler.get_branch_data(branch_id)
-
-        seg_start = 0.0
-        seg_start_index = 0
-
-        for seg_id, segment in branch.items():
-            segment = branch[seg_id]
-            length = segment["length"]
-
-            seg_end_index = (
-                np.abs(branch_data["path"] - length - seg_start)
-            ).argmin()
-            seg_end = branch_data["path"][seg_end_index]
-
-            segment.update(
-                {
-                    "flow_in": filter_last_cycle(
-                        branch_data["flow"], seg_start_index
-                    ),
-                    "flow_out": filter_last_cycle(
-                        branch_data["flow"], seg_end_index
-                    ),
-                    "pressure_in": filter_last_cycle(
-                        branch_data["pressure"], seg_start_index
-                    ),
-                    "pressure_out": filter_last_cycle(
-                        branch_data["pressure"], seg_end_index
-                    ),
-                    "x0": branch_data["points"][seg_start_index],
-                    "x1": branch_data["points"][seg_end_index],
-                }
-            )
-
-            seg_start = seg_end
-            seg_start_index = seg_end_index
-
-    if start_last_cycle == -1:
-        times -= times[0]
-    else:
-        times = times[start_last_cycle:-1] - np.amin(times[start_last_cycle])
-
-    return branchdata, times
-
-
 def map_centerline_result_to_0d_2(
     zerod_handler: reader.SvZeroDSolverInputHandler,
     cl_handler: reader.CenterlineHandler,
@@ -274,6 +182,12 @@ def map_centerline_result_to_0d_2(
             seg_end_index = (
                 np.abs(branch_data["path"] - length - seg_start)
             ).argmin()
+            if (np.abs(branch_data["path"] - length - seg_start)).min() > 1e-4:
+                raise RuntimeError(
+                    "Indexing mismatch between 0D solver input file and "
+                    "centerline. Please check that 0D config and centerline "
+                    "are matching."
+                )
             seg_end = branch_data["path"][seg_end_index]
 
             segment.update(
