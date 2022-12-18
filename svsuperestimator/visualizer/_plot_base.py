@@ -5,6 +5,9 @@ from base64 import b64encode
 from typing import Any
 
 import plotly.graph_objects as go
+import plotly.io as pio
+
+scope = pio.kaleido.scope
 
 
 class PlotBase:
@@ -84,6 +87,7 @@ class PlotBase:
                 include_mathjax="cdn",
                 full_html=False,
             )
+        scope._shutdown_kaleido()
         return html_str
 
     def to_image(self, path: str, dark: bool = False) -> None:
@@ -101,3 +105,4 @@ class PlotBase:
         else:
             self._fig.update_layout(**self._layout_light)
         self._fig.write_image(path)
+        scope._shutdown_kaleido()

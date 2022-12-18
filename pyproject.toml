@@ -16,7 +16,8 @@ dependencies = [
     "orjson", # Faster than json
     "click", # Easy to use argument parser
     "rich",
-    "particles"
+    "particles",
+    "kaleido"
 ]
 dynamic = ["version", "readme"]
 requires-python = ">=3.8"
