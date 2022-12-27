@@ -527,6 +527,7 @@ class BloodVesselTuning(Task):
                     f"{segment_data['name']}.png",
                 )
             )
+            plt.close(fig)
 
         return {
             "theta_opt": result.x,
