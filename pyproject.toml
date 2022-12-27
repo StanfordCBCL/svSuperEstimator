@@ -17,7 +17,7 @@ dependencies = [
     "click", # Easy to use argument parser
     "rich",
     "particles",
-    "kaleido"
+    "matplotlib"
 ]
 dynamic = ["version", "readme"]
 requires-python = ">=3.8"
