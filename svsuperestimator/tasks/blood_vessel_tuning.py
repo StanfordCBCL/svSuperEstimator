@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-from multiprocessing import Pool
+from multiprocessing import get_context
 from typing import Any
 
 import numpy as np
@@ -89,7 +89,9 @@ class BloodVesselTuning(Task):
         results = []
         num_pts = zerod_config_handler.num_pts_per_cycle
         result_labels = ["pressure_in", "pressure_out", "flow_in", "flow_out"]
-        with Pool(processes=self.config["num_procs"]) as pool:
+        with get_context("spawn").Pool(
+            processes=self.config["num_procs"]
+        ) as pool:
             for branch_id, branch in branch_data.items():
                 for seg_id, segment in branch.items():
 
@@ -423,7 +425,7 @@ class BloodVesselTuning(Task):
         )
 
         if segment_data["debug"]:
-            import plotly.express as px
+            import matplotlib.pyplot as plt
 
             os.makedirs(segment_data["debug_folder"], exist_ok=True)
             num_pts_per_cycle = segment_data["num_pts_per_cycle"]
@@ -440,24 +442,89 @@ class BloodVesselTuning(Task):
                 bc_outpres=bc_outpres,
                 num_pts_per_cycle=num_pts_per_cycle,
             )
-            plot1 = px.line({"Result": inpres_sim, "Target": inpres})
-            plot1.update_traces(
-                selector={"name": "Target"}, line={"dash": "dash"}
+            (
+                inpres_sim_start,
+                outflow_sim_start,
+            ) = BloodVesselTuning._simulate_blood_vessel(
+                segment_data["theta_start"][0],
+                segment_data["theta_start"][1],
+                segment_data["theta_start"][2],
+                segment_data["theta_start"][3],
+                bc_times=segment_data["times"],
+                bc_inflow=bc_inflow,
+                bc_outpres=bc_outpres,
+                num_pts_per_cycle=num_pts_per_cycle,
             )
-            plot1.write_image(
+            fig, axs = plt.subplots(1, 2, figsize=[10, 5])
+
+            axs[0].plot(
+                segment_data["times"],
+                taskutils.cgs_pressure_to_mmgh(inpres_sim_start),
+                label="Inlet pressure (before)",
+                color="grey",
+            )
+            axs[0].plot(
+                segment_data["times"],
+                taskutils.cgs_pressure_to_mmgh(bc_outpres),
+                "--",
+                label="Outlet pressure (prescribed)",
+                color="darkorange",
+                dashes=(5, 5),
+            )
+            axs[0].plot(
+                segment_data["times"],
+                taskutils.cgs_pressure_to_mmgh(inpres_sim),
+                label="Inlet pressure (after)",
+                color="black",
+            )
+            axs[0].plot(
+                segment_data["times"],
+                taskutils.cgs_pressure_to_mmgh(inpres),
+                "--",
+                label="Inlet pressure (target)",
+                color="red",
+                dashes=(5, 5),
+            )
+            axs[0].set_xlabel("Time [s]")
+            axs[0].set_ylabel("Pressure [mmHg]")
+            axs[0].legend()
+
+            axs[1].plot(
+                segment_data["times"],
+                taskutils.cgs_flow_to_lmin(outflow_sim_start),
+                label="Outlet flow (before)",
+                color="grey",
+            )
+            axs[1].plot(
+                segment_data["times"],
+                taskutils.cgs_flow_to_lmin(bc_inflow),
+                "--",
+                label="Inlet flow (prescribed)",
+                color="darkorange",
+                dashes=(5, 5),
+            )
+            axs[1].plot(
+                segment_data["times"],
+                taskutils.cgs_flow_to_lmin(outflow_sim),
+                label="Outlet flow (after)",
+                color="black",
+            )
+            axs[1].plot(
+                segment_data["times"],
+                taskutils.cgs_flow_to_lmin(outflow),
+                "--",
+                label="Outlet flow (target)",
+                color="red",
+                dashes=(5, 5),
+            )
+            axs[1].set_xlabel("Time [s]")
+            axs[1].set_ylabel("Flow [l/min]")
+            axs[1].legend()
+
+            fig.savefig(
                 os.path.join(
                     segment_data["debug_folder"],
-                    f"pres_{segment_data['name']}.png",
-                )
-            )
-            plot2 = px.line({"Result": outflow_sim, "Target": outflow})
-            plot2.update_traces(
-                selector={"name": "Target"}, line={"dash": "dash"}
-            )
-            plot2.write_image(
-                os.path.join(
-                    segment_data["debug_folder"],
-                    f"flow_{segment_data['name']}.png",
+                    f"{segment_data['name']}.png",
                 )
             )
 
