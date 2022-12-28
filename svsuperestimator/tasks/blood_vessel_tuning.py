@@ -563,10 +563,17 @@ class BloodVesselTuning(Task):
     def _optimize_blood_vessel_callback(self, output: dict) -> None:
         """Callback after optimization to log results."""
         if output["success"]:
-            self.log(
-                f"Optimization for branch {output['branch_id']} segment "
-                f"{output['seg_id']} [bold green]successful[/bold green] "
-            )
+            if "branch_id" in output:
+                self.log(
+                    f"Optimization for branch {output['branch_id']} segment "
+                    f"{output['seg_id']} [bold green]successful[/bold green]"
+                )
+            else:
+                self.log(
+                    f"Optimization for junction {output['junction_id']} "
+                    f"outlet {output['outlet_id']} "
+                    "[bold green]successful[/bold green]"
+                )
             table = Table(box=box.HORIZONTALS, show_header=False)
             table.add_column()
             table.add_column(style="cyan")
@@ -598,12 +605,20 @@ class BloodVesselTuning(Task):
             )
             self.log(table)
         else:
-            self.log(
-                f"Optimization for branch {output['branch_id']} segment "
-                f"{output['seg_id']} [bold red]failed[/bold red] with "
-                f"message {output['message']} after {output['nfev']} "
-                "evaluations."
-            )
+            if "branch_id" in output:
+                self.log(
+                    f"Optimization for branch {output['branch_id']} segment "
+                    f"{output['seg_id']} [bold red]failed[/bold red] with "
+                    f"message {output['message']} after {output['nfev']} "
+                    "evaluations."
+                )
+            else:
+                self.log(
+                    f"Optimization for junction {output['junction_id']} outlet"
+                    f" {output['outlet_id']} [bold red]failed[/bold red] with "
+                    f"message {output['message']} after {output['nfev']} "
+                    "evaluations."
+                )
 
     @classmethod
     def _simulate_blood_vessel(
@@ -714,129 +729,99 @@ class BloodVesselTuning(Task):
 
         junctions = zerod_handler.junctions
 
-        for junction_name in target_junctions:
-            junction_data = junctions[junction_name]
+        results = []
 
-            inlet_vessels = junction_data["inlet_vessels"]
-            outlet_vessels = junction_data["outlet_vessels"]
+        with get_context("spawn").Pool(
+            processes=self.config["num_procs"]
+        ) as pool:
 
-            if len(inlet_vessels) > 1:
-                raise NotImplementedError(
-                    "Multiple inlets are currently not supported."
-                )
+            for junction_name in target_junctions:
+                junction_data = junctions[junction_name]
 
-            junction_values: dict[str, Any] = {
-                n: [] for n in self._PARAMETER_SEQUENCE
-            }
+                inlet_vessels = junction_data["inlet_vessels"]
+                outlet_vessels = junction_data["outlet_vessels"]
 
-            inlet_branch_name = vessel_id_map[inlet_vessels[0]]
-            branch_id, seg_id = inlet_branch_name.split("_")
-            branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
+                if len(inlet_vessels) > 1:
+                    raise NotImplementedError(
+                        "Multiple inlets are currently not supported."
+                    )
 
-            pressure_in = taskutils.refine_with_cubic_spline(
-                mapped_data[branch_id][seg_id]["pressure_out"], num_pts
-            ).tolist()
-
-            for ovessel in outlet_vessels:
-
-                outlet_branch_name = vessel_id_map[ovessel]
-                branch_id, seg_id = outlet_branch_name.split("_")
+                inlet_branch_name = vessel_id_map[inlet_vessels[0]]
+                branch_id, seg_id = inlet_branch_name.split("_")
                 branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-                pressure_out = taskutils.refine_with_cubic_spline(
-                    mapped_data[branch_id][seg_id]["pressure_in"], num_pts
-                ).tolist()
-                flow_out = taskutils.refine_with_cubic_spline(
-                    mapped_data[branch_id][seg_id]["flow_in"], num_pts
+                pressure_in = taskutils.refine_with_cubic_spline(
+                    mapped_data[branch_id][seg_id]["pressure_out"], num_pts
                 ).tolist()
 
-                segment_data = {
-                    "times": np.linspace(
-                        times[0], times[-1], num_pts
-                    ).tolist(),
-                    "maxfev": 2000,
-                    "num_pts_per_cycle": num_pts,
-                    "theta_start": np.array([0.0, 1e-8, 1e-12, 0.0]),
-                    "debug": self.config["debug"],
-                    "debug_folder": os.path.join(self.output_folder, "debug"),
-                    "pressure_in": pressure_in,
-                    "pressure_out": pressure_out,
-                    "flow_in": flow_out,
-                    "flow_out": flow_out,
-                    "name": f"{inlet_branch_name}_{vessel_id_map[ovessel]}",
-                }
+                for outlet_id, ovessel in enumerate(outlet_vessels):
 
-                result = self._optimize_blood_vessel(segment_data)
+                    outlet_branch_name = vessel_id_map[ovessel]
+                    branch_id, seg_id = outlet_branch_name.split("_")
+                    branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-                result = {
+                    pressure_out = taskutils.refine_with_cubic_spline(
+                        mapped_data[branch_id][seg_id]["pressure_in"], num_pts
+                    ).tolist()
+                    flow_out = taskutils.refine_with_cubic_spline(
+                        mapped_data[branch_id][seg_id]["flow_in"], num_pts
+                    ).tolist()
+
+                    segment_data = {
+                        "times": np.linspace(
+                            times[0], times[-1], num_pts
+                        ).tolist(),
+                        "maxfev": 2000,
+                        "num_pts_per_cycle": num_pts,
+                        "theta_start": np.array([0.0, 1e-8, 1e-12, 0.0]),
+                        "debug": self.config["debug"],
+                        "debug_folder": os.path.join(
+                            self.output_folder, "debug"
+                        ),
+                        "pressure_in": pressure_in,
+                        "pressure_out": pressure_out,
+                        "flow_in": flow_out,
+                        "flow_out": flow_out,
+                        "name": f"{inlet_branch_name}_"
+                        + vessel_id_map[ovessel],
+                        "junction_id": junction_name,
+                        "outlet_id": outlet_id,
+                    }
+
+                    self.log(
+                        f"Optimization for junction {junction_name} outlet "
+                        f"{outlet_id} [bold #ff9100]started[/bold #ff9100]"
+                    )
+                    # result = self._optimize_blood_vessel(segment_data)
+                    r = pool.apply_async(
+                        self._optimize_blood_vessel,
+                        (segment_data,),
+                        callback=self._optimize_blood_vessel_callback,
+                    )
+                    results.append(r)
+
+            # Collect results when processes are complete
+            for r in results:
+                r.wait()
+
+            # Write results to respective branch in branch data
+            for result in [r.get() for r in results]:
+                junction_data = junctions[result["junction_id"]]
+                num_outlets = len(junction_data["outlet_vessels"])
+
+                result_values = {
                     n: result["theta_opt"][j]
                     for j, n in enumerate(self._PARAMETER_SEQUENCE)
                 }
 
-                for key, value in result.items():
-                    junction_values[key].append(value)
+                if "junction_values" not in junction_data:
+                    junction_data["junction_values"] = {}
+                    for key in result_values.keys():
+                        junction_data["junction_values"][key] = [
+                            None
+                        ] * num_outlets
 
-            junction_data["junction_type"] = "BloodVesselJunction"
-            junction_values_bef = junction_data.get("junction_values", {})
-            junction_data["junction_values"] = junction_values
-
-            self.log(
-                f"Optimization for junction [cyan]{junction_name}[/cyan] "
-                "[bold green]successful[/bold green]"
-            )
-            table = Table(box=box.HORIZONTALS, show_header=False)
-            table.add_column()
-            table.add_column(style="cyan")
-
-            if junction_values_bef:
-
-                for i, ovessel in enumerate(outlet_vessels):
-                    table.add_row(
-                        f"resistance {inlet_branch_name} -> "
-                        f"{vessel_id_map[ovessel]}",
-                        f"{junction_values_bef['R_poiseuille'][i]:.1e} -> "
-                        f"{junction_values['R_poiseuille'][i]:.1e}",
-                    )
-                    table.add_row(
-                        f"capacitance {inlet_branch_name} -> "
-                        f"{vessel_id_map[ovessel]}",
-                        f"{junction_values_bef['C'][i]:.1e} -> "
-                        f"{junction_values['C'][i]:.1e}",
-                    )
-                    table.add_row(
-                        f"inductance {inlet_branch_name} -> "
-                        f"{vessel_id_map[ovessel]}",
-                        f"{junction_values_bef['L'][i]:.1e} -> "
-                        f"{junction_values['L'][i]:.1e}",
-                    )
-                    table.add_row(
-                        f"stenosis_coefficient {inlet_branch_name} -> "
-                        f"{vessel_id_map[ovessel]}",
-                        f"{junction_values_bef['stenosis_coefficient'][i]:.1e}"
-                        f"-> {junction_values['stenosis_coefficient'][i]:.1e}",
-                    )
-            else:
-                for i, ovessel in enumerate(outlet_vessels):
-                    table.add_row(
-                        f"resistance {inlet_branch_name} -> "
-                        f"{vessel_id_map[ovessel]}",
-                        f"0.0 -> {junction_values['R_poiseuille'][i]:.1e}",
-                    )
-                    table.add_row(
-                        f"capacitance {inlet_branch_name} -> "
-                        f"{vessel_id_map[ovessel]}",
-                        f"0.0 -> {junction_values['C'][i]:.1e}",
-                    )
-                    table.add_row(
-                        f"inductance {inlet_branch_name} -> "
-                        f"{vessel_id_map[ovessel]}",
-                        f"0.0 -> {junction_values['L'][i]:.1e}",
-                    )
-                    table.add_row(
-                        f"stenosis_coefficient {inlet_branch_name} -> "
-                        f"{vessel_id_map[ovessel]}",
-                        "0.0 -> "
-                        f"{junction_values['stenosis_coefficient'][i]:.1e}",
-                    )
-
-            self.log(table)
+                for key, value in result_values.items():
+                    junction_data["junction_values"][key][
+                        result["outlet_id"]
+                    ] = value
