@@ -228,7 +228,7 @@ class BloodVesselTuning(Task):
                         **{n: f(segment[n]) for n, f in filter.items()},
                     )
                 )
-                results = results.append(results_new)
+                results = pd.concat([results, results_new])
 
                 # Append 0d result
                 vessel_result = zerod_result[zerod_result.name == vessel_name]
@@ -239,7 +239,7 @@ class BloodVesselTuning(Task):
                         **{n: f(vessel_result[n]) for n, f in filter.items()},
                     )
                 )
-                results = results.append(results_new)
+                results = pd.concat([results, results_new])
 
                 # Append 0d optimized result
                 vessel_result = zerod_opt_result[
@@ -252,7 +252,7 @@ class BloodVesselTuning(Task):
                         **{n: f(vessel_result[n]) for n, f in filter.items()},
                     )
                 )
-                results = results.append(results_new)
+                results = pd.concat([results, results_new])
 
         # Save parameters to file
         self.database["timestamp"] = datetime.now().strftime(
