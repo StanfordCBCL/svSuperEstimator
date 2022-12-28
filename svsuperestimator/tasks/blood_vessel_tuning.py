@@ -43,7 +43,7 @@ class BloodVesselTuning(Task):
     _OPT_NUM_CYCLES = 5
 
     # Parameter bounds for optimization
-    _OPT_BOUNDS = [(None, None), (1.0e-8, None), (1e-12, None), (None, None)]
+    _OPT_BOUNDS = [(0.0, None), (1.0e-8, None), (1e-12, None), (0.0, None)]
 
     # Optimization method used by scipy.optimize.minimize
     _OPT_METHOD = "Nelder-Mead"
@@ -526,12 +526,13 @@ class BloodVesselTuning(Task):
             axs[0, 1].set_title("Flow")
 
             axs[1, 0].axis("off")
+            x0 = segment_data["theta_start"]
             text = f"Status: {result.success}\n"
             text += f"Evaluations: {result.nfev}\n"
-            text += f"Resistance: {segment_data['theta_start'][0]:.1e} -> {result.x[0]:.1e}\n"
-            text += f"Capacitance: {segment_data['theta_start'][1]:.1e} -> {result.x[1]:.1e}\n"
-            text += f"Inductance: {segment_data['theta_start'][2]:.1e} -> {result.x[2]:.1e}\n"
-            text += f"Stenosis coefficient: {segment_data['theta_start'][3]:.1e} -> {result.x[3]:.1e}"
+            text += f"Resistance: {x0[0]:.1e} -> {result.x[0]:.1e}\n"
+            text += f"Capacitance: {x0[1]:.1e} -> {result.x[1]:.1e}\n"
+            text += f"Inductance: {x0[2]:.1e} -> {result.x[2]:.1e}\n"
+            text += f"Stenosis coefficient: {x0[3]:.1e} -> {result.x[3]:.1e}"
             axs[1, 0].text(
                 0.05,
                 0.3,
