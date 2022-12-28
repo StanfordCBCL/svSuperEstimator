@@ -153,7 +153,7 @@ class BloodVesselTuning(Task):
             ]["theta_opt"]
 
         # Improve junctions
-        self._make_resistive_junctions(
+        self._make_bloodvessel_junctions(
             zerod_config_handler, branch_data, times
         )
 
@@ -570,7 +570,7 @@ class BloodVesselTuning(Task):
                 )
             else:
                 self.log(
-                    f"Optimization for junction {output['junction_id']} "
+                    f"Optimization for junction {output['junction_id'][1:]} "
                     f"outlet {output['outlet_id']} "
                     "[bold green]successful[/bold green]"
                 )
@@ -579,9 +579,8 @@ class BloodVesselTuning(Task):
             table.add_column(style="cyan")
             table.add_row("number of evaluations", str(output["nfev"]))
             table.add_row(
-                "relative error",
-                f"{output['error_before']*100:.3f} -> "
-                f"{output['error']*100:.3f} %",
+                "mean squared error",
+                f"{output['error_before']:.1e} -> " f"{output['error']:.1e}",
             )
             table.add_row(
                 "resistance",
@@ -614,10 +613,10 @@ class BloodVesselTuning(Task):
                 )
             else:
                 self.log(
-                    f"Optimization for junction {output['junction_id']} outlet"
-                    f" {output['outlet_id']} [bold red]failed[/bold red] with "
-                    f"message {output['message']} after {output['nfev']} "
-                    "evaluations."
+                    f"Optimization for junction {output['junction_id'][1:]} "
+                    f"outlet {output['outlet_id']} [bold red]failed[/bold red]"
+                    f" with message {output['message']} after {output['nfev']}"
+                    " evaluations."
                 )
 
     @classmethod
@@ -704,13 +703,13 @@ class BloodVesselTuning(Task):
             sim_outflow,
         )
 
-    def _make_resistive_junctions(
+    def _make_bloodvessel_junctions(
         self,
         zerod_handler: reader.SvZeroDSolverInputHandler,
         mapped_data: dict,
         times: np.ndarray,
     ) -> None:
-        """Convert normal junctions to resistive junctions."""
+        """Convert normal junctions to blood vessel junctions."""
 
         vessel_id_map = zerod_handler.vessel_id_to_name_map
 
@@ -789,8 +788,8 @@ class BloodVesselTuning(Task):
                     }
 
                     self.log(
-                        f"Optimization for junction {junction_name} outlet "
-                        f"{outlet_id} [bold #ff9100]started[/bold #ff9100]"
+                        f"Optimization for junction {junction_name[1:]} outlet"
+                        f" {outlet_id} [bold #ff9100]started[/bold #ff9100]"
                     )
                     # result = self._optimize_blood_vessel(segment_data)
                     r = pool.apply_async(
