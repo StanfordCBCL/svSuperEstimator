@@ -455,15 +455,17 @@ class BloodVesselTuning(Task):
                 bc_outpres=bc_outpres,
                 num_pts_per_cycle=num_pts_per_cycle,
             )
-            fig, axs = plt.subplots(1, 2, figsize=[10, 5])
+            fig, axs = plt.subplots(2, 2, figsize=[10, 10])
+            fig.suptitle(segment_data["name"])
+            axs[1, 1].remove()
 
-            axs[0].plot(
+            axs[0, 0].plot(
                 segment_data["times"],
                 taskutils.cgs_pressure_to_mmgh(inpres_sim_start),
                 label="Inlet pressure (before)",
                 color="grey",
             )
-            axs[0].plot(
+            axs[0, 0].plot(
                 segment_data["times"],
                 taskutils.cgs_pressure_to_mmgh(bc_outpres),
                 "--",
@@ -471,13 +473,13 @@ class BloodVesselTuning(Task):
                 color="darkorange",
                 dashes=(5, 5),
             )
-            axs[0].plot(
+            axs[0, 0].plot(
                 segment_data["times"],
                 taskutils.cgs_pressure_to_mmgh(inpres_sim),
                 label="Inlet pressure (after)",
                 color="black",
             )
-            axs[0].plot(
+            axs[0, 0].plot(
                 segment_data["times"],
                 taskutils.cgs_pressure_to_mmgh(inpres),
                 "--",
@@ -485,17 +487,18 @@ class BloodVesselTuning(Task):
                 color="red",
                 dashes=(5, 5),
             )
-            axs[0].set_xlabel("Time [s]")
-            axs[0].set_ylabel("Pressure [mmHg]")
-            axs[0].legend()
+            axs[0, 0].set_xlabel("Time [s]")
+            axs[0, 0].set_ylabel("Pressure [mmHg]")
+            axs[0, 0].legend(loc="upper right", bbox_to_anchor=(1, -0.13))
+            axs[0, 0].set_title("Pressure")
 
-            axs[1].plot(
+            axs[0, 1].plot(
                 segment_data["times"],
                 taskutils.cgs_flow_to_lmin(outflow_sim_start),
                 label="Outlet flow (before)",
                 color="grey",
             )
-            axs[1].plot(
+            axs[0, 1].plot(
                 segment_data["times"],
                 taskutils.cgs_flow_to_lmin(bc_inflow),
                 "--",
@@ -503,13 +506,13 @@ class BloodVesselTuning(Task):
                 color="darkorange",
                 dashes=(5, 5),
             )
-            axs[1].plot(
+            axs[0, 1].plot(
                 segment_data["times"],
                 taskutils.cgs_flow_to_lmin(outflow_sim),
                 label="Outlet flow (after)",
                 color="black",
             )
-            axs[1].plot(
+            axs[0, 1].plot(
                 segment_data["times"],
                 taskutils.cgs_flow_to_lmin(outflow),
                 "--",
@@ -517,9 +520,26 @@ class BloodVesselTuning(Task):
                 color="red",
                 dashes=(5, 5),
             )
-            axs[1].set_xlabel("Time [s]")
-            axs[1].set_ylabel("Flow [l/min]")
-            axs[1].legend()
+            axs[0, 1].set_xlabel("Time [s]")
+            axs[0, 1].set_ylabel("Flow [l/min]")
+            axs[0, 1].legend(loc="upper right", bbox_to_anchor=(1, -0.13))
+            axs[0, 1].set_title("Flow")
+
+            axs[1, 0].axis("off")
+            text = f"Status: {result.success}\n"
+            text += f"Evaluations: {result.nfev}\n"
+            text += f"Resistance: {segment_data['theta_start'][0]:.1e} -> {result.x[0]:.1e}\n"
+            text += f"Capacitance: {segment_data['theta_start'][1]:.1e} -> {result.x[1]:.1e}\n"
+            text += f"Inductance: {segment_data['theta_start'][2]:.1e} -> {result.x[2]:.1e}\n"
+            text += f"Stenosis coefficient: {segment_data['theta_start'][3]:.1e} -> {result.x[3]:.1e}"
+            axs[1, 0].text(
+                0.05,
+                0.3,
+                text,
+                verticalalignment="bottom",
+                horizontalalignment="left",
+                transform=axs[1, 0].transAxes,
+            )
 
             fig.savefig(
                 os.path.join(
