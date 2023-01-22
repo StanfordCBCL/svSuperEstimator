@@ -1,4 +1,4 @@
-"""This module holds the BloodVesselTuning task."""
+"""This module holds the ModelCalibration task."""
 from __future__ import annotations
 
 import os
@@ -21,52 +21,92 @@ from . import plotutils, taskutils
 from .task import Task
 
 
-class BloodVesselTuning(Task):
-    """Blood vessel tuning task.
+class ModelCalibration(Task):
+    """Model calibration task.
 
-    Tunes all blood vessels in a 0D simulation file to a 3D simulation result.
+    Calibrates blood vessels and junctions elements in a 0D model to an
+    existing 3D solution.
     """
 
-    TASKNAME = "blood_vessel_tuning"
+    # Task name to configure task in config file
+    TASKNAME = "model_calibration"
+
+    # Configuration options for the task and their defaults
     DEFAULTS = {
         "zerod_config_file": None,
         "threed_solution_file": None,
         "num_procs": 1,
         "centerline_padding": False,
+        "calibration_targets_vessels": [
+            "R_poiseuille",
+            "C",
+            "L",
+            "stenosis_coefficient",
+        ],
+        "calibration_targets_junctions": [
+            "R_poiseuille",
+            "C",
+            "L",
+            "stenosis_coefficient",
+        ],
         **Task.DEFAULTS,
     }
 
     # The sequence that the blood vessel parameters are saved in arrays
-    _PARAMETER_SEQUENCE = ["R_poiseuille", "C", "L", "stenosis_coefficient"]
+    _PARAMETER_SEQUENCE = [
+        "R_poiseuille",
+        "C",
+        "L",
+        "stenosis_coefficient",
+    ]
 
-    # Number of cycles to simulate blood vessels during optimization
-    _OPT_NUM_CYCLES = 5
+    # Default parameter values to use when parameter is not calibrated
+    _PARAMETER_DEFAULTS = [0.0, 1e-10, 0.0, 0.0]
 
     # Parameter bounds for optimization
-    _OPT_BOUNDS = [(0.0, None), (1.0e-8, None), (1e-12, None), (0.0, None)]
-
-    # Optimization method used by scipy.optimize.minimize
-    _OPT_METHOD = "Nelder-Mead"
+    _OPT_BOUNDS = [
+        (None, None),
+        (1e-12, None),
+        (0.0, None),
+        (None, None),
+    ]
 
     def core_run(self) -> None:
         """Core routine of the task."""
 
         # Loading data from project
-        self.log("Loading 0D simulation input file")
+        self.log(
+            "Loading 0D simulation input from "
+            f"{self.config['zerod_config_file']}"
+        )
         zerod_config_handler = reader.SvZeroDSolverInputHandler.from_file(
             self.config["zerod_config_file"]
         )
 
         # Get 3D simulation time step size from 3d simulation input file
+        self.log(
+            "Loading 3D simulation input from "
+            f"{self.project['3d_simulation_input_path']}"
+        )
         threed_config_handler = self.project["3d_simulation_input"]
         threed_time_step_size = threed_config_handler.time_step_size
+        self.log(
+            f"Set 3D simulation time step size to {threed_time_step_size} s "
+        )
+
+        # Load 3D result file
+        self.log(
+            f"Loading 3D result from {self.config['threed_solution_file']}"
+        )
         threed_result_handler = CenterlineHandler.from_file(
             self.config["threed_solution_file"]
         )
-        cl_handler = self.project["centerline"]
-        self.log("Found 3D simulation time step size:", threed_time_step_size)
 
-        # Map centerline result to 3D simulation
+        # Load centerline
+        self.log(f"Loading centerline from {self.project['centerline_path']}")
+        cl_handler = self.project["centerline"]
+
+        # Map centerline result to 0D element nodes
         self.log("Map 3D centerline result to 0D elements")
         branch_data, times = taskutils.map_centerline_result_to_0d_2(
             zerod_config_handler,
@@ -76,86 +116,21 @@ class BloodVesselTuning(Task):
             padding=self.config["centerline_padding"],
         )
 
+        # Extract theta start
         for vessel in zerod_config_handler.vessels.values():
             name = vessel["vessel_name"]
             branch_id, seg_id = name.split("_")
             branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
             start_values = vessel["zero_d_element_values"]
             branch_data[branch_id][seg_id]["theta_start"] = [
-                start_values[n] for n in self._PARAMETER_SEQUENCE
+                start_values.get(n, 0.0) for n in self._PARAMETER_SEQUENCE
             ]
 
-        # Start optimizing the branches
-        results = []
-        num_pts = zerod_config_handler.num_pts_per_cycle
-        result_labels = ["pressure_in", "pressure_out", "flow_in", "flow_out"]
-        with get_context("spawn").Pool(
-            processes=self.config["num_procs"]
-        ) as pool:
-            for branch_id, branch in branch_data.items():
-                for seg_id, segment in branch.items():
+        # Calibrate the vessels
+        self._calibrate_vessels(zerod_config_handler, branch_data, times)
 
-                    results_data: dict[str, np.ndarray] = {
-                        n: taskutils.refine_with_cubic_spline(
-                            segment[n], num_pts
-                        ).tolist()
-                        for n in result_labels
-                    }
-
-                    segment_data = {
-                        "branch_id": branch_id,
-                        "seg_id": seg_id,
-                        "times": np.linspace(
-                            times[0], times[-1], num_pts
-                        ).tolist(),
-                        "maxfev": 2000,
-                        "num_pts_per_cycle": num_pts,
-                        "theta_start": np.array(segment["theta_start"]),
-                        "debug": self.config["debug"],
-                        "debug_folder": os.path.join(
-                            self.output_folder, "debug"
-                        ),
-                        "name": f"branch{branch_id}_seg{seg_id}",
-                        **results_data,
-                    }
-                    self.log(
-                        f"Optimization for branch {branch_id} segment "
-                        f"{seg_id} [bold #ff9100]started[/bold #ff9100]"
-                    )
-                    r = pool.apply_async(
-                        self._optimize_blood_vessel,
-                        (segment_data,),
-                        callback=self._optimize_blood_vessel_callback,
-                    )
-                    results.append(r)
-
-            # Collect results when processes are complete
-            for r in results:
-                r.wait()
-
-            # Write results to respective branch in branch data
-            for result in [r.get() for r in results]:
-                branch_data[result["branch_id"]][result["seg_id"]][
-                    "theta_opt"
-                ] = {
-                    n: result["theta_opt"][j]
-                    for j, n in enumerate(self._PARAMETER_SEQUENCE)
-                }
-
-        # Update 0D simulation config with optimized parameters
-        for vessel_config in zerod_config_handler.vessels.values():
-            name = vessel_config["vessel_name"]
-            branch_id, seg_id = name.split("_")
-            branch_id = int(branch_id[6:])
-            seg_id = int(seg_id[3:])
-            vessel_config["zero_d_element_values"] = branch_data[branch_id][
-                seg_id
-            ]["theta_opt"]
-
-        # Improve junctions
-        self._make_bloodvessel_junctions(
-            zerod_config_handler, branch_data, times
-        )
+        # Calibrate the junctions
+        self._calibrate_junctions(zerod_config_handler, branch_data, times)
 
         # Writing data to project
         self.log("Save optimized 0D simulation file")
@@ -190,9 +165,6 @@ class BloodVesselTuning(Task):
         # Run simulation for both configurations
         zerod_config_handler.update_simparams(last_cycle_only=True)
         zerod_opt_config_handler.update_simparams(last_cycle_only=True)
-        for junction in zerod_config_handler.junctions.values():
-            if junction["junction_type"] == "BloodVesselJunction":
-                junction["junction_type"] = "NORMAL_JUNCTION"
         zerod_result = runnercpp.run_from_config(zerod_config_handler.data)
         zerod_opt_result = runnercpp.run_from_config(
             zerod_opt_config_handler.data
@@ -269,7 +241,12 @@ class BloodVesselTuning(Task):
         # Add 3D plot of mesh with 0D elements
         report = visualizer.Report()
         report.add("Overview")
-        branch_data = readutils.get_0d_element_coordinates(self.project)
+        zerod_config_handler = reader.SvZeroDSolverInputHandler.from_file(
+            self.config["zerod_config_file"]
+        )
+        branch_data = readutils.get_0d_element_coordinates(
+            self.project, zerod_config_handler
+        )
         model_plot = plotutils.create_3d_geometry_plot_with_vessels(
             self.project, branch_data
         )
@@ -372,9 +349,222 @@ class BloodVesselTuning(Task):
 
         return report
 
+    def _calibrate_vessels(
+        self,
+        zerod_handler: reader.SvZeroDSolverInputHandler,
+        mapped_data: dict,
+        times: np.ndarray,
+    ) -> None:
+        """Calibrate parameters of vessels."""
+
+        self.log("Calibrate vessels")
+
+        results = []
+        num_pts = zerod_handler.num_pts_per_cycle
+        tune_ids = [
+            self._PARAMETER_SEQUENCE.index(key)
+            for key in self.config["calibration_targets_vessels"]
+        ]
+        result_labels = ["pressure_in", "pressure_out", "flow_in", "flow_out"]
+        with get_context("spawn").Pool(
+            processes=self.config["num_procs"]
+        ) as pool:
+            for branch_id, branch in mapped_data.items():
+                for seg_id, segment in branch.items():
+
+                    results_data: dict[str, np.ndarray] = {
+                        n: taskutils.refine_with_cubic_spline(
+                            segment[n], num_pts
+                        ).tolist()
+                        for n in result_labels
+                    }
+
+                    segment_data = {
+                        "branch_id": branch_id,
+                        "seg_id": seg_id,
+                        "times": np.linspace(
+                            times[0], times[-1], num_pts
+                        ).tolist(),
+                        "maxfev": 2000,
+                        "num_pts_per_cycle": num_pts,
+                        "theta_start": np.array(segment["theta_start"]),
+                        "debug": self.config["debug"],
+                        "debug_folder": os.path.join(
+                            self.output_folder, "debug"
+                        ),
+                        "name": f"branch{branch_id}_seg{seg_id}",
+                        "tune_ids": tune_ids,
+                        **results_data,
+                    }
+                    self.log(
+                        f"Optimization for branch {branch_id} segment "
+                        f"{seg_id} [bold #ff9100]started[/bold #ff9100]"
+                    )
+                    r = pool.apply_async(
+                        self._optimize_blood_vessel,
+                        (segment_data,),
+                        callback=self._optimize_blood_vessel_callback,
+                    )
+                    results.append(r)
+
+            # Collect results when processes are complete
+            for r in results:
+                r.wait()
+
+            # Write results to respective branch in branch data
+            for result in [r.get() for r in results]:
+                mapped_data[result["branch_id"]][result["seg_id"]][
+                    "theta_opt"
+                ] = {
+                    n: result["theta_opt"][j]
+                    for j, n in enumerate(self._PARAMETER_SEQUENCE)
+                }
+
+        # Update 0D simulation config with optimized parameters
+        for vessel_config in zerod_handler.vessels.values():
+            name = vessel_config["vessel_name"]
+            branch_id, seg_id = name.split("_")
+            branch_id = int(branch_id[6:])
+            seg_id = int(seg_id[3:])
+            vessel_config["zero_d_element_values"] = mapped_data[branch_id][
+                seg_id
+            ]["theta_opt"]
+
+    def _calibrate_junctions(
+        self,
+        zerod_handler: reader.SvZeroDSolverInputHandler,
+        mapped_data: dict,
+        times: np.ndarray,
+    ) -> None:
+        """Calibrate parameters of blood vessel junctions."""
+
+        self.log("Calibrate junctions")
+
+        vessel_id_map = zerod_handler.vessel_id_to_name_map
+
+        nodes = zerod_handler.nodes
+
+        num_pts = zerod_handler.num_pts_per_cycle
+
+        junction_nodes = {
+            n for n in nodes if n[0].startswith("J") or n[1].startswith("J")
+        }
+
+        ele1s = [node[0] for node in junction_nodes]
+        target_junctions = set(
+            [x for i, x in enumerate(ele1s) if i != ele1s.index(x)]
+        )
+
+        junctions = zerod_handler.junctions
+
+        results = []
+        tune_ids = [
+            self._PARAMETER_SEQUENCE.index(key)
+            for key in self.config["calibration_targets_junctions"]
+        ]
+
+        with get_context("spawn").Pool(
+            processes=self.config["num_procs"]
+        ) as pool:
+
+            for junction_name in target_junctions:
+                junction_data = junctions[junction_name]
+
+                inlet_vessels = junction_data["inlet_vessels"]
+                outlet_vessels = junction_data["outlet_vessels"]
+
+                if len(inlet_vessels) > 1:
+                    raise NotImplementedError(
+                        "Multiple inlets are currently not supported."
+                    )
+
+                inlet_branch_name = vessel_id_map[inlet_vessels[0]]
+                branch_id, seg_id = inlet_branch_name.split("_")
+                branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
+
+                pressure_in = taskutils.refine_with_cubic_spline(
+                    mapped_data[branch_id][seg_id]["pressure_out"], num_pts
+                ).tolist()
+
+                for outlet_id, ovessel in enumerate(outlet_vessels):
+
+                    outlet_branch_name = vessel_id_map[ovessel]
+                    branch_id, seg_id = outlet_branch_name.split("_")
+                    branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
+
+                    pressure_out = taskutils.refine_with_cubic_spline(
+                        mapped_data[branch_id][seg_id]["pressure_in"], num_pts
+                    ).tolist()
+                    flow_out = taskutils.refine_with_cubic_spline(
+                        mapped_data[branch_id][seg_id]["flow_in"], num_pts
+                    ).tolist()
+
+                    segment_data = {
+                        "times": np.linspace(
+                            times[0], times[-1], num_pts
+                        ).tolist(),
+                        "maxfev": 2000,
+                        "num_pts_per_cycle": num_pts,
+                        "theta_start": np.array([0.0, 1e-8, 1e-12, 0.0, 0.0]),
+                        "debug": self.config["debug"],
+                        "debug_folder": os.path.join(
+                            self.output_folder, "debug"
+                        ),
+                        "pressure_in": pressure_in,
+                        "pressure_out": pressure_out,
+                        "flow_in": flow_out,
+                        "flow_out": flow_out,
+                        "name": f"{inlet_branch_name}_"
+                        + vessel_id_map[ovessel],
+                        "junction_id": junction_name,
+                        "outlet_id": outlet_id,
+                        "tune_ids": tune_ids,
+                    }
+
+                    self.log(
+                        f"Optimization for junction {junction_name[1:]} outlet"
+                        f" {outlet_id} [bold #ff9100]started[/bold #ff9100]"
+                    )
+                    # result = self._optimize_blood_vessel(segment_data)
+                    r = pool.apply_async(
+                        self._optimize_blood_vessel,
+                        (segment_data,),
+                        callback=self._optimize_blood_vessel_callback,
+                    )
+                    results.append(r)
+
+            # Collect results when processes are complete
+            for r in results:
+                r.wait()
+
+            # Write results to respective branch in branch data
+            for result in [r.get() for r in results]:
+                junction_data = junctions[result["junction_id"]]
+                num_outlets = len(junction_data["outlet_vessels"])
+
+                result_values = {
+                    n: result["theta_opt"][j]
+                    for j, n in enumerate(self._PARAMETER_SEQUENCE)
+                }
+
+                if "junction_values" not in junction_data:
+                    junction_data["junction_values"] = {}
+                    for key in result_values.keys():
+                        junction_data["junction_values"][key] = [
+                            None
+                        ] * num_outlets
+
+                for key, value in result_values.items():
+                    junction_data["junction_values"][key][
+                        result["outlet_id"]
+                    ] = value
+
+                junction_data["junction_type"] = "BloodVesselJunction"
+
     @classmethod
     def _optimize_blood_vessel(cls, segment_data: dict) -> dict:
         """Optimization routine for one blood vessel."""
+        tune_ids = segment_data["tune_ids"]
 
         # Determine normalization factor for pressure and flow
         pres_norm_factor = np.amax(segment_data["pressure_in"]) - np.amin(
@@ -392,51 +582,41 @@ class BloodVesselTuning(Task):
         # Define objective function
         def _objective_function(theta: np.ndarray) -> float:
             num_pts_per_cycle = segment_data["num_pts_per_cycle"]
-            (
-                inpres_sim,
-                outflow_sim,
-            ) = BloodVesselTuning._simulate_blood_vessel(
-                theta[0],
-                theta[1],
-                theta[2],
-                theta[3],
+            theta_full = np.array(cls._PARAMETER_DEFAULTS)
+            theta_full[tune_ids] = theta
+            (inpres_sim, outflow_sim,) = cls._simulate_blood_vessel(
+                *theta_full,  # type: ignore
                 bc_times=segment_data["times"],
                 bc_inflow=bc_inflow,
                 bc_outpres=bc_outpres,
                 num_pts_per_cycle=num_pts_per_cycle,
             )
 
-            offset_pres = (np.abs(inpres_sim - inpres) / pres_norm_factor) ** 2
-            offset_flow = (
-                np.abs(outflow_sim - outflow) / flow_norm_factor
-            ) ** 2
+            offset_pres = np.abs(inpres_sim - inpres) / pres_norm_factor
+            offset_flow = np.abs(outflow_sim - outflow) / flow_norm_factor
 
             return np.mean(np.concatenate([offset_pres, offset_flow]))
 
         # Start optimization
-        x0 = segment_data["theta_start"].copy()
-        x0[1] = 1e-8  # Only good when 3d wall is stiff
+        x0 = np.array([segment_data["theta_start"][i] for i in tune_ids])
+        bounds = [cls._OPT_BOUNDS[i] for i in tune_ids]
         result = optimize.minimize(
             fun=_objective_function,
             x0=x0,
             method="Nelder-Mead",
             options={"maxfev": segment_data["maxfev"], "adaptive": True},
-            bounds=cls._OPT_BOUNDS,
+            bounds=bounds,
         )
+        theta_opt = np.array(cls._PARAMETER_DEFAULTS)
+        theta_opt[tune_ids] = result.x
 
         if segment_data["debug"]:
             import matplotlib.pyplot as plt
 
             os.makedirs(segment_data["debug_folder"], exist_ok=True)
             num_pts_per_cycle = segment_data["num_pts_per_cycle"]
-            (
-                inpres_sim,
-                outflow_sim,
-            ) = BloodVesselTuning._simulate_blood_vessel(
-                result.x[0],
-                result.x[1],
-                result.x[2],
-                result.x[3],
+            (inpres_sim, outflow_sim,) = cls._simulate_blood_vessel(
+                *theta_opt,  # type: ignore
                 bc_times=segment_data["times"],
                 bc_inflow=bc_inflow,
                 bc_outpres=bc_outpres,
@@ -445,11 +625,8 @@ class BloodVesselTuning(Task):
             (
                 inpres_sim_start,
                 outflow_sim_start,
-            ) = BloodVesselTuning._simulate_blood_vessel(
-                segment_data["theta_start"][0],
-                segment_data["theta_start"][1],
-                segment_data["theta_start"][2],
-                segment_data["theta_start"][3],
+            ) = cls._simulate_blood_vessel(
+                *segment_data["theta_start"],  # type: ignore
                 bc_times=segment_data["times"],
                 bc_inflow=bc_inflow,
                 bc_outpres=bc_outpres,
@@ -551,12 +728,12 @@ class BloodVesselTuning(Task):
             plt.close(fig)
 
         return {
-            "theta_opt": result.x,
+            "theta_opt": theta_opt,
             "nfev": result.nfev,
             "success": result.success,
             "message": result.message,
             "error": result.fun,
-            "error_before": _objective_function(segment_data["theta_start"]),
+            "error_before": _objective_function(x0),
             **segment_data,
         }
 
@@ -579,7 +756,7 @@ class BloodVesselTuning(Task):
             table.add_column(style="cyan")
             table.add_row("number of evaluations", str(output["nfev"]))
             table.add_row(
-                "mean squared error",
+                "mean error",
                 f"{output['error_before']:.1e} -> " f"{output['error']:.1e}",
             )
             table.add_row(
@@ -654,7 +831,7 @@ class BloodVesselTuning(Task):
             ],
             "junctions": [],
             "simulation_parameters": {
-                "number_of_cardiac_cycles": cls._OPT_NUM_CYCLES,
+                "number_of_cardiac_cycles": 2,
                 "number_of_time_pts_per_cardiac_cycle": num_pts_per_cycle,
                 "steady_initial": False,
                 "output_last_cycle_only": True,
@@ -702,125 +879,3 @@ class BloodVesselTuning(Task):
             sim_inpres,
             sim_outflow,
         )
-
-    def _make_bloodvessel_junctions(
-        self,
-        zerod_handler: reader.SvZeroDSolverInputHandler,
-        mapped_data: dict,
-        times: np.ndarray,
-    ) -> None:
-        """Convert normal junctions to blood vessel junctions."""
-
-        vessel_id_map = zerod_handler.vessel_id_to_name_map
-
-        nodes = zerod_handler.nodes
-
-        num_pts = zerod_handler.num_pts_per_cycle
-
-        junction_nodes = {
-            n for n in nodes if n[0].startswith("J") or n[1].startswith("J")
-        }
-
-        ele1s = [node[0] for node in junction_nodes]
-        target_junctions = set(
-            [x for i, x in enumerate(ele1s) if i != ele1s.index(x)]
-        )
-
-        junctions = zerod_handler.junctions
-
-        results = []
-
-        with get_context("spawn").Pool(
-            processes=self.config["num_procs"]
-        ) as pool:
-
-            for junction_name in target_junctions:
-                junction_data = junctions[junction_name]
-
-                inlet_vessels = junction_data["inlet_vessels"]
-                outlet_vessels = junction_data["outlet_vessels"]
-
-                if len(inlet_vessels) > 1:
-                    raise NotImplementedError(
-                        "Multiple inlets are currently not supported."
-                    )
-
-                inlet_branch_name = vessel_id_map[inlet_vessels[0]]
-                branch_id, seg_id = inlet_branch_name.split("_")
-                branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
-
-                pressure_in = taskutils.refine_with_cubic_spline(
-                    mapped_data[branch_id][seg_id]["pressure_out"], num_pts
-                ).tolist()
-
-                for outlet_id, ovessel in enumerate(outlet_vessels):
-
-                    outlet_branch_name = vessel_id_map[ovessel]
-                    branch_id, seg_id = outlet_branch_name.split("_")
-                    branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
-
-                    pressure_out = taskutils.refine_with_cubic_spline(
-                        mapped_data[branch_id][seg_id]["pressure_in"], num_pts
-                    ).tolist()
-                    flow_out = taskutils.refine_with_cubic_spline(
-                        mapped_data[branch_id][seg_id]["flow_in"], num_pts
-                    ).tolist()
-
-                    segment_data = {
-                        "times": np.linspace(
-                            times[0], times[-1], num_pts
-                        ).tolist(),
-                        "maxfev": 2000,
-                        "num_pts_per_cycle": num_pts,
-                        "theta_start": np.array([0.0, 1e-8, 1e-12, 0.0]),
-                        "debug": self.config["debug"],
-                        "debug_folder": os.path.join(
-                            self.output_folder, "debug"
-                        ),
-                        "pressure_in": pressure_in,
-                        "pressure_out": pressure_out,
-                        "flow_in": flow_out,
-                        "flow_out": flow_out,
-                        "name": f"{inlet_branch_name}_"
-                        + vessel_id_map[ovessel],
-                        "junction_id": junction_name,
-                        "outlet_id": outlet_id,
-                    }
-
-                    self.log(
-                        f"Optimization for junction {junction_name[1:]} outlet"
-                        f" {outlet_id} [bold #ff9100]started[/bold #ff9100]"
-                    )
-                    # result = self._optimize_blood_vessel(segment_data)
-                    r = pool.apply_async(
-                        self._optimize_blood_vessel,
-                        (segment_data,),
-                        callback=self._optimize_blood_vessel_callback,
-                    )
-                    results.append(r)
-
-            # Collect results when processes are complete
-            for r in results:
-                r.wait()
-
-            # Write results to respective branch in branch data
-            for result in [r.get() for r in results]:
-                junction_data = junctions[result["junction_id"]]
-                num_outlets = len(junction_data["outlet_vessels"])
-
-                result_values = {
-                    n: result["theta_opt"][j]
-                    for j, n in enumerate(self._PARAMETER_SEQUENCE)
-                }
-
-                if "junction_values" not in junction_data:
-                    junction_data["junction_values"] = {}
-                    for key in result_values.keys():
-                        junction_data["junction_values"][key] = [
-                            None
-                        ] * num_outlets
-
-                for key, value in result_values.items():
-                    junction_data["junction_values"][key][
-                        result["outlet_id"]
-                    ] = value

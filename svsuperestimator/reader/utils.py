@@ -1,16 +1,24 @@
 """This module contains input/output utils."""
+from typing import Optional
+
 import numpy as np
 
 from ._svproject import SimVascularProject
+from ._svzerodsolver_input_handler import SvZeroDSolverInputHandler
 
 
-def get_0d_element_coordinates(project: SimVascularProject) -> dict:
+def get_0d_element_coordinates(
+    project: SimVascularProject,
+    zerod_handler: Optional[SvZeroDSolverInputHandler] = None,
+) -> dict:
     """Extract 0D elements with coordinates from a project.
 
     Args:
         project: SimVascular project.
+        zerod_handler: 0D simulation input handler to use.
     """
-    zerod_handler = project["0d_simulation_input"]
+    if zerod_handler is None:
+        zerod_handler = project["0d_simulation_input"]
     cl_handler = project["centerline"]
 
     elements = {}

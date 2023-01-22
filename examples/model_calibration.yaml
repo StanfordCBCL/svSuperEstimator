@@ -1,11 +1,14 @@
-project: /Volumes/richter/projects/0069_0001
+project: /Users/stanford/Downloads/0080_0001
 global:
   num_procs: 4
 tasks:
-  BloodVesselTuning:
-    name: tmp_debug_test
-    debug: True
-    zerod_config_file: /Volumes/richter/projects/0069_0001/ROMSimulations/0069_0001/solver_0d.in
-    threed_solution_file: /Volumes/richter/72_centerline_results_martin/0069_0001.vtp
-    centerline_padding: False
+  model_calibration:
+    name: vessels_r_l_c_ste_junctions_r_l_default_ce-10
+    debug: False
+    zerod_config_file: /Users/stanford/Downloads/input_0d/0080_0001_0d.in
+    threed_solution_file: /Users/stanford/Downloads/3d_rerun/0080_0001.vtp
+    calibration_targets_vessels: ["R_poiseuille", "L", "stenosis_coefficient"]
+    calibration_targets_junctions: ["R_poiseuille", "L"]
+    debug: False
     overwrite: True
+    core_run: True

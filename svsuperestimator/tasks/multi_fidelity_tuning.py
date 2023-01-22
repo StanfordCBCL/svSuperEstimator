@@ -4,9 +4,9 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from .blood_vessel_tuning import BloodVesselTuning
 from .map_three_d_result_on_centerline import MapThreeDResultOnCenterline
 from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
+from .model_calibration import ModelCalibration
 from .task import Task
 from .three_d_simulation import ThreeDSimulation
 from .windkessel_tuning import WindkesselTuning
@@ -36,7 +36,7 @@ class MultiFidelityTuning(Task):
         "MapZeroDResultToThreeD": {},
         "ThreeDSimulation": {},
         "MapThreeDResultOnCenterline": {},
-        "BloodVesselTuning": {},
+        ModelCalibration.TASKNAME: {},
         **Task.DEFAULTS,
     }
 
@@ -132,7 +132,7 @@ class MultiFidelityTuning(Task):
                 parent_folder=self.output_folder,
             )
             task_sequence.append(map_three_zero_task)
-            bv_tuning_task = BloodVesselTuning(
+            bv_tuning_task = ModelCalibration(
                 project=self.project,
                 config={
                     "zerod_config_file": os.path.join(
@@ -144,7 +144,7 @@ class MultiFidelityTuning(Task):
                     ),
                     "num_procs": self.config["num_procs"],
                     **global_config,
-                    **self.config["BloodVesselTuning"],
+                    **self.config[ModelCalibration.TASKNAME],
                 },
                 prefix=f"{i*5+4}_",
                 parent_folder=self.output_folder,

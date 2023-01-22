@@ -96,6 +96,11 @@ class SvZeroDSolverInputHandler(DataHandler):
         ]
 
     @property
+    def num_cycles(self) -> int:
+        """Number of cardiac cycles to simulate."""
+        return self.data["simulation_parameters"]["number_of_cardiac_cycles"]
+
+    @property
     def nodes(self) -> list:
         """Nodes of the 0D model."""
         id_map = self.vessel_id_to_name_map
@@ -149,6 +154,7 @@ class SvZeroDSolverInputHandler(DataHandler):
         output_interval: Optional[bool] = None,
         last_cycle_only: Optional[bool] = None,
         variable_based: Optional[bool] = None,
+        pts_per_cycle: Optional[bool] = None,
     ) -> None:
         """Update the simulation parameters.
 
@@ -163,6 +169,7 @@ class SvZeroDSolverInputHandler(DataHandler):
             output_interval: Interval for writing a timestep to the output.
             last_cycle_only: Output only last cycle.
             variable_based: Node based output.
+            pts_per_cycle: Number of time steps per cardiac cycle.
         """
         simparams = self.data["simulation_parameters"]
         if abs_tol is not None:
@@ -181,3 +188,5 @@ class SvZeroDSolverInputHandler(DataHandler):
             simparams["number_of_cardiac_cycles"] = num_cycles
         if variable_based is not None:
             simparams["output_variable_based"] = variable_based
+        if pts_per_cycle is not None:
+            simparams["number_of_time_pts_per_cardiac_cycle"] = pts_per_cycle
