@@ -11,6 +11,7 @@ dependencies = [
     "scipy",
     "vtk",
     "plotly",
+    "kaleido", # Faster plotly image export
     "pandas",
     "pyyaml",
     "orjson", # Faster than json
