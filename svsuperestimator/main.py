@@ -3,6 +3,7 @@ import os
 import platform
 import sys
 from time import time
+from copy import deepcopy
 
 import click
 import yaml
@@ -92,7 +93,7 @@ def run_file(path: str) -> None:
             task_output_folder = os.path.join(parent_folder, name)
             os.makedirs(task_output_folder, exist_ok=True)
 
-            slurm_config = slurm_default.copy()
+            slurm_config = deepcopy(slurm_default)
             slurm_config.update(config["slurm"])
 
             for key, value in slurm_config.items():
@@ -123,7 +124,7 @@ def run_file(path: str) -> None:
                     del slurm_config[key]
 
             new_config_file = os.path.join(task_output_folder, "config.yaml")
-            new_config = config.copy()
+            new_config = deepcopy(config)
 
             del new_config["slurm"]
             new_config["tasks"] = {task_name: task_config}

@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 from typing import Optional
+from copy import deepcopy
 
 from ._data_handler import DataHandler
 
@@ -142,7 +143,7 @@ class SvZeroDSolverInputHandler(DataHandler):
         Returns:
             handler: Copy of the data handler.
         """
-        return SvZeroDSolverInputHandler(self.data.copy())
+        return SvZeroDSolverInputHandler(deepcopy(self.data))
 
     def update_simparams(
         self,

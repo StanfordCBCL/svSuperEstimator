@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from time import perf_counter as time
 from typing import Any, Dict, List, Optional
+from copy import deepcopy
 
 import orjson
 from rich import box
@@ -66,7 +67,7 @@ class Task(ABC):
             record=True, log_time_format="[%m/%d/%y %H:%M:%S]"
         )
         self.database: Dict[str, Any] = {}
-        self.config = self.DEFAULTS.copy()
+        self.config = deepcopy(self.DEFAULTS)
         self.config.update(config)
         if parent_folder is None:
             parent_folder = self.project["parameter_estimation_folder"]

@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 from multiprocessing import get_context
 from typing import Any
+from copy import deepcopy
 
 import numpy as np
 import orjson
@@ -131,6 +132,9 @@ class ModelCalibration(Task):
 
         # Calibrate the junctions
         self._calibrate_junctions(zerod_config_handler, branch_data, times)
+
+        # Final global refinement calibration
+        self._joint_post_calibration(zerod_config_handler, branch_data, times)
 
         # Writing data to project
         self.log("Save optimized 0D simulation file")
@@ -560,6 +564,128 @@ class ModelCalibration(Task):
                     ] = value
 
                 junction_data["junction_type"] = "BloodVesselJunction"
+
+    def _joint_post_calibration(
+        self,
+        zerod_handler: reader.SvZeroDSolverInputHandler,
+        mapped_data: dict,
+        times: np.ndarray,
+    ):
+        from rich import print
+
+        inlet_branch_name = zerod_handler.vessel_to_bc_map["INFLOW"]["name"]
+        inlet_pressure_name = zerod_handler.vessel_to_bc_map["INFLOW"][
+            "pressure"
+        ]
+
+        branch_id, seg_id = inlet_branch_name.split("_")
+        branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
+
+        pressure_in_gt = taskutils.refine_with_cubic_spline(
+            mapped_data[branch_id][seg_id][inlet_pressure_name],
+            zerod_handler.num_pts_per_cycle,
+        ).tolist()
+
+        outlet_branch_names = []
+        outlet_pressure_names = []
+        pressure_out_gts = []
+        for bc_name in zerod_handler.outlet_boundary_conditions.keys():
+            outlet_branch_name = zerod_handler.vessel_to_bc_map[bc_name][
+                "name"
+            ]
+            outlet_pressure_name = zerod_handler.vessel_to_bc_map[bc_name][
+                "pressure"
+            ]
+            outlet_branch_names.append(outlet_branch_name)
+            outlet_pressure_names.append(outlet_pressure_name)
+
+            branch_id, seg_id = outlet_branch_name.split("_")
+            branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
+
+            pressure_out_gts.append(
+                taskutils.refine_with_cubic_spline(
+                    mapped_data[branch_id][seg_id][outlet_pressure_name],
+                    zerod_handler.num_pts_per_cycle,
+                ).tolist()
+            )
+
+        pressure_norm_fac = 1.0 / (
+            np.max(pressure_in_gt) - np.min(pressure_in_gt)
+        )
+
+        def _objective_function(args):
+
+            config = deepcopy(zerod_handler.data)
+            config["simulation_parameters"]["output_last_cycle_only"] = True
+
+            for vessel in config["vessels"]:
+                vessel["zero_d_element_values"]["R_poiseuille"] *= args[0]
+                vessel["zero_d_element_values"]["L"] *= args[1]
+
+            for junction in config["junctions"]:
+                if not "junction_values" in junction:
+                    continue
+                for i in range(
+                    len(junction["junction_values"]["R_poiseuille"])
+                ):
+                    junction["junction_values"]["R_poiseuille"][i] *= args[0]
+                for i in range(len(junction["junction_values"]["L"])):
+                    junction["junction_values"]["L"][i] *= args[1]
+
+            try:
+                result = runnercpp.run_from_config(config)
+            except RuntimeError:
+                return np.inf
+
+            pressure_in = np.array(
+                result[result.name == inlet_branch_name][inlet_pressure_name]
+            )
+            pressure_outs = [
+                np.array(result[result.name == oname][pname])
+                for oname, pname in zip(
+                    outlet_branch_names, outlet_pressure_names
+                )
+            ]
+            error_in = np.mean(
+                np.abs(pressure_in - pressure_in_gt) * pressure_norm_fac
+            )
+            error_out = np.mean(
+                [
+                    np.mean(np.abs(pressure_out - pressure_out_gt))
+                    * pressure_norm_fac
+                    for pressure_out, pressure_out_gt in zip(
+                        pressure_outs, pressure_out_gts
+                    )
+                ]
+            )
+
+            return np.mean([error_in, error_out])
+
+        result = optimize.minimize(
+            fun=_objective_function,
+            x0=[1.0, 1.0],
+            method="Nelder-Mead",
+        )
+
+        calbrated_facs = result.x
+        print(result.success)
+        print(calbrated_facs)
+
+        for vessel in zerod_handler.data["vessels"]:
+            vessel["zero_d_element_values"]["R_poiseuille"] *= calbrated_facs[
+                0
+            ]
+            vessel["zero_d_element_values"]["L"] *= calbrated_facs[1]
+
+        for junction in zerod_handler.data["junctions"]:
+            if not "junction_values" in junction:
+                continue
+            for i in range(len(junction["junction_values"]["R_poiseuille"])):
+                junction["junction_values"]["R_poiseuille"][
+                    i
+                ] *= calbrated_facs[0]
+            for i in range(len(junction["junction_values"]["L"])):
+                junction["junction_values"]["L"][i] *= calbrated_facs[1]
 
     @classmethod
     def _optimize_blood_vessel(cls, segment_data: dict) -> dict:
