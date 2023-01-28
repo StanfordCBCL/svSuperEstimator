@@ -571,7 +571,7 @@ class ModelCalibration(Task):
         mapped_data: dict,
         times: np.ndarray,
     ):
-        from rich import print
+        self.log("Global optimization")
 
         inlet_branch_name = zerod_handler.vessel_to_bc_map["INFLOW"]["name"]
         inlet_pressure_name = zerod_handler.vessel_to_bc_map["INFLOW"][
@@ -621,6 +621,9 @@ class ModelCalibration(Task):
             for vessel in config["vessels"]:
                 vessel["zero_d_element_values"]["R_poiseuille"] *= args[0]
                 vessel["zero_d_element_values"]["L"] *= args[1]
+                vessel["zero_d_element_values"][
+                    "stenosis_coefficient"
+                ] *= args[2]
 
             for junction in config["junctions"]:
                 if not "junction_values" in junction:
@@ -663,19 +666,42 @@ class ModelCalibration(Task):
 
         result = optimize.minimize(
             fun=_objective_function,
-            x0=[1.0, 1.0],
+            x0=[1.0, 1.0, 1.0],
             method="Nelder-Mead",
         )
 
         calbrated_facs = result.x
-        print(result.success)
-        print(calbrated_facs)
+
+        if result.success:
+            self.log(
+                f"Global optimization [bold green]successful[/bold green]"
+            )
+            table = Table(box=box.HORIZONTALS, show_header=False)
+            table.add_column()
+            table.add_column(style="cyan")
+            table.add_row("number of evaluations", str(result.nfev))
+            table.add_row(
+                "mean error",
+                f"{_objective_function([1.0, 1.0, 1.0]):.1e} -> "
+                f"{_objective_function(calbrated_facs):.1e}",
+            )
+            table.add_row("resistance factor", f"{calbrated_facs[0]:.3f}")
+            table.add_row("inductance factor", f"{calbrated_facs[1]:.3f}")
+            table.add_row(
+                "stenosis coefficient factor", f"{calbrated_facs[2]:.3f}"
+            )
+            self.log(table)
+        else:
+            self.log(f"Global optimization [bold red]failed[/bold red]")
 
         for vessel in zerod_handler.data["vessels"]:
             vessel["zero_d_element_values"]["R_poiseuille"] *= calbrated_facs[
                 0
             ]
             vessel["zero_d_element_values"]["L"] *= calbrated_facs[1]
+            vessel["zero_d_element_values"][
+                "stenosis_coefficient"
+            ] *= calbrated_facs[2]
 
         for junction in zerod_handler.data["junctions"]:
             if not "junction_values" in junction:
