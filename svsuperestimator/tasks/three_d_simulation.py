@@ -17,12 +17,12 @@ class ThreeDSimulation(Task):
     TASKNAME = "three_d_simulation"
     DEFAULTS = {
         "num_procs": 1,
-        "num_cardiac_cycles": 2,
         "rcrt_dat_path": None,
         "initial_vtu_path": None,
         "svpre_executable": None,
         "svsolver_executable": None,
         "svpost_executable": None,
+        "svslicer_executable": None,
         **Task.DEFAULTS,
     }
 
@@ -30,11 +30,61 @@ class ThreeDSimulation(Task):
         "svpre_executable",
         "svsolver_executable",
         "svpost_executable",
+        "svslicer_executable"
     ]
 
     def core_run(self) -> None:
         """Core routine of the task."""
 
+        if os.path.exists(self._solver_output_folder):
+            raise RuntimeError(f"Solver output folder already exists: {self._solver_output_folder}")
+
+        self._setup_input_files()
+
+        self._run_preprocessor()
+
+        simulated_steps = 0
+        i_cardiac_cycle = 0
+
+        while True:
+            i_cardiac_cycle += 1
+
+            current_last_step = self._get_current_last_step()
+            self.log(f"Current last time step: {current_last_step}")
+
+            start_step = simulated_steps
+            end_step = simulated_steps + self._steps_per_cycle
+
+            self.log(
+                f"Simulating cardiac cycle {i_cardiac_cycle} "
+                f"(time step {start_step} to {end_step})"
+            )
+
+            self._run_solver()
+
+            three_d_result_file = os.path.join(
+                self.output_folder, f"result_cycle_{i_cardiac_cycle}.vtu"
+            )
+            self._run_postprocessor(start_step, end_step, three_d_result_file)
+
+            centerline_result_file = os.path.join(
+                self.output_folder, f"result_cycle_{i_cardiac_cycle}.vtp"
+            )
+            self._run_slicer(three_d_result_file, centerline_result_file)
+
+            simulated_steps = end_step
+
+    def post_run(self) -> None:
+        """Postprocessing routine of the task."""
+
+        pass
+
+    def generate_report(self) -> visualizer.Report:
+        """Generate the task report."""
+
+        return visualizer.Report()
+
+    def _setup_input_files(self):
         sim_folder_path = self.project["3d_simulation_folder_path"]
 
         self.log("Collect mesh-complete")
@@ -57,12 +107,18 @@ class ThreeDSimulation(Task):
         inflow_data = reader.SvSolverInflowHandler.from_file(
             os.path.join(self.output_folder, "inflow.flow")
         ).get_inflow_data()
-        cardiac_cycle_period = inflow_data["t"][-1] - inflow_data["t"][0]
+        self._cardiac_cycle_period = inflow_data["t"][-1] - inflow_data["t"][0]
+        self.log(f"Found cardiac cycle period {self._cardiac_cycle_period} s ")
         time_step_size = input_handler.time_step_size
-        steps_per_cycle = int(np.rint(cardiac_cycle_period / time_step_size))
-        # TODO: Check if time step calculation is correct
-        num_time_steps = steps_per_cycle * self.config["num_cardiac_cycles"]
-        input_handler.num_time_steps = num_time_steps
+        self.log(f"Found 3D simulation time step size {time_step_size} s ")
+        self._steps_per_cycle = int(
+            np.rint(self._cardiac_cycle_period / time_step_size)
+        )
+        self.log(
+            "Set number of 3D simulation time steps "
+            f"to {self._steps_per_cycle} s"
+        )
+        input_handler.num_time_steps = self._steps_per_cycle
         input_handler.to_file(os.path.join(self.output_folder, "solver.inp"))
 
         self.log(f"Collect {self.project.name}.svpre")
@@ -80,7 +136,8 @@ class ThreeDSimulation(Task):
         )
         copy2(self.config["initial_vtu_path"], target)
 
-        self.log("Calling svpre")
+    def _run_preprocessor(self):
+        self.log("Running preprocessor")
         run_subprocess(
             [
                 self.config["svpre_executable"],
@@ -91,67 +148,78 @@ class ThreeDSimulation(Task):
             cwd=self.output_folder,
         )
 
-        proc_folder = os.path.join(
-            self.output_folder, f"{self.config['num_procs']}-procs_case"
+    def _run_solver(self):
+        self.log(f"Running solver for {self._steps_per_cycle} time steps")
+        run_subprocess(
+            [
+                "UCX_POSIX_USE_PROC_LINK=n srun",
+                self.config["svsolver_executable"],
+                "solver.inp",
+            ],
+            logger=self.log,
+            logprefix=r"\[svsolver]: ",
+            cwd=self.output_folder,
         )
 
-        self.log("Calling svsolver")
-        try:
-            run_subprocess(
-                [
-                    "UCX_POSIX_USE_PROC_LINK=n srun",
-                    self.config["svsolver_executable"],
-                    "solver.inp",
-                ],
-                logger=self.log,
-                logprefix=r"\[svsolver]: ",
-                cwd=self.output_folder,
-            )
-        except RuntimeError as err:
-            if os.path.isdir(proc_folder):
-                self.log(
-                    "Existing proc folder caused problem. Folder "
-                    "will be removed and simulation restarted."
-                )
-                rmtree(proc_folder)
-                self.log("Calling svsolver")
-                run_subprocess(
-                    [
-                        "UCX_POSIX_USE_PROC_LINK=n srun",
-                        self.config["svsolver_executable"],
-                        "solver.inp",
-                    ],
-                    logger=self.log,
-                    logprefix=r"\[svsolver]: ",
-                    cwd=self.output_folder,
-                )
-            else:
-                raise err
-
-        self.log("Calling svpost")
+    def _run_postprocessor(
+        self,
+        start_step: int,
+        stop_step: int,
+        output_file: str,
+        interval: int = 5,
+    ):
+        self.log(
+            f"Postprocessing steps {start_step} to {stop_step} "
+            f"(interval {interval})"
+        )
         run_subprocess(
             [
                 self.config["svpost_executable"],
-                f"-start {num_time_steps-steps_per_cycle}",
-                f"-stop {num_time_steps}",
-                f"-incr {5}",
+                f"-start {start_step}",
+                f"-stop {stop_step}",
+                f"-incr {interval}",
                 "-sol -vtkcombo",
-                "-vtu ../result.vtu",
+                f"-vtu {output_file}",
             ],
             logger=self.log,
             logprefix=r"\[svpost]: ",
-            cwd=proc_folder,
+            cwd=self._solver_output_folder,
+        )
+        self.log(f"Saved postprocessed output file: {output_file}")
+        self.log("Completed postprocessing")
+
+    def _run_slicer(
+        self, three_d_result_file: str, centerline_result_file: str
+    ):
+        centerline_file = self.project["centerline_path"]
+        self.log(f"Slicing 3D output file {three_d_result_file}")
+        run_subprocess(
+            [
+                f"OMP_NUM_THREADS={self.config['num_procs']}",
+                self.config["svslicer_executable"],
+                three_d_result_file,
+                centerline_file,
+                centerline_result_file,
+            ],
+            logger=self.log,
+            logprefix=r"\[svslicer] ",
+            cwd=self.output_folder,
+        )
+        self.log(f"Saved centerline output file: {centerline_result_file}")
+        self.log("Completed slicing")
+
+    @property
+    def _solver_output_folder(self):
+        return os.path.join(
+            self.output_folder, f"{self.config['num_procs']}-procs_case"
         )
 
-        self.log("Cleaning up")
-        rmtree(proc_folder)
-
-    def post_run(self) -> None:
-        """Postprocessing routine of the task."""
-
-        pass
-
-    def generate_report(self) -> visualizer.Report:
-        """Generate the task report."""
-
-        return visualizer.Report()
+    def _get_current_last_step(self):
+        restart_files = [
+            f
+            for f in os.listdir(self._solver_output_folder)
+            if f.startswith("restart")
+        ]
+        if len(restart_files) == 0:
+            return 0
+        return np.max([f.split(".")[1] for f in restart_files])
