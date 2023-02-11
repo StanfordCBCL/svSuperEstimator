@@ -44,11 +44,11 @@ class AdaptiveThreeDSimulation(Task):
     def core_run(self) -> None:
         """Core routine of the task."""
 
-        # if os.path.exists(self._solver_output_folder):
-        #     raise RuntimeError(
-        #         "Solver output folder already exists: "
-        #         f"{self._solver_output_folder}"
-        #     )
+        if os.path.exists(self._solver_output_folder):
+            raise RuntimeError(
+                "Solver output folder already exists: "
+                f"{self._solver_output_folder}"
+            )
 
         # Setup all input files
         self._setup_input_files()
@@ -73,7 +73,7 @@ class AdaptiveThreeDSimulation(Task):
             )
 
             # Run the simulation
-            #self._run_solver()
+            self._run_solver()
             simulated_steps = end_step
 
             # Run the postprocessing
@@ -403,7 +403,7 @@ class AdaptiveThreeDSimulation(Task):
 
             # Compare the simulated pressure with the actual 3D pressure to
             # compute the asymptotic error
-            asymptotic_error = (
+            asymptotic_error = abs(
                 np.mean(three_d_pressure_refined) - np.mean(zerod_pressure)
             ) / np.mean(zerod_pressure)
 
