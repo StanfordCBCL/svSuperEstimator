@@ -215,6 +215,8 @@ class ThreeDSimulation(Task):
         )
 
     def _get_current_last_step(self):
+        if not os.path.exists(self._solver_output_folder):
+            return 0
         restart_files = [
             f
             for f in os.listdir(self._solver_output_folder)
