@@ -297,7 +297,6 @@ class WindkesselTuning(Task):
 
         # Create distribition plots for all boundary conditions
         for i, bc_name in enumerate(bc_names):
-
             report.add(f"Results for {bc_name}")
 
             # Calculate histogram data
@@ -580,7 +579,6 @@ class _SMCRunner:
             def loglik(
                 self, theta: np.ndarray, t: Optional[int] = None
             ) -> np.ndarray:
-
                 results = []
                 with get_context("fork").Pool(num_procs) as pool:
                     with Progress(
@@ -614,7 +612,6 @@ class _SMCRunner:
         )
 
     def run(self) -> tuple[list, list, list]:
-
         all_particles = []
         all_weights = []
         all_logpost = []

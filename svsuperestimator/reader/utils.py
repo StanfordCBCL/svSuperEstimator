@@ -26,7 +26,6 @@ def get_0d_element_coordinates(
     # Extract branch information of 0D config
     branchdata: dict = {}
     for vessel_config in zerod_handler.vessels.values():
-
         # Extract branch and segment id from name
         name = vessel_config["vessel_name"]
         branch_id, seg_id = name.split("_")
@@ -44,7 +43,6 @@ def get_0d_element_coordinates(
         ] = vessel_config.get("boundary_conditions", {})
 
     for branch_id, branch in branchdata.items():
-
         branch_data = cl_handler.get_branch_data(branch_id)
 
         seg_start = 0.0

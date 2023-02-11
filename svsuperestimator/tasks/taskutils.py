@@ -133,7 +133,6 @@ def map_centerline_result_to_0d_2(
     # Extract branch information of 0D config
     branchdata: dict = {}
     for vessel_config in zerod_handler.vessels.values():
-
         # Extract branch and segment id from name
         name = vessel_config["vessel_name"]
         branch_id, seg_id = name.split("_")
@@ -158,7 +157,6 @@ def map_centerline_result_to_0d_2(
     starts = np.array(list(results_branch_starts.values()))
 
     for branch_id, branch in branchdata.items():
-
         cl_data = cl_handler.get_branch_data(branch_id)
         start = cl_data["points"][0]
 
@@ -278,7 +276,6 @@ def set_initial_condition(
 
     for junction_name, junction in zerod_handler.junctions.items():
         if junction["junction_type"] == "resistive_junction":
-
             for node in nodes:
                 if node[1] == junction_name:
                     branch_id, seg_id = node[0].split("_")

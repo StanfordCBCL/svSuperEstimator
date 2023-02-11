@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import os
+from copy import deepcopy
 from datetime import datetime
 from multiprocessing import get_context
 from typing import Any
-from copy import deepcopy
 
 import numpy as np
 import orjson
@@ -192,7 +192,6 @@ class ModelCalibration(Task):
         }
         results = pd.DataFrame()
         for branch_id, branch in branch_data.items():
-
             for seg_id, segment in branch.items():
                 vessel_name = f"branch{branch_id}_seg{seg_id}"
 
@@ -325,7 +324,6 @@ class ModelCalibration(Task):
         trace_opts = [threed_opts, zerod_opts, zerod_opt_opts]
 
         for name in branch_data.keys():
-
             if not name.startswith("branch"):
                 continue
 
@@ -336,7 +334,6 @@ class ModelCalibration(Task):
                 plot_opts_sequence,
                 plot_label_sequence,
             ):
-
                 # Create and append plot
                 plots.append(
                     visualizer.Plot2D(
@@ -375,7 +372,6 @@ class ModelCalibration(Task):
         ) as pool:
             for branch_id, branch in mapped_data.items():
                 for seg_id, segment in branch.items():
-
                     results_data: dict[str, np.ndarray] = {
                         n: taskutils.refine_with_cubic_spline(
                             segment[n], num_pts
@@ -470,7 +466,6 @@ class ModelCalibration(Task):
         with get_context("spawn").Pool(
             processes=self.config["num_procs"]
         ) as pool:
-
             for junction_name in target_junctions:
                 junction_data = junctions[junction_name]
 
@@ -491,7 +486,6 @@ class ModelCalibration(Task):
                 ).tolist()
 
                 for outlet_id, ovessel in enumerate(outlet_vessels):
-
                     outlet_branch_name = vessel_id_map[ovessel]
                     branch_id, seg_id = outlet_branch_name.split("_")
                     branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
@@ -614,7 +608,6 @@ class ModelCalibration(Task):
         )
 
         def _objective_function(args):
-
             config = deepcopy(zerod_handler.data)
             config["simulation_parameters"]["output_last_cycle_only"] = True
 
@@ -626,7 +619,7 @@ class ModelCalibration(Task):
                 ] *= args[2]
 
             for junction in config["junctions"]:
-                if not "junction_values" in junction:
+                if "junction_values" not in junction:
                     continue
                 for i in range(
                     len(junction["junction_values"]["R_poiseuille"])
@@ -673,9 +666,7 @@ class ModelCalibration(Task):
         calbrated_facs = result.x
 
         if result.success:
-            self.log(
-                f"Global optimization [bold green]successful[/bold green]"
-            )
+            self.log("Global optimization [bold green]successful[/bold green]")
             table = Table(box=box.HORIZONTALS, show_header=False)
             table.add_column()
             table.add_column(style="cyan")
@@ -692,7 +683,7 @@ class ModelCalibration(Task):
             )
             self.log(table)
         else:
-            self.log(f"Global optimization [bold red]failed[/bold red]")
+            self.log("Global optimization [bold red]failed[/bold red]")
 
         for vessel in zerod_handler.data["vessels"]:
             vessel["zero_d_element_values"]["R_poiseuille"] *= calbrated_facs[
@@ -704,7 +695,7 @@ class ModelCalibration(Task):
             ] *= calbrated_facs[2]
 
         for junction in zerod_handler.data["junctions"]:
-            if not "junction_values" in junction:
+            if "junction_values" not in junction:
                 continue
             for i in range(len(junction["junction_values"]["R_poiseuille"])):
                 junction["junction_values"]["R_poiseuille"][
@@ -736,7 +727,10 @@ class ModelCalibration(Task):
             num_pts_per_cycle = segment_data["num_pts_per_cycle"]
             theta_full = np.array(cls._PARAMETER_DEFAULTS)
             theta_full[tune_ids] = theta
-            (inpres_sim, outflow_sim,) = cls._simulate_blood_vessel(
+            (
+                inpres_sim,
+                outflow_sim,
+            ) = cls._simulate_blood_vessel(
                 *theta_full,  # type: ignore
                 bc_times=segment_data["times"],
                 bc_inflow=bc_inflow,
@@ -767,7 +761,10 @@ class ModelCalibration(Task):
 
             os.makedirs(segment_data["debug_folder"], exist_ok=True)
             num_pts_per_cycle = segment_data["num_pts_per_cycle"]
-            (inpres_sim, outflow_sim,) = cls._simulate_blood_vessel(
+            (
+                inpres_sim,
+                outflow_sim,
+            ) = cls._simulate_blood_vessel(
                 *theta_opt,  # type: ignore
                 bc_times=segment_data["times"],
                 bc_inflow=bc_inflow,

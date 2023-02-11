@@ -2,8 +2,8 @@
 import os
 import platform
 import sys
-from time import time
 from copy import deepcopy
+from time import time
 
 import click
 import yaml
@@ -83,9 +83,7 @@ def run_file(path: str) -> None:
     global_setting = config.get("global", {})
 
     for task_name, task_config in config["tasks"].items():
-
         if "slurm" in config:
-
             parent_folder = project["parameter_estimation_folder"]
             name = task_config.get("name", None)
             if name is None:

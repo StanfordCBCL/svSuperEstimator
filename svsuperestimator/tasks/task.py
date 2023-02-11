@@ -1,10 +1,10 @@
 """This module holds the Task base class."""
 import os
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from pathlib import Path
 from time import perf_counter as time
 from typing import Any, Dict, List, Optional
-from copy import deepcopy
 
 import orjson
 from rich import box
