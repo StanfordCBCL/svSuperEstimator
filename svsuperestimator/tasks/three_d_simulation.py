@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 from shutil import copy2, copytree, ignore_patterns
+import multiprocessing
 
 import numpy as np
 from svzerodsolver import runnercpp
@@ -239,7 +240,7 @@ class AdaptiveThreeDSimulation(Task):
         self.log(f"Slicing 3D output file {three_d_result_file}")
         run_subprocess(
             [
-                f"OMP_NUM_THREADS={self.config['num_procs']}",
+                f"OMP_NUM_THREADS={min(self.config['num_procs'], multiprocessing.cpu_count())}",
                 self.config["svslicer_executable"],
                 three_d_result_file,
                 centerline_file,
