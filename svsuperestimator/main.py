@@ -53,7 +53,7 @@ slurm_default = {
     "walltime": "96:00:00",
     "qos": "normal",
     "nodes": 2,
-    "mem": "32GB",
+    "mem": "16GB",
     "ntasks-per-node": 24,
     "python-path": None,
 }

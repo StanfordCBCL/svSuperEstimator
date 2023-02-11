@@ -564,7 +564,7 @@ class ModelCalibration(Task):
         zerod_handler: reader.SvZeroDSolverInputHandler,
         mapped_data: dict,
         times: np.ndarray,
-    ):
+    ) -> None:
         self.log("Global optimization")
 
         inlet_branch_name = zerod_handler.vessel_to_bc_map["INFLOW"]["name"]
@@ -607,7 +607,7 @@ class ModelCalibration(Task):
             np.max(pressure_in_gt) - np.min(pressure_in_gt)
         )
 
-        def _objective_function(args):
+        def _objective_function(args: list) -> float:
             config = deepcopy(zerod_handler.data)
             config["simulation_parameters"]["output_last_cycle_only"] = True
 
