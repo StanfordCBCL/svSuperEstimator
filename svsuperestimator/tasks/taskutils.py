@@ -97,6 +97,8 @@ def run_subprocess(
     while process.poll() is None:
         check_io()
         sleep(refresh_rate)
+    else:
+        check_io()
 
     if process.returncode != 0:
         raise RuntimeError("Subprocess failed")
