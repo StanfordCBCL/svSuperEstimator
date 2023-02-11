@@ -26,7 +26,6 @@ class MultiFidelityTuning(Task):
         "smc_noise_factor": 0.05,
         "smc_waste_free": True,
         "smc_kernel_density_estimation": False,
-        "num_cardiac_cycles_3d": 2,
         "three_d_theta_source": "map",
         "svpre_executable": None,
         "svsolver_executable": None,
@@ -115,11 +114,13 @@ class MultiFidelityTuning(Task):
                     "initial_vtu_path": os.path.join(
                         map_zero_three_task.output_folder, "initial.vtu"
                     ),
+                    "zerod_config_file": os.path.join(
+                        windkessel_task.output_folder, zero_d_input_file_name
+                    ),
                     "svpre_executable": self.config["svpre_executable"],
                     "svsolver_executable": self.config["svsolver_executable"],
                     "svpost_executable": self.config["svpost_executable"],
                     "svslicer_executable": self.config["svslicer_executable"],
-                    "num_cardiac_cycles": self.config["num_cardiac_cycles_3d"],
                     **global_config,
                     **self.config[AdaptiveThreeDSimulation.TASKNAME],
                 },
