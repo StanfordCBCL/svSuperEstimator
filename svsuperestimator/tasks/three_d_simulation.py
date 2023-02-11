@@ -1,9 +1,9 @@
 """This module holds the ThreeDSimulation task."""
 from __future__ import annotations
 
+import multiprocessing
 import os
 from shutil import copy2, copytree, ignore_patterns
-import multiprocessing
 
 import numpy as np
 from svzerodsolver import runnercpp
@@ -238,9 +238,11 @@ class AdaptiveThreeDSimulation(Task):
         """Run svSlicer to map the volumetric 3D results on the centerline."""
         centerline_file = self.project["centerline_path"]
         self.log(f"Slicing 3D output file {three_d_result_file}")
+        num_cpus = min(self.config["num_procs"], multiprocessing.cpu_count())
+        self.log(f"Using {num_cpus} parallel threads for slicing")
         run_subprocess(
             [
-                f"OMP_NUM_THREADS={min(self.config['num_procs'], multiprocessing.cpu_count())}",
+                f"OMP_NUM_THREADS={num_cpus}",
                 self.config["svslicer_executable"],
                 three_d_result_file,
                 centerline_file,
