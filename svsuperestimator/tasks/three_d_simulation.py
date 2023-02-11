@@ -118,63 +118,68 @@ class AdaptiveThreeDSimulation(Task):
     def generate_report(self) -> visualizer.Report:
         """Generate the task report."""
 
-        report = visualizer.Report()
-
-        centerline_results = [
-            f
-            for f in os.listdir(self.output_folder)
-            if f.startswith("result_cycle_") and f.endswith(".vtp")
-        ]
-
-        zerod_input_handler = SvZeroDSolverInputHandler.from_file(
-            zero_d_input_file
-        )
-        centerline = self.project["centerline"]
-        cl_handler_current = CenterlineHandler.from_file(
-            current_centerline_result
-        )
-
-        # Map centerline 3D result to the 0D elements (helps to extract
-        # pressure and flow values at the outlets)
-        mapped_data_current, _ = map_centerline_result_to_0d_2(
-            zerod_input_handler,
-            centerline,
-            self.input_handler,
-            cl_handler_current,
-        )
-
-        zerod_boundary_conditions = zerod_input_handler.boundary_conditions
-        zerod_pts_per_cycle = zerod_input_handler.num_pts_per_cycle
-
-        zero_d_times = np.linspace(
-            zerod_boundary_conditions["INFLOW"]["bc_values"]["t"][0],
-            zerod_boundary_conditions["INFLOW"]["bc_values"]["t"][-1],
-            zerod_pts_per_cycle,
-        )
-
-        for (
-            bc_name,
-            bc_details,
-        ) in zerod_input_handler.vessel_to_bc_map.items():
-            report.add(f"At boundary condition {bc_name}")
-
-            branch_id, seg_id = bc_details["name"].split("_")
-            branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
-
-            for i in len(centerline_results):
-                current_centerline_result = os.path.join(
-                    self.output_folder, f"result_cycle_{i}.vtp"
-                )
-
-            # Extract pressure and flow at the Windkessel boundary condition
-            three_d_pressure = mapped_data_current[branch_id][seg_id][
-                bc_details["pressure"]
-            ]
-            three_d_flow = mapped_data_current[branch_id][seg_id][
-                bc_details["flow"]
-            ]
-
         return visualizer.Report()
+
+    # def generate_report(self) -> visualizer.Report:
+    #     """Generate the task report."""
+
+    #     report = visualizer.Report()
+
+    #     centerline_results = [
+    #         f
+    #         for f in os.listdir(self.output_folder)
+    #         if f.startswith("result_cycle_") and f.endswith(".vtp")
+    #     ]
+
+    #     zerod_input_handler = SvZeroDSolverInputHandler.from_file(
+    #         zero_d_input_file
+    #     )
+    #     centerline = self.project["centerline"]
+    #     cl_handler_current = CenterlineHandler.from_file(
+    #         current_centerline_result
+    #     )
+
+    #     # Map centerline 3D result to the 0D elements (helps to extract
+    #     # pressure and flow values at the outlets)
+    #     mapped_data_current, _ = map_centerline_result_to_0d_2(
+    #         zerod_input_handler,
+    #         centerline,
+    #         self.input_handler,
+    #         cl_handler_current,
+    #     )
+
+    #     zerod_boundary_conditions = zerod_input_handler.boundary_conditions
+    #     zerod_pts_per_cycle = zerod_input_handler.num_pts_per_cycle
+
+    #     zero_d_times = np.linspace(
+    #         zerod_boundary_conditions["INFLOW"]["bc_values"]["t"][0],
+    #         zerod_boundary_conditions["INFLOW"]["bc_values"]["t"][-1],
+    #         zerod_pts_per_cycle,
+    #     )
+
+    #     for (
+    #         bc_name,
+    #         bc_details,
+    #     ) in zerod_input_handler.vessel_to_bc_map.items():
+    #         report.add(f"At boundary condition {bc_name}")
+
+    #         branch_id, seg_id = bc_details["name"].split("_")
+    #         branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
+
+    #         for i in len(centerline_results):
+    #             current_centerline_result = os.path.join(
+    #                 self.output_folder, f"result_cycle_{i}.vtp"
+    #             )
+
+    #         # Extract pressure and flow at the Windkessel boundary condition
+    #         three_d_pressure = mapped_data_current[branch_id][seg_id][
+    #             bc_details["pressure"]
+    #         ]
+    #         three_d_flow = mapped_data_current[branch_id][seg_id][
+    #             bc_details["flow"]
+    #         ]
+
+    #     return visualizer.Report()
 
     def _setup_input_files(self) -> None:
         """Generate all input files for the 3D fluid simulation."""
