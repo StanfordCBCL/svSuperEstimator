@@ -10,8 +10,12 @@ from svzerodsolver import runnercpp
 
 from .. import reader, visualizer
 from ..reader import CenterlineHandler, SvZeroDSolverInputHandler
+from ..reader import utils as readutils
+from . import plotutils
 from .task import Task
 from .taskutils import (
+    cgs_flow_to_lmin,
+    cgs_pressure_to_mmgh,
     map_centerline_result_to_0d_2,
     refine_with_cubic_spline,
     run_subprocess,
@@ -118,68 +122,95 @@ class AdaptiveThreeDSimulation(Task):
     def generate_report(self) -> visualizer.Report:
         """Generate the task report."""
 
-        return visualizer.Report()
+        report = visualizer.Report()
 
-    # def generate_report(self) -> visualizer.Report:
-    #     """Generate the task report."""
+        report.add("Overview")
+        zerod_input_handler = SvZeroDSolverInputHandler.from_file(
+            self.config["zerod_config_file"]
+        )
+        branch_data = readutils.get_0d_element_coordinates(
+            self.project, zerod_input_handler
+        )
+        model_plot = plotutils.create_3d_geometry_plot_with_vessels(
+            self.project, branch_data, show_branches=False
+        )
+        report.add([model_plot])
 
-    #     report = visualizer.Report()
+        centerline_results = [
+            f
+            for f in os.listdir(self.output_folder)
+            if f.startswith("result_cycle_") and f.endswith(".vtp")
+        ]
+        centerline = self.project["centerline"]
+        input_handler = self.project["3d_simulation_input"]
 
-    #     centerline_results = [
-    #         f
-    #         for f in os.listdir(self.output_folder)
-    #         if f.startswith("result_cycle_") and f.endswith(".vtp")
-    #     ]
+        for (
+            bc_name,
+            bc_details,
+        ) in zerod_input_handler.vessel_to_bc_map.items():
+            report.add(f"At boundary condition {bc_name}")
 
-    #     zerod_input_handler = SvZeroDSolverInputHandler.from_file(
-    #         zero_d_input_file
-    #     )
-    #     centerline = self.project["centerline"]
-    #     cl_handler_current = CenterlineHandler.from_file(
-    #         current_centerline_result
-    #     )
+            branch_id, seg_id = bc_details["name"].split("_")
+            branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-    #     # Map centerline 3D result to the 0D elements (helps to extract
-    #     # pressure and flow values at the outlets)
-    #     mapped_data_current, _ = map_centerline_result_to_0d_2(
-    #         zerod_input_handler,
-    #         centerline,
-    #         self.input_handler,
-    #         cl_handler_current,
-    #     )
+            pressure_plot = visualizer.Plot2D(
+                title="Pressure",
+                xaxis_title=r"$s$",
+                yaxis_title=r"$mmHg$",
+            )
+            flow_plot = visualizer.Plot2D(
+                title="Flow",
+                xaxis_title=r"$s$",
+                yaxis_title=r"$\frac{l}{min}$",
+            )
 
-    #     zerod_boundary_conditions = zerod_input_handler.boundary_conditions
-    #     zerod_pts_per_cycle = zerod_input_handler.num_pts_per_cycle
+            for i in range(len(centerline_results)):
+                current_centerline_result = os.path.join(
+                    self.output_folder, f"result_cycle_{i+1}.vtp"
+                )
+                cl_handler_current = CenterlineHandler.from_file(
+                    current_centerline_result
+                )
 
-    #     zero_d_times = np.linspace(
-    #         zerod_boundary_conditions["INFLOW"]["bc_values"]["t"][0],
-    #         zerod_boundary_conditions["INFLOW"]["bc_values"]["t"][-1],
-    #         zerod_pts_per_cycle,
-    #     )
+                # Map centerline 3D result to the 0D elements (helps to extract
+                # pressure and flow values at the outlets)
+                mapped_data_current, times = map_centerline_result_to_0d_2(
+                    zerod_input_handler,
+                    centerline,
+                    input_handler,
+                    cl_handler_current,
+                )
 
-    #     for (
-    #         bc_name,
-    #         bc_details,
-    #     ) in zerod_input_handler.vessel_to_bc_map.items():
-    #         report.add(f"At boundary condition {bc_name}")
+                # Extract pressure and flow at Windkessel boundary condition
+                three_d_pressure = mapped_data_current[branch_id][seg_id][
+                    bc_details["pressure"]
+                ]
+                three_d_flow = mapped_data_current[branch_id][seg_id][
+                    bc_details["flow"]
+                ]
 
-    #         branch_id, seg_id = bc_details["name"].split("_")
-    #         branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
+                error_string = ""
+                if bc_name != "INFLOW":
+                    error = self.database["asymptotic_errors"][i][bc_name]
 
-    #         for i in len(centerline_results):
-    #             current_centerline_result = os.path.join(
-    #                 self.output_folder, f"result_cycle_{i}.vtp"
-    #             )
+                    error_string += f" ({error*100:.1f}%)"
 
-    #         # Extract pressure and flow at the Windkessel boundary condition
-    #         three_d_pressure = mapped_data_current[branch_id][seg_id][
-    #             bc_details["pressure"]
-    #         ]
-    #         three_d_flow = mapped_data_current[branch_id][seg_id][
-    #             bc_details["flow"]
-    #         ]
+                pressure_plot.add_line_trace(
+                    x=times,
+                    y=cgs_pressure_to_mmgh(three_d_pressure),
+                    name=f"Cardiac cycle {i+1}" + error_string,
+                    showlegend=True,
+                )
+                flow_plot.add_line_trace(
+                    x=times,
+                    y=cgs_flow_to_lmin(three_d_flow),
+                    name=f"Cardiac cycle {i+1}" + error_string,
+                    showlegend=True,
+                )
 
-    #     return visualizer.Report()
+            report.add([pressure_plot, flow_plot])
+
+        return report
 
     def _setup_input_files(self) -> None:
         """Generate all input files for the 3D fluid simulation."""

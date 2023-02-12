@@ -187,8 +187,8 @@ class ModelCalibration(Task):
         filter = {
             "pressure_in": taskutils.cgs_pressure_to_mmgh,
             "pressure_out": taskutils.cgs_pressure_to_mmgh,
-            "flow_in": taskutils.cgs_flow_to_lh,
-            "flow_out": taskutils.cgs_flow_to_lh,
+            "flow_in": taskutils.cgs_flow_to_lmin,
+            "flow_out": taskutils.cgs_flow_to_lmin,
         }
         results = pd.DataFrame()
         for branch_id, branch in branch_data.items():
@@ -275,7 +275,7 @@ class ModelCalibration(Task):
         # Options for flow plots
         flow_plot_opts: dict[str, Any] = {
             "xaxis_title": r"$s$",
-            "yaxis_title": r"$\frac{l}{h}$",
+            "yaxis_title": r"$\frac{l}{min}$",
             **common_plot_opts,
         }
 

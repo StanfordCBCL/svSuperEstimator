@@ -407,12 +407,12 @@ class WindkesselTuning(Task):
             flow_plot = visualizer.Plot2D(
                 title="Flow",
                 xaxis_title=r"$s$",
-                yaxis_title=r"$\frac{l}{h}$",
+                yaxis_title=r"$\frac{l}{min}$",
             )
             bc_result = result_map[result_map.name == bc_map[bc_name]["name"]]
             flow_plot.add_line_trace(
                 x=times,
-                y=taskutils.cgs_flow_to_lh(
+                y=taskutils.cgs_flow_to_lmin(
                     bc_result[bc_map[bc_name]["flow"]].iloc[
                         -num_pts_per_cycle:
                     ]
@@ -422,7 +422,7 @@ class WindkesselTuning(Task):
             bc_result = result_mean[result_map.name == bc_map[bc_name]["name"]]
             flow_plot.add_line_trace(
                 x=times,
-                y=taskutils.cgs_flow_to_lh(
+                y=taskutils.cgs_flow_to_lmin(
                     bc_result[bc_map[bc_name]["flow"]].iloc[
                         -num_pts_per_cycle:
                     ]

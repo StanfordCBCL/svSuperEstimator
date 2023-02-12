@@ -9,13 +9,16 @@ from .. import reader, visualizer
 
 
 def create_3d_geometry_plot_with_vessels(
-    project: reader.SimVascularProject, branch_data: Any
+    project: reader.SimVascularProject,
+    branch_data: Any,
+    show_branches: bool = True,
 ) -> visualizer.Plot3D:
     """Create a 3D plot with mesh and 0D element traces.
 
     Args:
         project: The project.
         branch_data: branch_data with 0D element coordinates.
+        show_branches: Toggle whether to show 0D element branches.
     """
 
     zerod_color = "cyan"
@@ -23,12 +26,13 @@ def create_3d_geometry_plot_with_vessels(
     label_points = []
     label_texts = []
     line_points = []
+
     for ele_name, ele_config in branch_data.items():
-        if ele_name.startswith("branch"):
+        if ele_name.startswith("branch") and show_branches:
             label_points.append((ele_config["x0"] + ele_config["x1"]) * 0.5)
             label_texts.append(ele_name)
             line_points += [ele_config["x0"], ele_config["x1"], [None] * 3]
-        else:
+        elif not ele_name.startswith("branch"):
             label_points.append(ele_config)
             label_texts.append(ele_name)
 
@@ -66,14 +70,15 @@ def create_3d_geometry_plot_with_vessels(
         textfont_size=12,
         textfont_color=zerod_color,
     )
-    plot.add_line_trace(
-        x=line_points_np[:, 0],
-        y=line_points_np[:, 1],
-        z=line_points_np[:, 2],
-        color=zerod_color,
-        name="Elements",
-        width=5,
-        marker_size=5,
-    )
+    if show_branches:
+        plot.add_line_trace(
+            x=line_points_np[:, 0],
+            y=line_points_np[:, 1],
+            z=line_points_np[:, 2],
+            color=zerod_color,
+            name="Elements",
+            width=5,
+            marker_size=5,
+        )
 
     return plot
