@@ -30,6 +30,9 @@ class AdaptiveThreeDSimulation(Task):
         "num_procs": 1,
         "rcrt_dat_path": None,
         "initial_vtu_path": None,
+        "max_asymptotic_error": 0.001,
+        "max_cardiac_cycles": 10,
+        "time_step_size": "auto",
         "zerod_config_file": None,
         "svpre_executable": None,
         "svsolver_executable": None,
@@ -61,13 +64,10 @@ class AdaptiveThreeDSimulation(Task):
         self._run_preprocessor()
 
         simulated_steps = 0
-        i_cardiac_cycle = 0
         self.database["asymptotic_errors"] = []
         self.database["max_asymptotic_errors"] = []
 
-        while True:
-            i_cardiac_cycle += 1
-
+        for i_cardiac_cycle in range(1, self.config["max_cardiac_cycles"] + 1):
             start_step = simulated_steps
             end_step = simulated_steps + self._steps_per_cycle
 
@@ -96,14 +96,14 @@ class AdaptiveThreeDSimulation(Task):
 
             # Check if simulation is periodic
             (
-                max_symptotic_error,
+                max_asymptotic_error,
                 asymptotic_errors_dict,
             ) = self._calculate_max_asymptotic_error(
                 centerline_result_file, self.config["zerod_config_file"]
             )
             self.database["asymptotic_errors"].append(asymptotic_errors_dict)
-            self.database["max_asymptotic_errors"].append(max_symptotic_error)
-            if max_symptotic_error <= 0.01:
+            self.database["max_asymptotic_errors"].append(max_asymptotic_error)
+            if max_asymptotic_error <= self.config["max_asymptotic_error"]:
                 break
 
         self.log(
@@ -179,6 +179,7 @@ class AdaptiveThreeDSimulation(Task):
                     centerline,
                     input_handler,
                     cl_handler_current,
+                    padding=True,
                 )
 
                 # Extract pressure and flow at Windkessel boundary condition
@@ -240,9 +241,15 @@ class AdaptiveThreeDSimulation(Task):
         self._cardiac_cycle_period = inflow_data["t"][-1] - inflow_data["t"][0]
         self.database["cardiac_cycle_period"] = self._cardiac_cycle_period
         self.log(f"Found cardiac cycle period {self._cardiac_cycle_period} s ")
-        time_step_size = self.input_handler.time_step_size
+        if self.config["time_step_size"] == "auto":
+            time_step_size = self.input_handler.time_step_size
+            self.log(
+                f"Automatically derived time step size of {time_step_size} s "
+            )
+        else:
+            time_step_size = self.config["time_step_size"]
+            self.log(f"Use configured time step size {time_step_size} s ")
         self.database["time_step_size"] = time_step_size
-        self.log(f"Found 3D simulation time step size {time_step_size} s ")
         self._steps_per_cycle = int(
             np.rint(self._cardiac_cycle_period / time_step_size)
         )

@@ -27,6 +27,9 @@ class MultiFidelityTuning(Task):
         "smc_waste_free": True,
         "smc_kernel_density_estimation": False,
         "three_d_theta_source": "map",
+        "three_d_max_asymptotic_error": 0.001,
+        "three_d_max_cardiac_cycles": 10,
+        "three_d_time_step_size": "auto",
         "svpre_executable": None,
         "svsolver_executable": None,
         "svpost_executable": None,
@@ -117,6 +120,13 @@ class MultiFidelityTuning(Task):
                     "zerod_config_file": os.path.join(
                         windkessel_task.output_folder, zero_d_input_file_name
                     ),
+                    "max_asymptotic_error": self.config[
+                        "three_d_max_asymptotic_error"
+                    ],
+                    "max_cardiac_cycles": self.config[
+                        "three_d_max_cardiac_cycles"
+                    ],
+                    "time_step_size": self.config["three_d_time_step_size"],
                     "svpre_executable": self.config["svpre_executable"],
                     "svsolver_executable": self.config["svsolver_executable"],
                     "svpost_executable": self.config["svpost_executable"],
