@@ -259,6 +259,7 @@ class AdaptiveThreeDSimulation(Task):
             f"to {self._steps_per_cycle} s"
         )
         self.input_handler.num_time_steps = self._steps_per_cycle
+        self.input_handler.set_tolerances(0.001)
         self.input_handler.to_file(
             os.path.join(self.output_folder, "solver.inp")
         )

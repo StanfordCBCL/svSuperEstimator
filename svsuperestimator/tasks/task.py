@@ -227,7 +227,10 @@ class Task(ABC):
         Returns:
             parameters: Parameters of the problem.
         """
-        with open(
-            os.path.join(self.output_folder, "taskdata.json"), "rb"
-        ) as ff:
-            self.database = orjson.loads(ff.read())
+        try:
+            with open(
+                os.path.join(self.output_folder, "taskdata.json"), "rb"
+            ) as ff:
+                self.database = orjson.loads(ff.read())
+        except FileNotFoundError:
+            self.database = {}

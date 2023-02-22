@@ -31,6 +31,23 @@ class SvSolverInputHandler(PlainHandler):
         surface_list = self._get_configuration("List of RCR Surfaces")
         return [int(num) for num in surface_list.split()]
 
+    def set_tolerances(self, tolerance: float) -> None:
+        """Set the solver tolerances.
+
+        Args:
+            tolerance: Tolerance.
+        """
+        self._set_configuration("Residual Criteria", f"{tolerance:f}")
+        self._set_configuration(
+            "Tolerance on Momentum Equations", f"{tolerance:f}"
+        )
+        self._set_configuration(
+            "Tolerance on Continuity Equations", f"{tolerance:f}"
+        )
+        self._set_configuration(
+            "Tolerance on svLS NS Solver", f"{tolerance:f}"
+        )
+
     def _get_configuration(self, label: str) -> str:
         """Find a configuration by a label.
 
