@@ -156,6 +156,7 @@ class SvZeroDSolverInputHandler(DataHandler):
         last_cycle_only: Optional[bool] = None,
         variable_based: Optional[bool] = None,
         pts_per_cycle: Optional[bool] = None,
+        output_derivative: Optional[bool] = None,
     ) -> None:
         """Update the simulation parameters.
 
@@ -171,6 +172,7 @@ class SvZeroDSolverInputHandler(DataHandler):
             last_cycle_only: Output only last cycle.
             variable_based: Node based output.
             pts_per_cycle: Number of time steps per cardiac cycle.
+            output_derivative: Output derivative of the solution.
         """
         simparams = self.data["simulation_parameters"]
         if abs_tol is not None:
@@ -191,3 +193,5 @@ class SvZeroDSolverInputHandler(DataHandler):
             simparams["output_variable_based"] = variable_based
         if pts_per_cycle is not None:
             simparams["number_of_time_pts_per_cardiac_cycle"] = pts_per_cycle
+        if output_derivative is not None:
+            simparams["output_derivative"] = output_derivative
