@@ -62,6 +62,30 @@ def refine_with_cubic_spline(y: np.ndarray, num: int) -> np.ndarray:
     return y_new
 
 
+def refine_with_cubic_spline_derivative(
+    x: np.ndarray, y: np.ndarray, num: int
+) -> np.ndarray:
+    """Refine a curve using cubic spline interpolation with derivative.
+
+    Args:
+        x: X-coordinates
+        y: Y-coordinates
+        num: New number of points of the refined data.
+
+
+    Returns:
+        new_y: New y-coordinates
+        new_dy: New dy-coordinates
+    """
+    y = y.copy()
+    y[-1] = y[0]
+    x_new = np.linspace(x[0], x[-1], num)
+    spline = CubicSpline(x, y, bc_type="periodic")
+    new_y = spline(x_new)
+    new_dy = spline.derivative()(x_new)
+    return new_y, new_dy
+
+
 def run_subprocess(
     args: list,
     logger: Callable,

@@ -60,12 +60,12 @@ class WindkesselTuning(Task):
         ]
         inflow_bc["Q"] = taskutils.refine_with_cubic_spline(
             inflow_bc["Q"], zerod_config_handler.num_pts_per_cycle
-        )
+        ).tolist()
         inflow_bc["t"] = np.linspace(
             inflow_bc["t"][0],
             inflow_bc["t"][-1],
             zerod_config_handler.num_pts_per_cycle,
-        )
+        ).tolist()
 
         # Get ground truth distal to proximal ratio
         theta_obs = np.array(self.config["theta_obs"])

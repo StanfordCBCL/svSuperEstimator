@@ -2,18 +2,12 @@
 from __future__ import annotations
 
 import os
-from copy import deepcopy
 from datetime import datetime
-from multiprocessing import get_context
 from typing import Any
-from tempfile import TemporaryDirectory
+from rich.progress import BarColumn, Progress
 
 import numpy as np
-import orjson
 import pandas as pd
-from rich import box
-from rich.table import Table
-from scipy import optimize
 from svzerodsolver import runnercpp
 
 from .. import reader, visualizer
@@ -38,6 +32,8 @@ class ModelCalibrationLeastSquares(Task):
         "zerod_config_file": None,
         "threed_solution_file": None,
         "centerline_padding": False,
+        "calibrate_stenosis_coefficient": True,
+        "set_capacitance_to_zero": False,
         "svzerodcalibrator_executable": None,
         **Task.DEFAULTS,
     }
@@ -82,15 +78,11 @@ class ModelCalibrationLeastSquares(Task):
             threed_result_handler,
             padding=self.config["centerline_padding"],
         )
+        times_new = np.linspace(times[0], times[-1], 100)
 
-        times = np.linspace(times[0], times[-1], 100)
-
-        time_step_size = times[1] - times[0]
-
+        self.log("Create calibrator input file")
         connections = []
-
         vessel_id_map = {}
-
         for vessel_name, vessel_config in zerod_config_handler.vessels.items():
             vessel_id_map[vessel_config["vessel_id"]] = vessel_name
             if "boundary_conditions" not in vessel_config:
@@ -119,14 +111,16 @@ class ModelCalibrationLeastSquares(Task):
                 ovessels.append(vessel_id_map[outlet_vessel])
 
             if len(junction_config["outlet_vessels"]) > 1:
-                bv_junctions.append((junction_name, ovessels))
+                bv_junctions.append(
+                    (
+                        junction_name,
+                        ovessels,
+                        vessel_id_map[junction_config["inlet_vessels"][0]],
+                    )
+                )
 
         y = {}
         dy = {}
-
-        def get_derivative(array):
-            shifted_array = np.append(array[1:], [array[0]])
-            return (shifted_array - array) / time_step_size
 
         for connection in connections:
             if connection[0].startswith("branch"):
@@ -134,15 +128,15 @@ class ModelCalibrationLeastSquares(Task):
                 branch_id, seg_id = branch_name.split("_")
                 branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-                pressure = taskutils.refine_with_cubic_spline(
-                    branch_data[branch_id][seg_id]["pressure_out"], 100
+                (
+                    pressure,
+                    dpressure,
+                ) = taskutils.refine_with_cubic_spline_derivative(
+                    times, branch_data[branch_id][seg_id]["pressure_out"], 100
                 )
-                flow = taskutils.refine_with_cubic_spline(
-                    branch_data[branch_id][seg_id]["flow_out"], 100
+                flow, dflow = taskutils.refine_with_cubic_spline_derivative(
+                    times, branch_data[branch_id][seg_id]["flow_out"], 100
                 )
-
-                dpressure = get_derivative(pressure)
-                dflow = get_derivative(flow)
 
                 y[
                     f"pressure:{branch_name}:{connection[1]}"
@@ -158,15 +152,15 @@ class ModelCalibrationLeastSquares(Task):
                 branch_id, seg_id = branch_name.split("_")
                 branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
 
-                pressure = taskutils.refine_with_cubic_spline(
-                    branch_data[branch_id][seg_id]["pressure_in"], 100
+                (
+                    pressure,
+                    dpressure,
+                ) = taskutils.refine_with_cubic_spline_derivative(
+                    times, branch_data[branch_id][seg_id]["pressure_in"], 100
                 )
-                flow = taskutils.refine_with_cubic_spline(
-                    branch_data[branch_id][seg_id]["flow_in"], 100
+                flow, dflow = taskutils.refine_with_cubic_spline_derivative(
+                    times, branch_data[branch_id][seg_id]["flow_in"], 100
                 )
-
-                dpressure = get_derivative(pressure)
-                dflow = get_derivative(flow)
 
                 y[
                     f"pressure:{connection[0]}:{branch_name}"
@@ -177,20 +171,35 @@ class ModelCalibrationLeastSquares(Task):
                 ] = dpressure.tolist()
                 dy[f"flow:{connection[0]}:{branch_name}"] = dflow.tolist()
 
-        for junction_name, outlet_vessels in bv_junctions:
+        for junction_name, outlet_vessels, inlet_vessel in bv_junctions:
+            inlet_flow = np.array(y[f"flow:{inlet_vessel}:{junction_name}"])
+            inlet_dflow = np.array(dy[f"flow:{inlet_vessel}:{junction_name}"])
+            mean_inlet_flow = np.mean(inlet_flow)
             for i, vessel_name in enumerate(outlet_vessels):
-                y[f"flow_{i}:{junction_name}"] = y[
-                    f"flow:{junction_name}:{vessel_name}"
-                ]
-                dy[f"flow_{i}:{junction_name}"] = dy[
-                    f"flow:{junction_name}:{vessel_name}"
-                ]
+                mean_outlet_flow = np.mean(
+                    y[f"flow:{junction_name}:{vessel_name}"]
+                )
+                inlet_flow_i = inlet_flow * mean_outlet_flow / mean_inlet_flow
+                inlet_dflow_i = (
+                    inlet_dflow * mean_outlet_flow / mean_inlet_flow
+                )
+
+                y[f"flow_{i}:{junction_name}"] = inlet_flow_i.tolist()
+                dy[f"flow_{i}:{junction_name}"] = inlet_dflow_i.tolist()
 
         zerod_config_handler.data["y"] = y
         zerod_config_handler.data["dy"] = dy
 
+        zerod_config_handler.data["calibration_parameters"] = {
+            "calibrate_stenosis_coefficient": self.config[
+                "calibrate_stenosis_coefficient"
+            ],
+            "set_capacitance_to_zero": self.config["set_capacitance_to_zero"],
+        }
+
         # Create debug plots
         if self.config["debug"]:
+            self.log("Create debug plots")
             debug_folder = os.path.join(self.output_folder, "debug")
             os.makedirs(debug_folder, exist_ok=True)
             zerod_config_handler_test = (
@@ -206,43 +215,52 @@ class ModelCalibrationLeastSquares(Task):
             zerod_result = runnercpp.run_from_config(
                 zerod_config_handler_test.data
             )
-            for key in y:
-                selection = zerod_result[zerod_result.name == key]
-                plot = visualizer.Plot2D()
-                plot.add_line_trace(times, y[key], name="3D", showlegend=True)
-                plot.add_line_trace(
-                    np.array(selection["time"]),
-                    np.array(selection["y"]),
-                    name="0D",
-                    showlegend=True,
-                )
-                plot.to_image(f"debug/{key}_y.png")
-                plot = visualizer.Plot2D()
-                plot.add_line_trace(times, dy[key], name="3D", showlegend=True)
-                plot.add_line_trace(
-                    np.array(selection["time"]),
-                    np.array(selection["ydot"]),
-                    name="0D",
-                    showlegend=True,
-                )
-                plot.to_image(f"debug/{key}_dy.png")
+            with Progress(
+                " " * 20 + "Creating plots... ",
+                BarColumn(),
+                "{task.completed}/{task.total} completed | "
+                "{task.speed} plots/s",
+                console=self.console,
+            ) as progress:
+                for key in progress.track(y):
+                    selection = zerod_result[zerod_result.name == key]
+                    plot = visualizer.Plot2D()
+                    plot.add_line_trace(
+                        times_new, y[key], name="3D", showlegend=True
+                    )
+                    plot.add_line_trace(
+                        np.array(selection["time"]),
+                        np.array(selection["y"]),
+                        name="0D",
+                        showlegend=True,
+                    )
+                    plot.to_image(os.path.join(debug_folder, f"{key}_y.png"))
+                    plot = visualizer.Plot2D()
+                    plot.add_line_trace(
+                        times_new, dy[key], name="3D", showlegend=True
+                    )
+                    plot.add_line_trace(
+                        np.array(selection["time"]),
+                        np.array(selection["ydot"]),
+                        name="0D",
+                        showlegend=True,
+                    )
+                    plot.to_image(os.path.join(debug_folder, f"{key}_dy.png"))
+        input_file = os.path.join(self.output_folder, "calibrator_input.json")
+        zerod_config_handler.to_file(input_file)
 
         # Run calibration
-        with TemporaryDirectory() as tmpdir:
-            input_file = os.path.join(tmpdir, "input.json")
-            zerod_config_handler.to_file(input_file)
-            output_file = os.path.join(self.output_folder, "solver_0d.in")
-            taskutils.run_subprocess(
-                [
-                    self.config["svzerodcalibrator_executable"],
-                    input_file,
-                    output_file,
-                ],
-                logger=self.log,
-            )
-
-        # Writing data to project
-        self.log("Save optimized 0D simulation file")
+        self.log("Start calibration")
+        output_file = os.path.join(self.output_folder, "solver_0d.in")
+        taskutils.run_subprocess(
+            [
+                self.config["svzerodcalibrator_executable"],
+                input_file,
+                output_file,
+            ],
+            logger=self.log,
+        )
+        self.log("Completed calibration")
 
     def post_run(self) -> None:
         """Postprocessing routine of the task."""
@@ -359,7 +377,7 @@ class ModelCalibrationLeastSquares(Task):
 
         # Options for all plots
         common_plot_opts: dict[str, Any] = {
-            "static": False,
+            "static": True,
             "width": 750,
             "height": 400,
         }
