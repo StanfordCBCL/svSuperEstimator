@@ -33,7 +33,7 @@ class ModelCalibrationLeastSquares(Task):
         "threed_solution_file": None,
         "centerline_padding": False,
         "calibrate_stenosis_coefficient": True,
-        "set_capacitance_to_zero": False,
+        "set_capacitance_to_zero": True,
         "svzerodcalibrator_executable": None,
         **Task.DEFAULTS,
     }

@@ -5,7 +5,7 @@ import os
 from typing import Any
 
 from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
-from .model_calibration import ModelCalibration
+from .model_calibration_least_squares import ModelCalibrationLeastSquares
 from .task import Task
 from .three_d_simulation import AdaptiveThreeDSimulation
 from .windkessel_tuning import WindkesselTuning
@@ -34,10 +34,11 @@ class MultiFidelityTuning(Task):
         "svsolver_executable": None,
         "svpost_executable": None,
         "svslicer_executable": None,
+        "svzerodcalibrator_executable": None,
         WindkesselTuning.TASKNAME: {},
         MapZeroDResultToThreeD.TASKNAME: {},
         AdaptiveThreeDSimulation.TASKNAME: {},
-        ModelCalibration.TASKNAME: {},
+        ModelCalibrationLeastSquares.TASKNAME: {},
         **Task.DEFAULTS,
     }
 
@@ -138,7 +139,7 @@ class MultiFidelityTuning(Task):
                 parent_folder=self.output_folder,
             )
             task_sequence.append(three_d_sim_task)
-            bv_tuning_task = ModelCalibration(
+            bv_tuning_task = ModelCalibrationLeastSquares(
                 project=self.project,
                 config={
                     "zerod_config_file": os.path.join(
@@ -148,9 +149,12 @@ class MultiFidelityTuning(Task):
                         three_d_sim_task.output_folder,
                         "result.vtp",
                     ),
+                    "svzerodcalibrator_executable": self.config[
+                        "svzerodcalibrator_executable"
+                    ],
                     "num_procs": self.config["num_procs"],
                     **global_config,
-                    **self.config[ModelCalibration.TASKNAME],
+                    **self.config[ModelCalibrationLeastSquares.TASKNAME],
                 },
                 prefix=f"{i*5+4}_",
                 parent_folder=self.output_folder,
