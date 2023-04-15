@@ -104,11 +104,14 @@ class AdaptiveThreeDSimulation(Task):
             self.database["asymptotic_errors"].append(asymptotic_errors_dict)
             self.database["max_asymptotic_errors"].append(max_asymptotic_error)
             if max_asymptotic_error <= self.config["max_asymptotic_error"]:
+                self.log(
+                    f"Periodic state reached after {i_cardiac_cycle} cardiac cycles."
+                )
                 break
-
-        self.log(
-            f"Periodic state reached after {i_cardiac_cycle} cardiac cycles."
-        )
+        else:
+            self.log(
+                f"Periodic state not reached after {i_cardiac_cycle} cardiac cycles."
+            )
         centerline_result_file_final = os.path.join(
             self.output_folder, "result.vtp"
         )
