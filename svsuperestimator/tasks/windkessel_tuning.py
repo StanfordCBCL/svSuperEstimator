@@ -16,6 +16,7 @@ from particles import smc_samplers as ssp
 from rich.progress import BarColumn, Progress
 from scipy import stats
 from svzerodsolver import runnercpp
+from libsvzerodplus import Solver
 
 from .. import reader, visualizer
 from ..reader import utils as readutils
@@ -479,12 +480,19 @@ class _Forward_Model:
             zerod_config: 0D simulation config handler.
         """
 
-        self.base_config = zerod_config.copy()
-        self.outlet_bcs = self.base_config.outlet_boundary_conditions
-        self.num_pts_per_cycle = self.base_config.num_pts_per_cycle
-        self.base_config.data["simulation_parameters"].update(
+        self.base_config = zerod_config.data.copy()
+        self.outlet_bcs = zerod_config.outlet_boundary_conditions
+        self.outlet_bc_ids = []
+        for i, bc in enumerate(zerod_config.data["boundary_conditions"]):
+            if bc["bc_name"] in self.outlet_bcs:
+                self.outlet_bc_ids.append(i)
+        self.base_config["simulation_parameters"].update(
             {"output_last_cycle_only": True, "output_interval": 10}
         )
+
+        bc_node_names = zerod_config.get_bc_node_names()
+        self.inlet_dof_name = [f"pressure:{n}" for n in bc_node_names if "INFLOW" in n][0]
+        self.outlet_dof_names = [f"flow:{n}" for n in bc_node_names if not "INFLOW" in n]
 
         # Distal to proximal resistance ratio at each outlet
         self._distal_to_proximal = [
@@ -498,46 +506,40 @@ class _Forward_Model:
             for bc in self.outlet_bcs.values()
         ]
 
-        # Map boundary conditions to vessel names
-        bc_map = zerod_config.vessel_to_bc_map
-
-        self.bc_names = [bc_map[bc]["name"] for bc in self.outlet_bcs]
-        self.bc_flow = [bc_map[bc]["flow"] for bc in self.outlet_bcs]
-        self.inflow_name = bc_map["INFLOW"]["name"]
-        self.inflow_pressure = bc_map["INFLOW"]["pressure"]
-
     def evaluate(self, sample: np.ndarray) -> np.ndarray:
         """Objective function for the optimization.
 
         Evaluates the sum of the offsets for the input output pressure relation
         for each outlet.
         """
+        config = self.base_config.copy()
 
         # Set new total resistance at each outlet
-        for i, bc in enumerate(
-            self.base_config.outlet_boundary_conditions.values()
-        ):
+        boundary_conditions = config["boundary_conditions"]
+        for i, bc_id in enumerate(self.outlet_bc_ids):
             ki = np.exp(sample[f"k{i}"])
-            bc["bc_values"]["Rp"] = ki / (1.0 + self._distal_to_proximal[i])
-            bc["bc_values"]["Rd"] = ki - bc["bc_values"]["Rp"]
-            bc["bc_values"]["C"] = (
-                self._time_constants[i] / bc["bc_values"]["Rd"]
+            bc_values = boundary_conditions[bc_id]["bc_values"]
+            bc_values["Rp"] = ki / (1.0 + self._distal_to_proximal[i])
+            bc_values["Rd"] = ki - bc_values["Rp"]
+            bc_values["C"] = (
+                self._time_constants[i] / bc_values["Rd"]
             )
 
         # Run simulation
         try:
-            result = runnercpp.run_from_config(self.base_config.data)
+            solver = Solver(config)
+            solver.run()
         except RuntimeError:
             print("WARNING: Forward model evaluation failed.")
             return np.array([9e99] * (len(self.bc_names) + 2))
 
         # Extract minimum and maximum inlet pressure for last cardiac cycle
-        p_inlet = result[result.name == self.inflow_name][self.inflow_pressure]
+        p_inlet = solver.get_single_result(self.inlet_dof_name)
 
         # Extract mean outlet pressure for last cardiac cycle at each BC
         q_outlet_mean = [
-            result.loc[result.name == name, flow_id].mean()
-            for name, flow_id in zip(self.bc_names, self.bc_flow)
+            solver.get_single_result_avg(dof)
+            for dof in self.outlet_dof_names
         ]
 
         return np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean])
