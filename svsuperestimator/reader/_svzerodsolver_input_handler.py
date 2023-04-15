@@ -137,6 +137,20 @@ class SvZeroDSolverInputHandler(DataHandler):
 
         return connections
 
+    def get_bc_node_names(self):
+        """Return names of the nodes where the model is connected to the BCs."""
+        bc_node_names = []
+        for name, vessel in self.vessels.items():
+            bcs = vessel.get("boundary_conditions", None)
+            if bcs is not None:
+                inlet_bc = bcs.get("inlet", None)
+                if inlet_bc is not None:
+                    bc_node_names.append(f"{inlet_bc}:{name}")
+                outlet_bc = bcs.get("outlet", None)
+                if outlet_bc is not None:
+                    bc_node_names.append(f"{name}:{outlet_bc}")
+        return bc_node_names
+
     def copy(self) -> SvZeroDSolverInputHandler:
         """Create and return a copy of the handler.
 
