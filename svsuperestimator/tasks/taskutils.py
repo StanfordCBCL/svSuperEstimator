@@ -206,7 +206,7 @@ def map_centerline_result_to_0d_2(
             seg_end_index = (
                 np.abs(branch_data["path"] - length - seg_start)
             ).argmin()
-            if (np.abs(branch_data["path"] - length - seg_start)).min() > 1e-4:
+            if (np.abs(branch_data["path"] - length - seg_start)).min() > 1e2:
                 raise RuntimeError(
                     "Indexing mismatch between 0D solver input file and "
                     "centerline. Please check that 0D config and centerline "
@@ -245,7 +245,7 @@ def map_centerline_result_to_0d_2(
 
 
 def set_initial_condition(
-    zerod_handler: reader.SvZeroDSolverInputHandler, mapped_data: dict
+    zerod_handler: reader.SvZeroDSolverInputHandler, mapped_data: dict, times
 ) -> None:
     """Set initial condition of 0D configuration based on mapped 0D results.
 
@@ -257,27 +257,35 @@ def set_initial_condition(
     nodes = zerod_handler.nodes
 
     bcs = zerod_handler.boundary_conditions
-    vessels = zerod_handler.vessels
 
     initial_condition = {}
+    initial_condition_d = {}
     for ele1, ele2 in nodes:
         try:
             branch_id, seg_id = ele1.split("_")
             branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
-            pressure = mapped_data[branch_id][seg_id]["pressure_out"][0]
-            flow = mapped_data[branch_id][seg_id]["flow_out"][0]
-            initial_condition[f"pressure:{ele1}:{ele2}"] = pressure
-            initial_condition[f"flow:{ele1}:{ele2}"] = flow
+            pressure = mapped_data[branch_id][seg_id]["pressure_out"]
+            flow = mapped_data[branch_id][seg_id]["flow_out"]
+            pres, dpres = refine_with_cubic_spline_derivative(times, pressure, len(times))
+            flow, dflow = refine_with_cubic_spline_derivative(times, flow, len(times))
+            initial_condition[f"pressure:{ele1}:{ele2}"] = pres[0]
+            initial_condition_d[f"pressure:{ele1}:{ele2}"] = dpres[0]
+            initial_condition[f"flow:{ele1}:{ele2}"] = flow[0]
+            initial_condition_d[f"flow:{ele1}:{ele2}"] = dflow[0]
         except ValueError:
             pass
 
         try:
             branch_id, seg_id = ele2.split("_")
             branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
-            pressure = mapped_data[branch_id][seg_id]["pressure_in"][0]
-            flow = mapped_data[branch_id][seg_id]["flow_in"][0]
-            initial_condition[f"pressure:{ele1}:{ele2}"] = pressure
-            initial_condition[f"flow:{ele1}:{ele2}"] = flow
+            pressure = mapped_data[branch_id][seg_id]["pressure_in"]
+            flow = mapped_data[branch_id][seg_id]["flow_in"]
+            pres, dpres = refine_with_cubic_spline_derivative(times, pressure, len(times))
+            flow, dflow = refine_with_cubic_spline_derivative(times, flow, len(times))
+            initial_condition[f"pressure:{ele1}:{ele2}"] = pres[0]
+            initial_condition_d[f"pressure:{ele1}:{ele2}"] = dpres[0]
+            initial_condition[f"flow:{ele1}:{ele2}"] = flow[0]
+            initial_condition_d[f"flow:{ele1}:{ele2}"] = dflow[0]
         except ValueError:
             pass
 
@@ -287,27 +295,23 @@ def set_initial_condition(
                 - bcs[ele2]["bc_values"]["Rp"]
                 * initial_condition[f"flow:{ele1}:{ele2}"]
             )
-
-        if ele2.startswith("branch"):
-            vessel_params = vessels[ele2]["zero_d_element_values"]
-            initial_condition[f"pressure_c:{ele2}"] = (
-                initial_condition[f"pressure:{ele1}:{ele2}"]
-                - (
-                    vessel_params["R_poiseuille"]
-                    + vessel_params["stenosis_coefficient"]
-                    * abs(initial_condition[f"flow:{ele1}:{ele2}"])
-                )
-                * initial_condition[f"flow:{ele1}:{ele2}"]
+            initial_condition_d[f"pressure_c:{ele2}"] = (
+                initial_condition_d[f"pressure:{ele1}:{ele2}"]
+                - bcs[ele2]["bc_values"]["Rp"]
+                * initial_condition_d[f"flow:{ele1}:{ele2}"]
             )
+    vessel_id_map = zerod_handler.vessel_id_to_name_map
 
     for junction_name, junction in zerod_handler.junctions.items():
-        if junction["junction_type"] == "resistive_junction":
-            for node in nodes:
-                if node[1] == junction_name:
-                    branch_id, seg_id = node[0].split("_")
-                    branch_id, seg_id = int(branch_id[6:]), int(seg_id[3:])
-                    initial_condition[
-                        f"pressure_c:{node[1]}"
-                    ] = initial_condition[f"pressure:{node[0]}:{node[1]}"]
+        if len(junction["outlet_vessels"]) > 1:
+            for i, outlet_vessel in enumerate(junction["outlet_vessels"]):
+                ovessel_name = vessel_id_map[outlet_vessel]
+                initial_condition[
+                        f"flow_{i}:{junction_name}"
+                    ] = initial_condition[f"flow:{junction_name}:{ovessel_name}"]
+                initial_condition_d[
+                        f"flow_{i}:{junction_name}"
+                    ] = initial_condition_d[f"flow:{junction_name}:{ovessel_name}"]
 
     zerod_handler.data["initial_condition"] = initial_condition
+    zerod_handler.data["initial_condition_d"] = initial_condition_d

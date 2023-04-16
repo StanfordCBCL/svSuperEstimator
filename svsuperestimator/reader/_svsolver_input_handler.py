@@ -31,6 +31,12 @@ class SvSolverInputHandler(PlainHandler):
         surface_list = self._get_configuration("List of RCR Surfaces")
         return [int(num) for num in surface_list.split()]
 
+    @property
+    def r_surface_ids(self) -> list[int]:
+        """Surface ID sequence of the R boundary surfaces."""
+        surface_list = self._get_configuration("List of Resistance Surfaces")
+        return [int(num) for num in surface_list.split()]
+
     def set_tolerances(self, tolerance: float) -> None:
         """Set the solver tolerances.
 
