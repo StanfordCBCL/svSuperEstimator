@@ -85,7 +85,10 @@ class AdaptiveThreeDSimulation(Task):
                 self.output_folder, f"result_cycle_{i_cardiac_cycle}.vtu"
             )
             self._run_postprocessor(
-                start_step, end_step, f"../result_cycle_{i_cardiac_cycle}.vtu"
+                start_step,
+                end_step,
+                f"../result_cycle_{i_cardiac_cycle}.vtu",
+                int(self._steps_per_cycle / 100),
             )
 
             # Map the postprocessed results to the centerline
