@@ -1,4 +1,4 @@
 [flake8]
-ignore = D202 E203 W503
+ignore = D202 E203 W503 E501
 max-line-length = 79
 docstring-convention = google

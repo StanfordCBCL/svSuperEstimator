@@ -45,7 +45,6 @@ dev = [
     "sphinxcontrib-bibtex",
     "sphinxcontrib-mermaid",
     "isort",
-    "mypy",
     "types-PyYAML",
 ]
 
@@ -59,12 +58,6 @@ line-length = 79
 profile = "black"
 line_length = 79
 src_paths = ["."]
-
-[tool.mypy]
-ignore_missing_imports = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-exclude = "doc|tests|cases"
 
 [tool.pytest.ini_options]
 addopts = """

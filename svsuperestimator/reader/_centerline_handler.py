@@ -1,8 +1,9 @@
 """This module holds the CenterlineHandler class."""
+import os
+from typing import Type, TypeVar
+
 import numpy as np
 import vtk
-import os
-from typing import TypeVar, Type
 
 from ._vtk_handler import VtkHandler
 

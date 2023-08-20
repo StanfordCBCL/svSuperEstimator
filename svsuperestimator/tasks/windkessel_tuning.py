@@ -15,8 +15,8 @@ from particles import distributions as dists
 from particles import smc_samplers as ssp
 from rich.progress import BarColumn, Progress
 from scipy import stats
-from svzerodsolver import runnercpp
 from svzerodplus import Solver
+from svzerodsolver import runnercpp
 
 from .. import reader, visualizer
 from ..reader import utils as readutils
@@ -491,8 +491,12 @@ class _Forward_Model:
         )
 
         bc_node_names = zerod_config.get_bc_node_names()
-        self.inlet_dof_name = [f"pressure:{n}" for n in bc_node_names if "INFLOW" in n][0]
-        self.outlet_dof_names = [f"flow:{n}" for n in bc_node_names if not "INFLOW" in n]
+        self.inlet_dof_name = [
+            f"pressure:{n}" for n in bc_node_names if "INFLOW" in n
+        ][0]
+        self.outlet_dof_names = [
+            f"flow:{n}" for n in bc_node_names if "INFLOW" not in n
+        ]
 
         # Distal to proximal resistance ratio at each outlet
         self._distal_to_proximal = [
@@ -521,9 +525,7 @@ class _Forward_Model:
             bc_values = boundary_conditions[bc_id]["bc_values"]
             bc_values["Rp"] = ki / (1.0 + self._distal_to_proximal[i])
             bc_values["Rd"] = ki - bc_values["Rp"]
-            bc_values["C"] = (
-                self._time_constants[i] / bc_values["Rd"]
-            )
+            bc_values["C"] = self._time_constants[i] / bc_values["Rd"]
 
         # Run simulation
         try:
@@ -538,8 +540,7 @@ class _Forward_Model:
 
         # Extract mean outlet pressure for last cardiac cycle at each BC
         q_outlet_mean = [
-            solver.get_single_result_avg(dof)
-            for dof in self.outlet_dof_names
+            solver.get_single_result_avg(dof) for dof in self.outlet_dof_names
         ]
 
         return np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean])

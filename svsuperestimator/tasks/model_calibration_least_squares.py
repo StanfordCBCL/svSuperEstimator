@@ -1,15 +1,15 @@
 """This module holds the ModelCalibrationLeastSquares task."""
 from __future__ import annotations
 
+import json
 import os
 from datetime import datetime
 from typing import Any
-from rich.progress import BarColumn, Progress
-import json
 
 import numpy as np
 import pandas as pd
 import svzerodplus
+from rich.progress import BarColumn, Progress
 from svzerodsolver import runnercpp
 
 from .. import reader, visualizer
@@ -126,10 +126,14 @@ class ModelCalibrationLeastSquares(Task):
                     pressure,
                     dpressure,
                 ) = taskutils.refine_with_cubic_spline_derivative(
-                    times, branch_data[branch_id][seg_id]["pressure_out"], NUM_REFINED
+                    times,
+                    branch_data[branch_id][seg_id]["pressure_out"],
+                    NUM_REFINED,
                 )
                 flow, dflow = taskutils.refine_with_cubic_spline_derivative(
-                    times, branch_data[branch_id][seg_id]["flow_out"], NUM_REFINED
+                    times,
+                    branch_data[branch_id][seg_id]["flow_out"],
+                    NUM_REFINED,
                 )
 
                 y[
@@ -150,10 +154,14 @@ class ModelCalibrationLeastSquares(Task):
                     pressure,
                     dpressure,
                 ) = taskutils.refine_with_cubic_spline_derivative(
-                    times, branch_data[branch_id][seg_id]["pressure_in"], NUM_REFINED
+                    times,
+                    branch_data[branch_id][seg_id]["pressure_in"],
+                    NUM_REFINED,
                 )
                 flow, dflow = taskutils.refine_with_cubic_spline_derivative(
-                    times, branch_data[branch_id][seg_id]["flow_in"], NUM_REFINED
+                    times,
+                    branch_data[branch_id][seg_id]["flow_in"],
+                    NUM_REFINED,
                 )
 
                 y[
@@ -174,7 +182,7 @@ class ModelCalibrationLeastSquares(Task):
             ],
             "set_capacitance_to_zero": self.config["set_capacitance_to_zero"],
             "initial_damping_factor": self.config["initial_damping_factor"],
-            "maximum_iterations": self.config["maximum_iterations"]
+            "maximum_iterations": self.config["maximum_iterations"],
         }
 
         # Create debug plots
