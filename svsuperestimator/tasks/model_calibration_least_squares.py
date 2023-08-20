@@ -5,9 +5,11 @@ import os
 from datetime import datetime
 from typing import Any
 from rich.progress import BarColumn, Progress
+import json
 
 import numpy as np
 import pandas as pd
+import svzerodplus
 from svzerodsolver import runnercpp
 
 from .. import reader, visualizer
@@ -15,6 +17,8 @@ from ..reader import CenterlineHandler
 from ..reader import utils as readutils
 from . import plotutils, taskutils
 from .task import Task
+
+NUM_REFINED = 100
 
 
 class ModelCalibrationLeastSquares(Task):
@@ -34,7 +38,7 @@ class ModelCalibrationLeastSquares(Task):
         "centerline_padding": False,
         "calibrate_stenosis_coefficient": True,
         "set_capacitance_to_zero": True,
-        "svzerodcalibrator_executable": None,
+        "initial_damping_factor": 1.0,
         **Task.DEFAULTS,
     }
 
@@ -78,7 +82,7 @@ class ModelCalibrationLeastSquares(Task):
             threed_result_handler,
             padding=self.config["centerline_padding"],
         )
-        times_new = np.linspace(times[0], times[-1], 100)
+        times_new = np.linspace(times[0], times[-1], NUM_REFINED)
 
         self.log("Create calibrator input file")
         connections = []
@@ -93,7 +97,6 @@ class ModelCalibrationLeastSquares(Task):
             if "outlet" in bc_config:
                 connections.append((vessel_name, bc_config["outlet"]))
 
-        bv_junctions = []
         for (
             junction_name,
             junction_config,
@@ -110,15 +113,6 @@ class ModelCalibrationLeastSquares(Task):
                 )
                 ovessels.append(vessel_id_map[outlet_vessel])
 
-            if len(junction_config["outlet_vessels"]) > 1:
-                bv_junctions.append(
-                    (
-                        junction_name,
-                        ovessels,
-                        vessel_id_map[junction_config["inlet_vessels"][0]],
-                    )
-                )
-
         y = {}
         dy = {}
 
@@ -132,10 +126,10 @@ class ModelCalibrationLeastSquares(Task):
                     pressure,
                     dpressure,
                 ) = taskutils.refine_with_cubic_spline_derivative(
-                    times, branch_data[branch_id][seg_id]["pressure_out"], 100
+                    times, branch_data[branch_id][seg_id]["pressure_out"], NUM_REFINED
                 )
                 flow, dflow = taskutils.refine_with_cubic_spline_derivative(
-                    times, branch_data[branch_id][seg_id]["flow_out"], 100
+                    times, branch_data[branch_id][seg_id]["flow_out"], NUM_REFINED
                 )
 
                 y[
@@ -156,10 +150,10 @@ class ModelCalibrationLeastSquares(Task):
                     pressure,
                     dpressure,
                 ) = taskutils.refine_with_cubic_spline_derivative(
-                    times, branch_data[branch_id][seg_id]["pressure_in"], 100
+                    times, branch_data[branch_id][seg_id]["pressure_in"], NUM_REFINED
                 )
                 flow, dflow = taskutils.refine_with_cubic_spline_derivative(
-                    times, branch_data[branch_id][seg_id]["flow_in"], 100
+                    times, branch_data[branch_id][seg_id]["flow_in"], NUM_REFINED
                 )
 
                 y[
@@ -171,22 +165,6 @@ class ModelCalibrationLeastSquares(Task):
                 ] = dpressure.tolist()
                 dy[f"flow:{connection[0]}:{branch_name}"] = dflow.tolist()
 
-        for junction_name, outlet_vessels, inlet_vessel in bv_junctions:
-            inlet_flow = np.array(y[f"flow:{inlet_vessel}:{junction_name}"])
-            inlet_dflow = np.array(dy[f"flow:{inlet_vessel}:{junction_name}"])
-            mean_inlet_flow = np.mean(inlet_flow)
-            for i, vessel_name in enumerate(outlet_vessels):
-                mean_outlet_flow = np.mean(
-                    y[f"flow:{junction_name}:{vessel_name}"]
-                )
-                inlet_flow_i = inlet_flow * mean_outlet_flow / mean_inlet_flow
-                inlet_dflow_i = (
-                    inlet_dflow * mean_outlet_flow / mean_inlet_flow
-                )
-
-                y[f"flow_{i}:{junction_name}"] = inlet_flow_i.tolist()
-                dy[f"flow_{i}:{junction_name}"] = inlet_dflow_i.tolist()
-
         zerod_config_handler.data["y"] = y
         zerod_config_handler.data["dy"] = dy
 
@@ -195,6 +173,8 @@ class ModelCalibrationLeastSquares(Task):
                 "calibrate_stenosis_coefficient"
             ],
             "set_capacitance_to_zero": self.config["set_capacitance_to_zero"],
+            "initial_damping_factor": self.config["initial_damping_factor"],
+            "maximum_iterations": self.config["maximum_iterations"]
         }
 
         # Create debug plots
@@ -246,20 +226,15 @@ class ModelCalibrationLeastSquares(Task):
                         showlegend=True,
                     )
                     plot.to_image(os.path.join(debug_folder, f"{key}_dy.png"))
-        input_file = os.path.join(self.output_folder, "calibrator_input.json")
-        zerod_config_handler.to_file(input_file)
 
         # Run calibration
         self.log("Start calibration")
         output_file = os.path.join(self.output_folder, "solver_0d.in")
-        taskutils.run_subprocess(
-            [
-                self.config["svzerodcalibrator_executable"],
-                input_file,
-                output_file,
-            ],
-            logger=self.log,
-        )
+        input_file = os.path.join(self.output_folder, "calibrator_0d.in")
+        zerod_config_handler.to_file(input_file)
+        calibrated_config = svzerodplus.calibrate(zerod_config_handler.data)
+        with open(output_file, "w") as ff:
+            json.dump(calibrated_config, ff, indent=4)
         self.log("Completed calibration")
 
     def post_run(self) -> None:

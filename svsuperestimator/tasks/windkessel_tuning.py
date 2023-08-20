@@ -16,7 +16,7 @@ from particles import smc_samplers as ssp
 from rich.progress import BarColumn, Progress
 from scipy import stats
 from svzerodsolver import runnercpp
-from libsvzerodplus import Solver
+from svzerodplus import Solver
 
 from .. import reader, visualizer
 from ..reader import utils as readutils
