@@ -353,6 +353,7 @@ def set_initial_condition(
     Args:
         zerod_handler: 0D simulation input handler.
         mapped_data: Mapped 3D result.
+        times: Time steps.
     """
 
     nodes = zerod_handler.nodes

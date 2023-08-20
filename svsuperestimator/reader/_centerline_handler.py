@@ -72,6 +72,7 @@ class CenterlineHandler(VtkHandler):
 
         Args:
             filename: Path to the file to read data from.
+            padding: Activate padding.
         """
         if not os.path.exists(filename):
             raise FileNotFoundError(f"File {filename} does not exist")
