@@ -1,14 +1,17 @@
-project: /Users/stanford/Downloads/0080_0001
+project: /Volumes/richter/projects/0140_2001
 global:
   num_procs: 4
 tasks:
-  model_calibration:
-    name: vessels_r_l_c_ste_junctions_r_l_default_ce-10
+  model_calibration_least_squares:
+    name: calibration_least_squares
     debug: False
-    zerod_config_file: /Users/stanford/Downloads/input_0d/0080_0001_0d.in
-    threed_solution_file: /Users/stanford/Downloads/3d_rerun/0080_0001.vtp
-    calibration_targets_vessels: ["R_poiseuille", "L", "stenosis_coefficient"]
-    calibration_targets_junctions: ["R_poiseuille", "L"]
+    zerod_config_file: /Volumes/richter/projects/input_0d/0140_2001_0d.in
+    threed_solution_file: /Volumes/richter/projects/72_centerline_results_martin/0140_2001.vtp
+    calibrate_stenosis_coefficient: True
+    set_capacitance_to_zero: False
+    initial_damping_factor: 1.0
+    maximum_iterations: 100
     debug: False
     overwrite: True
     core_run: True
+    centerline_padding: True

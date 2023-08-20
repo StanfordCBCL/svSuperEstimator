@@ -1,0 +1,25 @@
+project: /Users/stanford/Downloads/0104_0001
+global:
+    num_procs: 48
+slurm:
+    partition: amarsden
+    python-path: ~/miniconda3/envs/estimator/bin/python
+    mem: 32GB
+tasks:
+    multi_fidelity_tuning:
+        name: adaptive_three_d_map_rerun_tol
+        num_iter: 5
+        theta_obs: [9.671050954310326, 8.137103389639302, 9.808957068689894, 10.818837842333226, 9.808957068689894]
+        y_obs: [93171.98165729424, 180604.48325122145, 7.333997572189272, 32.805978271097715, 6.458491855909689, 2.192145926308586, 6.3301109204888]
+        smc_num_particles: 10000
+        smc_num_rejuvenation_steps: 2
+        smc_resampling_threshold: 0.5
+        smc_noise_factor: 0.1
+        three_d_theta_source: map # mean
+        three_d_time_step_size: 0.000484
+        svpre_executable: /home/users/richter7/svsolver/build/svSolver-build/bin/svpre
+        svsolver_executable: /home/users/richter7/svsolver/build/svSolver-build/bin/svsolver
+        svpost_executable: /home/users/richter7/svsolver/build/svSolver-build/bin/svpost
+        svslicer_executable: /home/users/richter7/svSlicer/Release/svslicer
+        overwrite: True
+

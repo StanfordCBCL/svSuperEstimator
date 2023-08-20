@@ -7,7 +7,7 @@ name = "svsuperestimator"
 description = "A framework for multi-fidelity estimation of boundary condition parameters for cardiovascular fluid dynamics simulations."
 keywords = ["parameter estimation", "simulation", "cfd"]
 dependencies = [
-    "numpy",
+    "numpy<=1.23.5",
     "scipy",
     "vtk",
     "plotly",
