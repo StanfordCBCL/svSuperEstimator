@@ -35,7 +35,7 @@ pip install git+https://github.com/StanfordCBCL/svSuperEstimator.git
 
 The remaining dependencies have to be installed manually:
 
-* [svZeroDSolver](https://github.com/richterjakob/svZeroDSolver): Install via pip and build release version in local folder.
+* [svZeroDSolver](https://github.com/richterjakob/svZeroDSolver): Install via pip.
 * [3D result slicer](https://gitlab.com/sanddorn/sanddorn-toolbox/-/tree/main/slicer): Build release version and specify path to executable in config file.
 * [svSolver](https://github.com/SimVascular/svSolver): Build release version and specify path to executable in config file.
 
@@ -84,7 +84,7 @@ global:
 # Task configuration (configure one or more tasks)
 # -------------------------------------------------------------------------------------------
 tasks:
-  MultiFidelityTuning:                      # Run sequential multi-fidelity tuning
+  multi_fidelity_tuning:                     # Run sequential multi-fidelity tuning
     name: my_case                           # Name of the task (determines the folder name)
     num_iter: 3                             # Number of multi-fidelity iterations to perform
     theta_obs: [...]                        # Ground truth theta
@@ -93,13 +93,10 @@ tasks:
     smc_num_rejuvenation_steps: 2           # Number of rejuvenation steps for Sequential-Monte-Carlo
     smc_resampling_threshold: 0.5           # Resampling threshold for Sequential-Monte-Carlo
     smc_noise_factor: 0.05                  # Relative noise on observations (relative standard deviation)
-    num_cardiac_cycles_3d: 2                # Number of cardiac cycles to simulate in 3D
     svpre_executable: path/to/svpre         # Path to svpre
     svsolver_executable: path/to/svsolver   # Path to svsolver
     svpost_executable: path/to/svpost       # Path to svsolver
-    slicer_executable: path/to/slicer       # Path to result slicer
-    MapThreeDResultOnCenterline:            # Overwrite some global settings for task MapThreeDResultOnCenterline
-      num_procs: 12                         # Only use 12 num_procs for 3D-0D mapping
+    svslicer_executable: path/to/slicer       # Path to result slicer
 
 # -------------------------------------------------------------------------------------------
 # (Optional) Submit as slurm job (creates and submits slurm job)
@@ -132,7 +129,7 @@ global:
 # Task configuration (configure one or more tasks)
 # -------------------------------------------------------------------------------------------
 tasks:
-  WindkesselTuning:                             # Run sequential Windkessel tuning
+  windkessel_tuning:                            # Run sequential Windkessel tuning
     name: my_case                               # Name of the task (determines the folder name)
     zerod_config_file: path/to/zerod_config.in  # Path to svZeroDSolver input file
     theta_obs: [...]                            # Ground truth theta
@@ -155,7 +152,7 @@ slurm:
   ntasks-per-node: 24           # Number of tasks per node
 ```
 
-### Model calibration based on 3D result
+### Model calibration based on 3D result using Levenberg-Marquardt optimization
 
 ```yaml
 # -------------------------------------------------------------------------------------------
@@ -173,11 +170,15 @@ global:
 # Task configuration (configure one or more tasks)
 # -------------------------------------------------------------------------------------------
 tasks:
-  BloodVesselTuning:
+  model_calibration_least_squares:
     name: my_case
     zerod_config_file: path/to/zerod_config.in                  # Path to svZeroDSolver input file
     threed_solution_file: path/to/threed_centerline_result.vtp  # Path 3D result mapped on centerline
     centerline_padding: False                                   # Toggle padding over border nodes in centerline result
+    calibrate_stenosis_coefficient: True                        # Specify whether to calibrate stenosis coefficient
+    set_capacitance_to_zero: False                              # Specify whether capacitance should be set to 0
+    initial_damping_factor: 1.0                                 # Initial damping factor for Levenberg-Marquardt optimization
+    maximum_iterations: 100                                     # Maximum number of calibration iterations
 
 # -------------------------------------------------------------------------------------------
 # (Optional) Submit as slurm job (creates and submits slurm job)
