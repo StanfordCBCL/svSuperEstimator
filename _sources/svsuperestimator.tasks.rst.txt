@@ -4,26 +4,26 @@ svsuperestimator.tasks package
 Submodules
 ----------
 
-svsuperestimator.tasks.blood\_vessel\_tuning module
----------------------------------------------------
-
-.. automodule:: svsuperestimator.tasks.blood_vessel_tuning
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-svsuperestimator.tasks.map\_three\_d\_result\_on\_centerline module
--------------------------------------------------------------------
-
-.. automodule:: svsuperestimator.tasks.map_three_d_result_on_centerline
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 svsuperestimator.tasks.map\_zero\_d\_result\_to\_three\_d module
 ----------------------------------------------------------------
 
 .. automodule:: svsuperestimator.tasks.map_zero_d_result_to_three_d
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+svsuperestimator.tasks.model\_calibration module
+------------------------------------------------
+
+.. automodule:: svsuperestimator.tasks.model_calibration
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+svsuperestimator.tasks.model\_calibration\_least\_squares module
+----------------------------------------------------------------
+
+.. automodule:: svsuperestimator.tasks.model_calibration_least_squares
    :members:
    :undoc-members:
    :show-inheritance:
