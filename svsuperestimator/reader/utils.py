@@ -1,16 +1,24 @@
 """This module contains input/output utils."""
+from typing import Optional
+
 import numpy as np
 
 from ._svproject import SimVascularProject
+from ._svzerodsolver_input_handler import SvZeroDSolverInputHandler
 
 
-def get_0d_element_coordinates(project: SimVascularProject) -> dict:
+def get_0d_element_coordinates(
+    project: SimVascularProject,
+    zerod_handler: Optional[SvZeroDSolverInputHandler] = None,
+) -> dict:
     """Extract 0D elements with coordinates from a project.
 
     Args:
         project: SimVascular project.
+        zerod_handler: 0D simulation input handler to use.
     """
-    zerod_handler = project["0d_simulation_input"]
+    if zerod_handler is None:
+        zerod_handler = project["0d_simulation_input"]
     cl_handler = project["centerline"]
 
     elements = {}
@@ -18,7 +26,6 @@ def get_0d_element_coordinates(project: SimVascularProject) -> dict:
     # Extract branch information of 0D config
     branchdata: dict = {}
     for vessel_config in zerod_handler.vessels.values():
-
         # Extract branch and segment id from name
         name = vessel_config["vessel_name"]
         branch_id, seg_id = name.split("_")
@@ -36,7 +43,6 @@ def get_0d_element_coordinates(project: SimVascularProject) -> dict:
         ] = vessel_config.get("boundary_conditions", {})
 
     for branch_id, branch in branchdata.items():
-
         branch_data = cl_handler.get_branch_data(branch_id)
 
         seg_start = 0.0

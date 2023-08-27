@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+from copy import deepcopy
 from typing import Optional
 
 from ._data_handler import DataHandler
@@ -96,6 +97,11 @@ class SvZeroDSolverInputHandler(DataHandler):
         ]
 
     @property
+    def num_cycles(self) -> int:
+        """Number of cardiac cycles to simulate."""
+        return self.data["simulation_parameters"]["number_of_cardiac_cycles"]
+
+    @property
     def nodes(self) -> list:
         """Nodes of the 0D model."""
         id_map = self.vessel_id_to_name_map
@@ -131,13 +137,27 @@ class SvZeroDSolverInputHandler(DataHandler):
 
         return connections
 
+    def get_bc_node_names(self):
+        """Return names of the nodes where the model is connected to the BCs."""
+        bc_node_names = []
+        for name, vessel in self.vessels.items():
+            bcs = vessel.get("boundary_conditions", None)
+            if bcs is not None:
+                inlet_bc = bcs.get("inlet", None)
+                if inlet_bc is not None:
+                    bc_node_names.append(f"{inlet_bc}:{name}")
+                outlet_bc = bcs.get("outlet", None)
+                if outlet_bc is not None:
+                    bc_node_names.append(f"{name}:{outlet_bc}")
+        return bc_node_names
+
     def copy(self) -> SvZeroDSolverInputHandler:
         """Create and return a copy of the handler.
 
         Returns:
             handler: Copy of the data handler.
         """
-        return SvZeroDSolverInputHandler(self.data.copy())
+        return SvZeroDSolverInputHandler(deepcopy(self.data))
 
     def update_simparams(
         self,
@@ -149,6 +169,8 @@ class SvZeroDSolverInputHandler(DataHandler):
         output_interval: Optional[bool] = None,
         last_cycle_only: Optional[bool] = None,
         variable_based: Optional[bool] = None,
+        pts_per_cycle: Optional[bool] = None,
+        output_derivative: Optional[bool] = None,
     ) -> None:
         """Update the simulation parameters.
 
@@ -163,6 +185,8 @@ class SvZeroDSolverInputHandler(DataHandler):
             output_interval: Interval for writing a timestep to the output.
             last_cycle_only: Output only last cycle.
             variable_based: Node based output.
+            pts_per_cycle: Number of time steps per cardiac cycle.
+            output_derivative: Output derivative of the solution.
         """
         simparams = self.data["simulation_parameters"]
         if abs_tol is not None:
@@ -181,3 +205,7 @@ class SvZeroDSolverInputHandler(DataHandler):
             simparams["number_of_cardiac_cycles"] = num_cycles
         if variable_based is not None:
             simparams["output_variable_based"] = variable_based
+        if pts_per_cycle is not None:
+            simparams["number_of_time_pts_per_cardiac_cycle"] = pts_per_cycle
+        if output_derivative is not None:
+            simparams["output_derivative"] = output_derivative

@@ -2,6 +2,7 @@
 import os
 import platform
 import sys
+from copy import deepcopy
 from time import time
 
 import click
@@ -52,7 +53,7 @@ slurm_default = {
     "walltime": "96:00:00",
     "qos": "normal",
     "nodes": 2,
-    "mem": "32GB",
+    "mem": "16GB",
     "ntasks-per-node": 24,
     "python-path": None,
 }
@@ -82,9 +83,7 @@ def run_file(path: str) -> None:
     global_setting = config.get("global", {})
 
     for task_name, task_config in config["tasks"].items():
-
         if "slurm" in config:
-
             parent_folder = project["parameter_estimation_folder"]
             name = task_config.get("name", None)
             if name is None:
@@ -92,7 +91,7 @@ def run_file(path: str) -> None:
             task_output_folder = os.path.join(parent_folder, name)
             os.makedirs(task_output_folder, exist_ok=True)
 
-            slurm_config = slurm_default.copy()
+            slurm_config = deepcopy(slurm_default)
             slurm_config.update(config["slurm"])
 
             for key, value in slurm_config.items():
@@ -123,7 +122,7 @@ def run_file(path: str) -> None:
                     del slurm_config[key]
 
             new_config_file = os.path.join(task_output_folder, "config.yaml")
-            new_config = config.copy()
+            new_config = deepcopy(config)
 
             del new_config["slurm"]
             new_config["tasks"] = {task_name: task_config}

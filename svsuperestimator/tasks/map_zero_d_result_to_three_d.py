@@ -279,7 +279,6 @@ class MapZeroDResultToThreeD(Task):
             return np.array(ids)
 
         def region_grow(geo, seed_points, seed_ids, n_max=99):  # type: ignore
-
             pts = geo.points
 
             # initialize output arrays

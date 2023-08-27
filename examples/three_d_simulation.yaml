@@ -1,0 +1,14 @@
+project: /scratch/users/richter7/data/projects72/0094_0001
+global:
+    num_procs: 48
+slurm:
+    partition: amarsden
+    python-path: ~/miniconda3/envs/estimator/bin/python
+tasks:
+    three_d_simulation:
+        rcrt_dat_path: /scratch/users/richter7/data/projects72/0094_0001/Simulations/0094_0001/rcrt.dat
+        initial_vtu_path: /scratch/users/richter7/data/projects72/0094_0001/Simulations/0094_0001/mesh-complete/initial.vtu
+        svpre_executable: /home/users/richter7/svsolver/build/svSolver-build/bin/svpre
+        svsolver_executable: /home/users/richter7/svsolver/build/svSolver-build/bin/svsolver
+        svpost_executable: /home/users/richter7/svsolver/build/svSolver-build/bin/svpost
+        svslicer_executable: /home/users/richter7/svSlicer/Release/svslicer

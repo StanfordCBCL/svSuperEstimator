@@ -7,16 +7,18 @@ name = "svsuperestimator"
 description = "A framework for multi-fidelity estimation of boundary condition parameters for cardiovascular fluid dynamics simulations."
 keywords = ["parameter estimation", "simulation", "cfd"]
 dependencies = [
-    "numpy",
+    "numpy<=1.23.5",
     "scipy",
     "vtk",
     "plotly",
+    "kaleido", # Faster plotly image export
     "pandas",
     "pyyaml",
     "orjson", # Faster than json
     "click", # Easy to use argument parser
     "rich",
-    "particles"
+    "particles",
+    "matplotlib"
 ]
 dynamic = ["version", "readme"]
 requires-python = ">=3.8"
@@ -43,7 +45,6 @@ dev = [
     "sphinxcontrib-bibtex",
     "sphinxcontrib-mermaid",
     "isort",
-    "mypy",
     "types-PyYAML",
 ]
 
@@ -57,12 +58,6 @@ line-length = 79
 profile = "black"
 line_length = 79
 src_paths = ["."]
-
-[tool.mypy]
-ignore_missing_imports = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-exclude = "doc|tests|cases"
 
 [tool.pytest.ini_options]
 addopts = """

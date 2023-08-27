@@ -1,6 +1,7 @@
 """This module holds the Task base class."""
 import os
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from pathlib import Path
 from time import perf_counter as time
 from typing import Any, Dict, List, Optional
@@ -66,7 +67,7 @@ class Task(ABC):
             record=True, log_time_format="[%m/%d/%y %H:%M:%S]"
         )
         self.database: Dict[str, Any] = {}
-        self.config = self.DEFAULTS.copy()
+        self.config = deepcopy(self.DEFAULTS)
         self.config.update(config)
         if parent_folder is None:
             parent_folder = self.project["parameter_estimation_folder"]
@@ -226,7 +227,10 @@ class Task(ABC):
         Returns:
             parameters: Parameters of the problem.
         """
-        with open(
-            os.path.join(self.output_folder, "taskdata.json"), "rb"
-        ) as ff:
-            self.database = orjson.loads(ff.read())
+        try:
+            with open(
+                os.path.join(self.output_folder, "taskdata.json"), "rb"
+            ) as ff:
+                self.database = orjson.loads(ff.read())
+        except FileNotFoundError:
+            self.database = {}

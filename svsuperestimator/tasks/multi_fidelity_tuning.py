@@ -4,11 +4,10 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from .blood_vessel_tuning import BloodVesselTuning
-from .map_three_d_result_on_centerline import MapThreeDResultOnCenterline
 from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
+from .model_calibration_least_squares import ModelCalibrationLeastSquares
 from .task import Task
-from .three_d_simulation import ThreeDSimulation
+from .three_d_simulation import AdaptiveThreeDSimulation
 from .windkessel_tuning import WindkesselTuning
 
 
@@ -27,16 +26,19 @@ class MultiFidelityTuning(Task):
         "smc_noise_factor": 0.05,
         "smc_waste_free": True,
         "smc_kernel_density_estimation": False,
-        "num_cardiac_cycles_3d": 2,
+        "three_d_theta_source": "map",
+        "three_d_max_asymptotic_error": 0.001,
+        "three_d_max_cardiac_cycles": 10,
+        "three_d_time_step_size": "auto",
         "svpre_executable": None,
         "svsolver_executable": None,
         "svpost_executable": None,
-        "slicer_executable": None,
-        "WindkesselTuning": {},
-        "MapZeroDResultToThreeD": {},
-        "ThreeDSimulation": {},
-        "MapThreeDResultOnCenterline": {},
-        "BloodVesselTuning": {},
+        "svslicer_executable": None,
+        "svzerodcalibrator_executable": None,
+        WindkesselTuning.TASKNAME: {},
+        MapZeroDResultToThreeD.TASKNAME: {},
+        AdaptiveThreeDSimulation.TASKNAME: {},
+        ModelCalibrationLeastSquares.TASKNAME: {},
         **Task.DEFAULTS,
     }
 
@@ -55,6 +57,16 @@ class MultiFidelityTuning(Task):
             "core_run": self.config["core_run"],
             "post_proc": self.config["post_proc"],
         }
+
+        if self.config["three_d_theta_source"] == "map":
+            zero_d_input_file_name = "solver_0d_map.in"
+        elif self.config["three_d_theta_source"] == "mean":
+            zero_d_input_file_name = "solver_0d_mean.in"
+        else:
+            raise ValueError(
+                "Invalid configuration for 'three_d_theta_source': "
+                f"{self.config['three_d_theta_source']}"
+            )
 
         for i in range(self.config["num_iter"]):
             windkessel_task = WindkesselTuning(
@@ -77,7 +89,7 @@ class MultiFidelityTuning(Task):
                         "smc_kernel_density_estimation"
                     ],
                     **global_config,
-                    **self.config["WindkesselTuning"],
+                    **self.config[WindkesselTuning.TASKNAME],
                 },
                 prefix=f"{i*5}_",
                 parent_folder=self.output_folder,
@@ -87,16 +99,16 @@ class MultiFidelityTuning(Task):
                 project=self.project,
                 config={
                     "zerod_config_file": os.path.join(
-                        windkessel_task.output_folder, "solver_0d_map.in"
+                        windkessel_task.output_folder, zero_d_input_file_name
                     ),
                     **global_config,
-                    **self.config["MapZeroDResultToThreeD"],
+                    **self.config[MapZeroDResultToThreeD.TASKNAME],
                 },
                 prefix=f"{i*5+1}_",
                 parent_folder=self.output_folder,
             )
             task_sequence.append(map_zero_three_task)
-            three_d_sim_task = ThreeDSimulation(
+            three_d_sim_task = AdaptiveThreeDSimulation(
                 project=self.project,
                 config={
                     "num_procs": self.config["num_procs"],
@@ -106,45 +118,43 @@ class MultiFidelityTuning(Task):
                     "initial_vtu_path": os.path.join(
                         map_zero_three_task.output_folder, "initial.vtu"
                     ),
+                    "zerod_config_file": os.path.join(
+                        windkessel_task.output_folder, zero_d_input_file_name
+                    ),
+                    "max_asymptotic_error": self.config[
+                        "three_d_max_asymptotic_error"
+                    ],
+                    "max_cardiac_cycles": self.config[
+                        "three_d_max_cardiac_cycles"
+                    ],
+                    "time_step_size": self.config["three_d_time_step_size"],
                     "svpre_executable": self.config["svpre_executable"],
                     "svsolver_executable": self.config["svsolver_executable"],
                     "svpost_executable": self.config["svpost_executable"],
-                    "num_cardiac_cycles": self.config["num_cardiac_cycles_3d"],
+                    "svslicer_executable": self.config["svslicer_executable"],
                     **global_config,
-                    **self.config["ThreeDSimulation"],
+                    **self.config[AdaptiveThreeDSimulation.TASKNAME],
                 },
                 prefix=f"{i*5+2}_",
                 parent_folder=self.output_folder,
             )
             task_sequence.append(three_d_sim_task)
-            map_three_zero_task = MapThreeDResultOnCenterline(
-                project=self.project,
-                config={
-                    "num_procs": self.config["num_procs"],
-                    "slicer_executable": self.config["slicer_executable"],
-                    "threed_result_file": os.path.join(
-                        three_d_sim_task.output_folder, "result.vtu"
-                    ),
-                    **global_config,
-                    **self.config["MapThreeDResultOnCenterline"],
-                },
-                prefix=f"{i*5+3}_",
-                parent_folder=self.output_folder,
-            )
-            task_sequence.append(map_three_zero_task)
-            bv_tuning_task = BloodVesselTuning(
+            bv_tuning_task = ModelCalibrationLeastSquares(
                 project=self.project,
                 config={
                     "zerod_config_file": os.path.join(
-                        windkessel_task.output_folder, "solver_0d_map.in"
+                        windkessel_task.output_folder, zero_d_input_file_name
                     ),
                     "threed_solution_file": os.path.join(
-                        map_three_zero_task.output_folder,
-                        "result_mapped_on_centerline.vtp",
+                        three_d_sim_task.output_folder,
+                        "result.vtp",
                     ),
+                    "svzerodcalibrator_executable": self.config[
+                        "svzerodcalibrator_executable"
+                    ],
                     "num_procs": self.config["num_procs"],
                     **global_config,
-                    **self.config["BloodVesselTuning"],
+                    **self.config[ModelCalibrationLeastSquares.TASKNAME],
                 },
                 prefix=f"{i*5+4}_",
                 parent_folder=self.output_folder,

@@ -1,11 +1,17 @@
-project: /Volumes/richter/projects/0069_0001
+project: /Volumes/richter/projects/0140_2001
 global:
   num_procs: 4
 tasks:
-  BloodVesselTuning:
-    name: tmp_debug_test
-    debug: True
-    zerod_config_file: /Volumes/richter/projects/0069_0001/ROMSimulations/0069_0001/solver_0d.in
-    threed_solution_file: /Volumes/richter/72_centerline_results_martin/0069_0001.vtp
-    centerline_padding: False
+  model_calibration_least_squares:
+    name: calibration_least_squares
+    debug: False
+    zerod_config_file: /Volumes/richter/projects/input_0d/0140_2001_0d.in
+    threed_solution_file: /Volumes/richter/projects/72_centerline_results_martin/0140_2001.vtp
+    calibrate_stenosis_coefficient: True
+    set_capacitance_to_zero: False
+    initial_damping_factor: 1.0
+    maximum_iterations: 100
+    debug: False
     overwrite: True
+    core_run: True
+    centerline_padding: True
