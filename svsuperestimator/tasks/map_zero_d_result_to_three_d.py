@@ -8,10 +8,10 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+import svzerodplus
 import vtk
 from rich.progress import Progress
 from scipy.interpolate import interp1d
-from svzerodsolver import runnercpp
 from vtk.util.numpy_support import numpy_to_vtk
 
 from .. import reader
@@ -49,7 +49,7 @@ class MapZeroDResultToThreeD(Task):
         )
         zerod_handler.update_simparams(last_cycle_only=True)
 
-        result0d = runnercpp.run_from_config(zerod_handler.data)
+        result0d = svzerodplus.simulate(zerod_handler.data)
 
         # assemble output dict
         def rec_dd() -> defaultdict:

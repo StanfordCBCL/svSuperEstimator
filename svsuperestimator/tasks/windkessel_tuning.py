@@ -11,12 +11,12 @@ import numpy as np
 import orjson
 import pandas as pd
 import particles
+import svzerodplus
 from particles import distributions as dists
 from particles import smc_samplers as ssp
 from rich.progress import BarColumn, Progress
 from scipy import stats
 from svzerodplus import Solver
-from svzerodsolver import runnercpp
 
 from .. import reader, visualizer
 from ..reader import utils as readutils
@@ -208,7 +208,7 @@ class WindkesselTuning(Task):
         zerod_config_handler.to_file(
             os.path.join(self.output_folder, "solver_0d_mean.in")
         )
-        runnercpp.run_from_config(zerod_config_handler.data).to_csv(
+        svzerodplus.simulate(zerod_config_handler.data).to_csv(
             os.path.join(self.output_folder, "solution_mean.csv")
         )
         for i, bc in enumerate(outlet_bcs):
@@ -219,7 +219,7 @@ class WindkesselTuning(Task):
         zerod_config_handler.to_file(
             os.path.join(self.output_folder, "solver_0d_map.in")
         )
-        runnercpp.run_from_config(zerod_config_handler.data).to_csv(
+        svzerodplus.simulate(zerod_config_handler.data).to_csv(
             os.path.join(self.output_folder, "solution_map.csv")
         )
 

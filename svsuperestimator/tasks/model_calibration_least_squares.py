@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import svzerodplus
 from rich.progress import BarColumn, Progress
-from svzerodsolver import runnercpp
 
 from .. import reader, visualizer
 from ..reader import CenterlineHandler
@@ -200,9 +199,7 @@ class ModelCalibrationLeastSquares(Task):
                 variable_based=True,
                 output_derivative=True,
             )
-            zerod_result = runnercpp.run_from_config(
-                zerod_config_handler_test.data
-            )
+            zerod_result = svzerodplus.simulate(zerod_config_handler_test.data)
             with Progress(
                 " " * 20 + "Creating plots... ",
                 BarColumn(),
@@ -272,10 +269,8 @@ class ModelCalibrationLeastSquares(Task):
         # Run simulation for both configurations
         zerod_config_handler.update_simparams(last_cycle_only=True)
         zerod_opt_config_handler.update_simparams(last_cycle_only=True)
-        zerod_result = runnercpp.run_from_config(zerod_config_handler.data)
-        zerod_opt_result = runnercpp.run_from_config(
-            zerod_opt_config_handler.data
-        )
+        zerod_result = svzerodplus.simulate(zerod_config_handler.data)
+        zerod_opt_result = svzerodplus.simulate(zerod_opt_config_handler.data)
 
         # Extract time steps of last cardiac cycle
         pts_per_cycle = zerod_config_handler.num_pts_per_cycle

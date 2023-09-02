@@ -6,7 +6,7 @@ import os
 from shutil import copy2, copytree, ignore_patterns
 
 import numpy as np
-from svzerodsolver import runnercpp
+import svzerodplus
 
 from .. import reader, visualizer
 from ..reader import CenterlineHandler, SvZeroDSolverInputHandler
@@ -522,6 +522,6 @@ class AdaptiveThreeDSimulation(Task):
                 }
             ],
         }
-        result = runnercpp.run_from_config(config)
+        result = svzerodplus.simulate(config)
 
         return np.array(result["pressure_out"])
