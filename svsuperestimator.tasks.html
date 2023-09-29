@@ -18,12 +18,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
 
   
-  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -32,8 +32,9 @@
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
+  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
 
     <script src="_static/documentation_options.js?v=7ff6d70c"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
@@ -54,6 +55,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -94,7 +104,8 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
   
@@ -116,7 +127,6 @@
 </a></div>
     
   </div>
-  
   
   <div class="col-lg-9 navbar-header-items">
     
@@ -161,13 +171,15 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -182,8 +194,8 @@ document.write(`
           
           
           
-          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
-            <label class="sr-only">GitHub</label></a>
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
         </li>
 </ul></div>
       
@@ -193,18 +205,20 @@ document.write(`
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
       <span class="fa-solid fa-outdent"></span>
     </label>
   
@@ -273,8 +287,8 @@ document.write(`
           
           
           
-          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
-            <label class="sr-only">GitHub</label></a>
+          <a href="https://github.com/SimVascular/svSuperEstimator" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
         </li>
 </ul></div>
         
@@ -322,8 +336,8 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="index.html" class="nav-link" aria-label="Home">
@@ -336,7 +350,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="svsuperestimator.html" class="nav-link">svsuperestimator package</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">svsuperestimator.tasks package</li>
+    <li class="breadcrumb-item active" aria-current="page">svsuperestim...</li>
   </ul>
 </nav>
 </div>
@@ -370,9 +384,9 @@ document.write(`
 <section id="svsuperestimator-tasks-multi-fidelity-tuning-module">
 <h2>svsuperestimator.tasks.multi_fidelity_tuning module<a class="headerlink" href="#svsuperestimator-tasks-multi-fidelity-tuning-module" title="Link to this heading">#</a></h2>
 </section>
-<section id="svsuperestimator-tasks-plotutils-module">
-<h2>svsuperestimator.tasks.plotutils module<a class="headerlink" href="#svsuperestimator-tasks-plotutils-module" title="Link to this heading">#</a></h2>
-<p id="module-svsuperestimator.tasks.plotutils">This module holds task helper function related to plotting.</p>
+<section id="module-svsuperestimator.tasks.plotutils">
+<span id="svsuperestimator-tasks-plotutils-module"></span><h2>svsuperestimator.tasks.plotutils module<a class="headerlink" href="#module-svsuperestimator.tasks.plotutils" title="Link to this heading">#</a></h2>
+<p>This module holds task helper function related to plotting.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="svsuperestimator.tasks.plotutils.create_3d_geometry_plot_with_vessels">
 <span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.plotutils.</span></span><span class="sig-name descname"><span class="pre">create_3d_geometry_plot_with_vessels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_branches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/plotutils.html#create_3d_geometry_plot_with_vessels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.plotutils.create_3d_geometry_plot_with_vessels" title="Link to this definition">#</a></dt>
@@ -392,9 +406,9 @@ document.write(`
 </dd></dl>
 
 </section>
-<section id="svsuperestimator-tasks-statutils-module">
-<h2>svsuperestimator.tasks.statutils module<a class="headerlink" href="#svsuperestimator-tasks-statutils-module" title="Link to this heading">#</a></h2>
-<p id="module-svsuperestimator.tasks.statutils">This module holds task helper function related to statistics.</p>
+<section id="module-svsuperestimator.tasks.statutils">
+<span id="svsuperestimator-tasks-statutils-module"></span><h2>svsuperestimator.tasks.statutils module<a class="headerlink" href="#module-svsuperestimator.tasks.statutils" title="Link to this heading">#</a></h2>
+<p>This module holds task helper function related to statistics.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="svsuperestimator.tasks.statutils.particle_covmat">
 <span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.statutils.</span></span><span class="sig-name descname"><span class="pre">particle_covmat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/statutils.html#particle_covmat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.statutils.particle_covmat" title="Link to this definition">#</a></dt>
@@ -447,9 +461,9 @@ document.write(`
 </dd></dl>
 
 </section>
-<section id="svsuperestimator-tasks-task-module">
-<h2>svsuperestimator.tasks.task module<a class="headerlink" href="#svsuperestimator-tasks-task-module" title="Link to this heading">#</a></h2>
-<p id="module-svsuperestimator.tasks.task">This module holds the Task base class.</p>
+<section id="module-svsuperestimator.tasks.task">
+<span id="svsuperestimator-tasks-task-module"></span><h2>svsuperestimator.tasks.task module<a class="headerlink" href="#module-svsuperestimator.tasks.task" title="Link to this heading">#</a></h2>
+<p>This module holds the Task base class.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="svsuperestimator.tasks.task.Task">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.task.</span></span><span class="sig-name descname"><span class="pre">Task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/task.html#Task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.task.Task" title="Link to this definition">#</a></dt>
@@ -584,9 +598,9 @@ results are visualized.</p>
 </dd></dl>
 
 </section>
-<section id="svsuperestimator-tasks-taskutils-module">
-<h2>svsuperestimator.tasks.taskutils module<a class="headerlink" href="#svsuperestimator-tasks-taskutils-module" title="Link to this heading">#</a></h2>
-<p id="module-svsuperestimator.tasks.taskutils">This module holds general task helper function.</p>
+<section id="module-svsuperestimator.tasks.taskutils">
+<span id="svsuperestimator-tasks-taskutils-module"></span><h2>svsuperestimator.tasks.taskutils module<a class="headerlink" href="#module-svsuperestimator.tasks.taskutils" title="Link to this heading">#</a></h2>
+<p>This module holds general task helper function.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="svsuperestimator.tasks.taskutils.cgs_flow_to_lh">
 <span class="sig-prename descclassname"><span class="pre">svsuperestimator.tasks.taskutils.</span></span><span class="sig-name descname"><span class="pre">cgs_flow_to_lh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cgs_flow</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/svsuperestimator/tasks/taskutils.html#cgs_flow_to_lh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#svsuperestimator.tasks.taskutils.cgs_flow_to_lh" title="Link to this definition">#</a></dt>
@@ -744,9 +758,9 @@ new_dy: New dy-coordinates</p>
 <section id="svsuperestimator-tasks-windkessel-tuning-module">
 <h2>svsuperestimator.tasks.windkessel_tuning module<a class="headerlink" href="#svsuperestimator-tasks-windkessel-tuning-module" title="Link to this heading">#</a></h2>
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
-<p id="module-svsuperestimator.tasks">svSuperEstimator’s task subpackage.</p>
+<section id="module-svsuperestimator.tasks">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-svsuperestimator.tasks" title="Link to this heading">#</a></h2>
+<p>svSuperEstimator’s task subpackage.</p>
 <p>Contains all the tasks for performing multi-fidelity parameter estimation.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="svsuperestimator.tasks.get_task_by_name">
@@ -773,6 +787,8 @@ new_dy: New dy-coordinates</p>
               
               
               
+              
+              
             </div>
             
             
@@ -790,17 +806,17 @@ new_dy: New dy-coordinates</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator-tasks-model-calibration-module">svsuperestimator.tasks.model_calibration module</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator-tasks-model-calibration-least-squares-module">svsuperestimator.tasks.model_calibration_least_squares module</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator-tasks-multi-fidelity-tuning-module">svsuperestimator.tasks.multi_fidelity_tuning module</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator-tasks-plotutils-module">svsuperestimator.tasks.plotutils module</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-svsuperestimator.tasks.plotutils">svsuperestimator.tasks.plotutils module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator.tasks.plotutils.create_3d_geometry_plot_with_vessels"><code class="docutils literal notranslate"><span class="pre">create_3d_geometry_plot_with_vessels()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator-tasks-statutils-module">svsuperestimator.tasks.statutils module</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-svsuperestimator.tasks.statutils">svsuperestimator.tasks.statutils module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator.tasks.statutils.particle_covmat"><code class="docutils literal notranslate"><span class="pre">particle_covmat()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator.tasks.statutils.particle_map"><code class="docutils literal notranslate"><span class="pre">particle_map()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator.tasks.statutils.particle_wmean"><code class="docutils literal notranslate"><span class="pre">particle_wmean()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator-tasks-task-module">svsuperestimator.tasks.task module</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-svsuperestimator.tasks.task">svsuperestimator.tasks.task module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task"><code class="docutils literal notranslate"><span class="pre">Task</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task.TASKNAME"><code class="docutils literal notranslate"><span class="pre">Task.TASKNAME</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator.tasks.task.Task.DEFAULTS"><code class="docutils literal notranslate"><span class="pre">Task.DEFAULTS</span></code></a></li>
@@ -819,7 +835,7 @@ new_dy: New dy-coordinates</p>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator-tasks-taskutils-module">svsuperestimator.tasks.taskutils module</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-svsuperestimator.tasks.taskutils">svsuperestimator.tasks.taskutils module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator.tasks.taskutils.cgs_flow_to_lh"><code class="docutils literal notranslate"><span class="pre">cgs_flow_to_lh()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator.tasks.taskutils.cgs_flow_to_lmin"><code class="docutils literal notranslate"><span class="pre">cgs_flow_to_lmin()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator.tasks.taskutils.cgs_pressure_to_mmgh"><code class="docutils literal notranslate"><span class="pre">cgs_pressure_to_mmgh()</span></code></a></li>
@@ -833,7 +849,7 @@ new_dy: New dy-coordinates</p>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator-tasks-three-d-simulation-module">svsuperestimator.tasks.three_d_simulation module</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator-tasks-windkessel-tuning-module">svsuperestimator.tasks.windkessel_tuning module</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-svsuperestimator.tasks">Module contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svsuperestimator.tasks.get_task_by_name"><code class="docutils literal notranslate"><span class="pre">get_task_by_name()</span></code></a></li>
 </ul>
 </li>
@@ -861,8 +877,8 @@ new_dy: New dy-coordinates</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -880,7 +896,7 @@ new_dy: New dy-coordinates</p>
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -888,10 +904,11 @@ new_dy: New dy-coordinates</p>
     </div>
   
   
+  
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.1.
 </p></div>
       
     </div>
