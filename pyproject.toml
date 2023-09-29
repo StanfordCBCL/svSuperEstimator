@@ -9,7 +9,7 @@ keywords = ["parameter estimation", "simulation", "cfd"]
 dependencies = [
     "numpy<=1.23.5",
     "scipy",
-    "vtk",
+    "vtk>=9.1.0",
     "plotly",
     "kaleido", # Faster plotly image export
     "pandas",
