@@ -36,7 +36,6 @@ class ModelCalibrationLeastSquares(Task):
         "threed_solution_file": None,
         "centerline_padding": False,
         "calibrate_stenosis_coefficient": True,
-        "set_capacitance_to_zero": True,
         "initial_damping_factor": 1.0,
         **Task.DEFAULTS,
     }
@@ -178,7 +177,6 @@ class ModelCalibrationLeastSquares(Task):
         zerod_config_handler.data["calibration_parameters"] = {
             "calibrate_stenosis_coefficient": False,
             "initialize_zero": True,
-            "set_capacitance_to_zero": self.config["set_capacitance_to_zero"],
             "initial_damping_factor": self.config["initial_damping_factor"],
             "maximum_iterations": self.config["maximum_iterations"],
         }
@@ -237,17 +235,18 @@ class ModelCalibrationLeastSquares(Task):
         input_file = os.path.join(self.output_folder, "calibrator_0d.in")
         zerod_config_handler.to_file(input_file)
         calibrated_config = svzerodplus.calibrate(zerod_config_handler.data)
-        self.log("Start calibration 2")
-        zerod_config_handler.data["calibration_parameters"] = {
-            "calibrate_resistance": False,
-            "calibrate_inductance": False,
-            "calibrate_capacitance": False,
-            "calibrate_stenosis_coefficient": True,
-            "initialize_zero": False
-        }
-        zerod_config_handler.data["vessels"] = calibrated_config["vessels"]
-        zerod_config_handler.data["junctions"] = calibrated_config["junctions"]
-        calibrated_config = svzerodplus.calibrate(zerod_config_handler.data)
+        if self.config['calibrate_stenosis_coefficient']:
+            self.log("Start calibration 2")
+            zerod_config_handler.data["calibration_parameters"] = {
+                "calibrate_resistance": False,
+                "calibrate_inductance": False,
+                "calibrate_capacitance": False,
+                "calibrate_stenosis_coefficient": True,
+                "initialize_zero": False
+            }
+            zerod_config_handler.data["vessels"] = calibrated_config["vessels"]
+            zerod_config_handler.data["junctions"] = calibrated_config["junctions"]
+            calibrated_config = svzerodplus.calibrate(zerod_config_handler.data)
         with open(output_file, "w") as ff:
             json.dump(calibrated_config, ff, indent=4)
         self.log("Completed calibration")
