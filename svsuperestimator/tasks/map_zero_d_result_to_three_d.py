@@ -8,7 +8,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-import svzerodplus
+import pysvzerod
 import vtk
 from rich.progress import Progress
 from scipy.interpolate import interp1d
@@ -49,7 +49,7 @@ class MapZeroDResultToThreeD(Task):
         )
         zerod_handler.update_simparams(last_cycle_only=True)
 
-        result0d = svzerodplus.simulate(zerod_handler.data)
+        result0d = pysvzerod.simulate(zerod_handler.data)
 
         # assemble output dict
         def rec_dd() -> defaultdict:

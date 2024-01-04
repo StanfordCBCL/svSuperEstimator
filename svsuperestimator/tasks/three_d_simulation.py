@@ -6,7 +6,7 @@ import os
 from shutil import copy2, copytree, ignore_patterns
 
 import numpy as np
-import svzerodplus
+import pysvzerod
 
 from .. import reader, visualizer
 from ..reader import CenterlineHandler, SvZeroDSolverInputHandler
@@ -522,6 +522,6 @@ class AdaptiveThreeDSimulation(Task):
                 }
             ],
         }
-        result = svzerodplus.simulate(config)
+        result = pysvzerod.simulate(config)
 
         return np.array(result["pressure_out"])

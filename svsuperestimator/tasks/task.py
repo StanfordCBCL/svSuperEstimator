@@ -154,7 +154,8 @@ class Task(ABC):
         # Generate task report and export data
         self.log("Generate task report")
         self.load_database()
-        report = self.generate_report()
+        if self.config["report_html"] or self.config["report_files"]:
+            report = self.generate_report()
 
         # Export report files
         if self.config["report_files"]:

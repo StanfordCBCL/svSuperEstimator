@@ -8,7 +8,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-import svzerodplus
+import pysvzerod
 from rich.progress import BarColumn, Progress
 
 from .. import reader, visualizer
@@ -37,6 +37,7 @@ class ModelCalibrationLeastSquares(Task):
         "centerline_padding": False,
         "calibrate_stenosis_coefficient": True,
         "initial_damping_factor": 1.0,
+        "maximum_iterations": 100,
         **Task.DEFAULTS,
     }
 
@@ -64,7 +65,7 @@ class ModelCalibrationLeastSquares(Task):
             f"Loading 3D result from {self.config['threed_solution_file']}"
         )
         threed_result_handler = CenterlineHandler.from_file(
-            self.config["threed_solution_file"]
+            self.config["threed_solution_file"], padding=True
         )
 
         # Load centerline
@@ -73,12 +74,12 @@ class ModelCalibrationLeastSquares(Task):
 
         # Map centerline result to 0D element nodes
         self.log("Map 3D centerline result to 0D elements")
-        branch_data, times = taskutils.map_centerline_result_to_0d_2(
+        branch_data, times = taskutils.map_centerline_result_to_0d_3(
             zerod_config_handler,
             cl_handler,
             threed_config_handler,
             threed_result_handler,
-            padding=self.config["centerline_padding"],
+            #padding=self.config["centerline_padding"],
         )
         times_new = np.linspace(times[0], times[-1], NUM_REFINED)
 
@@ -175,8 +176,10 @@ class ModelCalibrationLeastSquares(Task):
         zerod_config_handler.data["dy"] = dy
 
         zerod_config_handler.data["calibration_parameters"] = {
-            "calibrate_stenosis_coefficient": False,
-            "initialize_zero": True,
+            "tolerance_gradient": 1e-6,
+            "tolerance_increment": 1e-10,
+            "initial_damping_factor": 1.0,
+            "calibrate_stenosis_coefficient": self.config['calibrate_stenosis_coefficient'],
             "initial_damping_factor": self.config["initial_damping_factor"],
             "maximum_iterations": self.config["maximum_iterations"],
         }
@@ -196,7 +199,7 @@ class ModelCalibrationLeastSquares(Task):
                 variable_based=True,
                 output_derivative=True,
             )
-            zerod_result = svzerodplus.simulate(zerod_config_handler_test.data)
+            zerod_result = pysvzerod.simulate(zerod_config_handler_test.data)
             with Progress(
                 " " * 20 + "Creating plots... ",
                 BarColumn(),
@@ -234,19 +237,7 @@ class ModelCalibrationLeastSquares(Task):
         output_file = os.path.join(self.output_folder, "solver_0d.in")
         input_file = os.path.join(self.output_folder, "calibrator_0d.in")
         zerod_config_handler.to_file(input_file)
-        calibrated_config = svzerodplus.calibrate(zerod_config_handler.data)
-        if self.config['calibrate_stenosis_coefficient']:
-            self.log("Start calibration 2")
-            zerod_config_handler.data["calibration_parameters"] = {
-                "calibrate_resistance": False,
-                "calibrate_inductance": False,
-                "calibrate_capacitance": False,
-                "calibrate_stenosis_coefficient": True,
-                "initialize_zero": False
-            }
-            zerod_config_handler.data["vessels"] = calibrated_config["vessels"]
-            zerod_config_handler.data["junctions"] = calibrated_config["junctions"]
-            calibrated_config = svzerodplus.calibrate(zerod_config_handler.data)
+        calibrated_config = pysvzerod.calibrate(zerod_config_handler.data)
         with open(output_file, "w") as ff:
             json.dump(calibrated_config, ff, indent=4)
         self.log("Completed calibration")
@@ -263,23 +254,22 @@ class ModelCalibrationLeastSquares(Task):
         )
         threed_config_handler = self.project["3d_simulation_input"]
         threed_result_handler = CenterlineHandler.from_file(
-            self.config["threed_solution_file"]
+            self.config["threed_solution_file"], padding=True
         )
 
         # Map centerline data to 0D elements
-        branch_data, times = taskutils.map_centerline_result_to_0d_2(
+        branch_data, times = taskutils.map_centerline_result_to_0d_3(
             zerod_config_handler,
             self.project["centerline"],
             threed_config_handler,
             threed_result_handler,
-            padding=self.config["centerline_padding"],
         )
 
         # Run simulation for both configurations
         zerod_config_handler.update_simparams(last_cycle_only=True)
         zerod_opt_config_handler.update_simparams(last_cycle_only=True)
-        zerod_result = svzerodplus.simulate(zerod_config_handler.data)
-        zerod_opt_result = svzerodplus.simulate(zerod_opt_config_handler.data)
+        zerod_result = pysvzerod.simulate(zerod_config_handler.data)
+        zerod_opt_result = pysvzerod.simulate(zerod_opt_config_handler.data)
 
         # Extract time steps of last cardiac cycle
         pts_per_cycle = zerod_config_handler.num_pts_per_cycle

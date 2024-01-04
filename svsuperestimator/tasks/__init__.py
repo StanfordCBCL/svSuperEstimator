@@ -29,6 +29,6 @@ def get_task_by_name(name: str) -> Type[Task]:
         MapZeroDResultToThreeD.TASKNAME: MapZeroDResultToThreeD,
         AdaptiveThreeDSimulation.TASKNAME: AdaptiveThreeDSimulation,
         MultiFidelityTuning.TASKNAME: MultiFidelityTuning,
-        ModelCalibrationLeastSquares.TASKNAME: ModelCalibrationLeastSquares,
+        ModelCalibrationLeastSquares.TASKNAME: ModelCalibrationLeastSquares
     }
     return task_mapping[name]

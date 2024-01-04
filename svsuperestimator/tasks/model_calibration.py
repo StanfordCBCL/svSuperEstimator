@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 import orjson
 import pandas as pd
-import svzerodplus
+import pysvzerod
 from rich import box
 from rich.table import Table
 from scipy import optimize
@@ -169,8 +169,8 @@ class ModelCalibration(Task):
         # Run simulation for both configurations
         zerod_config_handler.update_simparams(last_cycle_only=True)
         zerod_opt_config_handler.update_simparams(last_cycle_only=True)
-        zerod_result = svzerodplus.simulate(zerod_config_handler.data)
-        zerod_opt_result = svzerodplus.simulate(zerod_opt_config_handler.data)
+        zerod_result = pysvzerod.simulate(zerod_config_handler.data)
+        zerod_opt_result = pysvzerod.simulate(zerod_opt_config_handler.data)
 
         # Extract time steps of last cardiac cycle
         pts_per_cycle = zerod_config_handler.num_pts_per_cycle
@@ -627,7 +627,7 @@ class ModelCalibration(Task):
                     junction["junction_values"]["L"][i] *= args[1]
 
             try:
-                result = svzerodplus.simulate(config)
+                result = pysvzerod.simulate(config)
             except RuntimeError:
                 return np.inf
 
@@ -1003,7 +1003,7 @@ class ModelCalibration(Task):
         }
         try:
             result = np.genfromtxt(
-                svzerodplus.simulate(
+                pysvzerod.simulate(
                     orjson.dumps(
                         config,
                         option=orjson.OPT_NAIVE_UTC

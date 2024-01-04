@@ -1,13 +1,12 @@
-project: /Volumes/richter/projects/0140_2001
+project: /Volumes/richter/final_data/projects/0081_0001
 global:
   num_procs: 4
 tasks:
   model_calibration_least_squares:
-    name: calibration_least_squares
+    name: calibration_least_squares_test
     debug: False
-    zerod_config_file: /Volumes/richter/input_0d/0140_2001_0d.in
-    threed_solution_file: /Volumes/richter/72_centerline_results_martin/0140_2001.vtp
-    calibrate_stenosis_coefficient: True
+    zerod_config_file: /Volumes/richter/final_data/input_0d/0081_0001_0d.in
+    threed_solution_file: /Volumes/richter/final_data/centerline_results/0081_0001.vtp
     set_capacitance_to_zero: False
     initial_damping_factor: 1.0
     maximum_iterations: 100
@@ -15,3 +14,5 @@ tasks:
     overwrite: True
     core_run: True
     centerline_padding: True
+file_registry:
+    centerline: /Volumes/richter/final_data/centerlines/0081_0001.vtp
