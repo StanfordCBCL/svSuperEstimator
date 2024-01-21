@@ -1,0 +1,18 @@
+project: /Volumes/richter/final_data/projects/0104_0001
+global: 
+  num_procs: 12
+  overwrite: True
+tasks:
+  grid_sampling:
+    name: grid_sampling_january2024
+    zerod_config_file: /Volumes/richter/final_data/model_calibration_aug28/0104_0001_0d.in
+
+    # Total: Rp, C
+    # Works for outlet 4
+    theta_range: [[11.0, 14.0], [-8.0, -4.0]]
+
+    num_samples: 100
+    noise_factor: 0.2
+
+    # pressure, max/mean min/mean t_max/nt t_min/nt
+    y_obs: [1.267346159337098, 0.7962525939933489, 0.09803921568627451, 0.9019607843137255]

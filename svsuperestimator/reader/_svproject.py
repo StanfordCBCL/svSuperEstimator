@@ -26,7 +26,7 @@ _HANDLERS = {
 class SimVascularProject:
     """Class handling the SimVascular project folder."""
 
-    def __init__(self, folder: str, registry_override: dict) -> None:
+    def __init__(self, folder: str, registry_override: dict = None) -> None:
         """Create a new SimVascular project instance from a folder.
 
         Args:
@@ -46,8 +46,9 @@ class SimVascularProject:
         ) as ff:
             self._file_registry = yaml.full_load(ff)
 
-        for key, value in registry_override.items():
-            self._file_registry[key]["path"] = value
+        if registry_override is not None:
+            for key, value in registry_override.items():
+                self._file_registry[key]["path"] = value
 
     def __getitem__(self, key: str) -> Any:
         """Get data specified by a key.

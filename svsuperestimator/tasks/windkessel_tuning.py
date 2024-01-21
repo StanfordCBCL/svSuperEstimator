@@ -76,7 +76,6 @@ class WindkesselTuning(Task):
         # Setup forward model
         forward_model = _Forward_Model(zerod_config_handler)
 
-        # Determine target observations through one forward evaluation
         y_obs = np.array(self.config["y_obs"])
         self.log("Setting target observation to:", y_obs)
         self.database["y_obs"] = y_obs.tolist()
