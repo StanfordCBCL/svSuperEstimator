@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from multiprocessing import get_context
 from typing import Any, Optional
+import json
 
 import numpy as np
 import pysvzerod as svzerodplus
@@ -39,7 +40,7 @@ class GridSampling(Task):
         """Core routine of the task."""
 
         self.theta_range = self.config["theta_range"]
-        
+
         # Load the 0D simulation configuration
         zerod_config_handler = reader.SvZeroDSolverInputHandler.from_file(
             self.config["zerod_config_file"]
@@ -59,7 +60,10 @@ class GridSampling(Task):
         ).tolist()
 
         # Setup forward model
-        self.forward_model = _Forward_ModelRC(zerod_config_handler)
+        self.forward_model = _Forward_ModelRC(
+            zerod_config_handler,
+            os.path.join(self.output_folder, "sample_configs"),
+        )
 
         # Set target observations
         y_obs = np.array(self.config["y_obs"])
@@ -100,7 +104,14 @@ class GridSampling(Task):
         particles = np.array(self.database["particles"][-1])
         weights = np.array(self.database["weights"][-1])
         assert particles.shape[1] == 2, "Expected 2D particle space"
-        joint_plot(particles[:, 0], particles[:, 1], weights, self.config["theta_range"], os.path.join(self.output_folder, "joint_plot.png"))
+        joint_plot(
+            particles[:, 0],
+            particles[:, 1],
+            weights,
+            self.config["theta_range"],
+            os.path.join(self.output_folder, "joint_plot.png"),
+        )
+
 
 class _GridRunner:
     def __init__(
@@ -137,7 +148,11 @@ class _GridRunner:
                 console=self.console,
             ) as progress:
                 for res in progress.track(
-                    pool.imap(self.forward_model.evaluate, theta, 1),
+                    pool.imap(
+                        self.forward_model.evaluate,
+                        zip(range(len(theta)), theta),
+                        1,
+                    ),
                     total=len(theta),
                 ):
                     results.append(res)
@@ -149,7 +164,9 @@ class _GridRunner:
     def run(self) -> tuple[list, list, list]:
         ranges = [
             np.linspace(
-                self.prior_bounds[i][0], self.prior_bounds[i][1], self.num_samples
+                self.prior_bounds[i][0],
+                self.prior_bounds[i][1],
+                self.num_samples,
             )
             for i in range(self.len_theta)
         ]
@@ -164,7 +181,7 @@ class _GridRunner:
         all_weights /= np.sum(all_weights)
 
         return [all_particles], [all_weights], [all_logpost]
-    
+
 
 class _Forward_Model:
     """Windkessel tuning forward model.
@@ -173,13 +190,20 @@ class _Forward_Model:
     given total resistance.
     """
 
-    def __init__(self, zerod_config: reader.SvZeroDSolverInputHandler) -> None:
+    def __init__(
+        self,
+        zerod_config: reader.SvZeroDSolverInputHandler,
+        output_folder: str = None,
+    ) -> None:
         """Construct the forward model.
 
         Args:
             zerod_config: 0D simulation config handler.
+            output_folder: Optional output folder to write the the 0D configs to.
         """
-
+        self.output_folder = output_folder
+        if self.output_folder is not None:
+            os.makedirs(self.output_folder, exist_ok=True)
         self.based_zerod = zerod_config
         self.base_config = zerod_config.data.copy()
         self.outlet_bcs = zerod_config.outlet_boundary_conditions
@@ -204,12 +228,18 @@ class _Forward_Model:
         """Run forward simulation with base configuration and save results to csv"""
         svzerodplus.simulate(self.base_config).to_csv(filename)
 
-    def simulate(self, sample: np.ndarray) -> Solver:
+    def simulate(self, sample: np.ndarray, num: int) -> Solver:
         """Run forward simulation with sample and return the solver object"""
         config = self.base_config.copy()
 
         # Change boundary conditions (set in derived class)
         self.change_boundary_conditions(config["boundary_conditions"], sample)
+
+        if self.output_folder is not None:
+            with open(
+                os.path.join(self.output_folder, f"sample_{num}.json"), "w"
+            ) as f:
+                json.dump(config, f, indent=4)
 
         # Run simulation
         try:
@@ -227,10 +257,14 @@ class _Forward_Model:
         """Specify how boundary conditions are set with parameters"""
         raise NotImplementedError
 
-class _Forward_ModelRC(_Forward_Model):
 
-    def __init__(self, zerod_config: reader.SvZeroDSolverInputHandler) -> None:
-        super().__init__(zerod_config)
+class _Forward_ModelRC(_Forward_Model):
+    def __init__(
+        self,
+        zerod_config: reader.SvZeroDSolverInputHandler,
+        output_folder: str = None,
+    ) -> None:
+        super().__init__(zerod_config, output_folder)
 
         # Ratio to total values at each outlet
         self._total_ratio = {}
@@ -239,8 +273,7 @@ class _Forward_ModelRC(_Forward_Model):
             for bc in self.outlet_bcs.values():
                 total += bc["bc_values"][val]
             self._total_ratio[val] = [
-                bc["bc_values"][val] / total
-                for bc in self.outlet_bcs.values()
+                bc["bc_values"][val] / total for bc in self.outlet_bcs.values()
             ]
 
         self.num_params = 2
@@ -249,16 +282,28 @@ class _Forward_ModelRC(_Forward_Model):
         out_ids = range(len(self.outlet_bc_ids))
         for i, val in enumerate(["Rd", "C"]):
             for j in out_ids:
-                bc_values = boundary_conditions[self.outlet_bc_ids[j]]["bc_values"]
+                bc_values = boundary_conditions[self.outlet_bc_ids[j]][
+                    "bc_values"
+                ]
                 bc_values[val] = np.exp(sample[i]) * self._total_ratio[val][j]
 
     def evaluate(self, sample: np.ndarray) -> np.ndarray:
         """Get the pressure curve at the inlet"""
-        solver = self.simulate(sample)
+        num, sample = sample
+        solver = self.simulate(sample, num)
         if solver is None:
             return np.array([9e99] * 4)
         p_inlet = solver.get_single_result(self.inlet_dof_name)
 
-        nt = self.base_config["simulation_parameters"]["number_of_time_pts_per_cardiac_cycle"]
+        nt = self.base_config["simulation_parameters"][
+            "number_of_time_pts_per_cardiac_cycle"
+        ]
 
-        return np.array([p_inlet.max() / p_inlet.mean(), p_inlet.min() / p_inlet.mean(), p_inlet.argmax() / nt, p_inlet.argmin() / nt])
+        return np.array(
+            [
+                p_inlet.max() / p_inlet.mean(),
+                p_inlet.min() / p_inlet.mean(),
+                p_inlet.argmax() / nt,
+                p_inlet.argmin() / nt,
+            ]
+        )
