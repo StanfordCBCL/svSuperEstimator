@@ -37,5 +37,5 @@ def get_task_by_name(name: str) -> Type[Task]:
     }
     try:
         task_mapping[name]
-    except IndexError:
+    except KeyError:
         return ThreeDSimulationFromZeroDConfig
