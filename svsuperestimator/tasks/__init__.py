@@ -35,7 +35,4 @@ def get_task_by_name(name: str) -> Type[Task]:
         GridSampling.TASKNAME: GridSampling,
         ThreeDSimulationFromZeroDConfig.TASKNAME: ThreeDSimulationFromZeroDConfig
     }
-    try:
-        task_mapping[name]
-    except KeyError:
-        return ThreeDSimulationFromZeroDConfig
+    return task_mapping[name]
