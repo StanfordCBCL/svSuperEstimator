@@ -48,11 +48,14 @@ class SvZeroDSolverInputHandler(DataHandler):
 
     @property
     def junctions(self) -> dict[str, dict]:
-        """Get the vessels of the configuration."""
-        return {
-            junction["junction_name"]: junction
-            for junction in self.data["junctions"]
-        }
+        """Get the junctions of the configuration."""
+        junction_map = {}
+        for junction in self.data["junctions"]:
+            if junction["junction_type"] = "internal_junction":
+                # we no longer use interna_junction type in the zerod solver
+                junction["junction_type"] = "NORMAL_JUNCTION"
+            junction_map[junction["junction_name"]] = junction
+        return junction_map
 
     @property
     def outlet_boundary_conditions(self) -> dict[str, dict]:
