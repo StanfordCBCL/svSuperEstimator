@@ -60,7 +60,7 @@ class GridSampling(Task):
         ).tolist()
 
         # Setup forward model
-        self.forward_model = _Forward_ModelRC(
+        self.forward_model = _Forward_ModelRpRd(
             zerod_config_handler,
             os.path.join(self.output_folder, "sample_configs"),
         )
@@ -258,7 +258,7 @@ class _Forward_Model:
         raise NotImplementedError
 
 
-class _Forward_ModelRC(_Forward_Model):
+class _Forward_ModelRpRd(_Forward_Model):
     def __init__(
         self,
         zerod_config: reader.SvZeroDSolverInputHandler,
@@ -266,44 +266,63 @@ class _Forward_ModelRC(_Forward_Model):
     ) -> None:
         super().__init__(zerod_config, output_folder)
 
-        # Ratio to total values at each outlet
-        self._total_ratio = {}
-        for val in ["C", "Rp", "Rd"]:
-            total = 0.0
-            for bc in self.outlet_bcs.values():
-                total += bc["bc_values"][val]
-            self._total_ratio[val] = [
-                bc["bc_values"][val] / total for bc in self.outlet_bcs.values()
-            ]
+        self.base_config = zerod_config.data.copy()
+        self.outlet_bcs = zerod_config.outlet_boundary_conditions
+        self.outlet_bc_ids = []
+        for i, bc in enumerate(zerod_config.data["boundary_conditions"]):
+            if bc["bc_name"] in self.outlet_bcs:
+                self.outlet_bc_ids.append(i)
+        self.base_config["simulation_parameters"].update(
+            {"output_last_cycle_only": True, "output_interval": 10}
+        )
+
+        bc_node_names = zerod_config.get_bc_node_names()
+        self.inlet_dof_name = [
+            f"pressure:{n}" for n in bc_node_names if "INFLOW" in n
+        ][0]
+        self.outlet_dof_names = [
+            f"flow:{n}" for n in bc_node_names if "INFLOW" not in n
+        ]
+
+        # Distal to proximal resistance ratio at each outlet
+        self._distal_to_proximal = [
+            bc["bc_values"]["Rd"] / bc["bc_values"]["Rp"]
+            for bc in self.outlet_bcs.values()
+        ]
+
+        # Time constants for each outlet
+        self._time_constants = [
+            bc["bc_values"]["Rd"] * bc["bc_values"]["C"]
+            for bc in self.outlet_bcs.values()
+        ]
 
         self.num_params = 2
 
     def change_boundary_conditions(self, boundary_conditions, sample):
-        out_ids = range(len(self.outlet_bc_ids))
-        for i, val in enumerate(["Rd", "C"]):
-            for j in out_ids:
-                bc_values = boundary_conditions[self.outlet_bc_ids[j]][
-                    "bc_values"
-                ]
-                bc_values[val] = np.exp(sample[i]) * self._total_ratio[val][j]
+        # Set new total resistance at each outlet
+        for i, bc_id in enumerate(self.outlet_bc_ids):
+            if i == 2:
+                ki = np.exp(sample[0])
+            else:
+                ki = np.exp(sample[1])
+            bc_values = boundary_conditions[bc_id]["bc_values"]
+            bc_values["Rp"] = ki / (1.0 + self._distal_to_proximal[i])
+            bc_values["Rd"] = ki - bc_values["Rp"]
+            bc_values["C"] = self._time_constants[i] / bc_values["Rd"]
 
     def evaluate(self, sample: np.ndarray) -> np.ndarray:
         """Get the pressure curve at the inlet"""
         num, sample = sample
         solver = self.simulate(sample, num)
         if solver is None:
-            return np.array([9e99] * 4)
+            return np.array([9e99] * (len(self.outlet_dof_names) + 2))
+
+        # Extract minimum and maximum inlet pressure for last cardiac cycle
         p_inlet = solver.get_single_result(self.inlet_dof_name)
 
-        nt = self.base_config["simulation_parameters"][
-            "number_of_time_pts_per_cardiac_cycle"
+        # Extract mean outlet pressure for last cardiac cycle at each BC
+        q_outlet_mean = [
+            solver.get_single_result_avg(dof) for dof in self.outlet_dof_names
         ]
 
-        return np.array(
-            [
-                p_inlet.max() / p_inlet.mean(),
-                p_inlet.min() / p_inlet.mean(),
-                p_inlet.argmax() / nt,
-                p_inlet.argmin() / nt,
-            ]
-        )
+        return np.array([p_inlet.min(), p_inlet.max(), *q_outlet_mean])
