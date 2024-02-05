@@ -51,7 +51,7 @@ echo "$(date): Job $SLURM_JOBID finished on $SLURM_NODELIST"
 
 slurm_default = {
     "partition": "normal",
-    "walltime": "96:00:00",
+    "walltime": "48:00:00",
     "qos": "normal",
     "nodes": 2,
     "mem": "16GB",
