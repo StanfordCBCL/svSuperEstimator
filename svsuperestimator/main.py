@@ -29,18 +29,19 @@ slurm_base = """#!/bin/bash
 #SBATCH --qos={qos}
 #SBATCH --nodes={nodes}
 #SBATCH --mem={mem}
+#SBATCH --account={account}
+#SBATCH --export=ALL
 #SBATCH --ntasks-per-node={ntasks_per_node}
 
 module purge
-module load system
-module load binutils/2.38
-module load qt
+module load cpu/0.15.4
+module load shared
+module load slurm
+module load sdsc
+module load gcc/9.2.0
+module load cmake/3.18.2
 module load openmpi
-module load mesa
-module load cmake/3.23.1
-module load gcc/12.1.0
-module load x11
-module load sqlite/3.37.2
+export SLURM_MPI_TYPE=pmi2
 
 # Command
 echo "$(date): Job $SLURM_JOBID starting on $SLURM_NODELIST"
@@ -56,6 +57,7 @@ slurm_default = {
     "mem": "16GB",
     "ntasks-per-node": 24,
     "python-path": None,
+    "account": None
 }
 
 
