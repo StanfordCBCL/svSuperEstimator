@@ -346,7 +346,7 @@ class AdaptiveThreeDSimulation(Task):
         """Run svSlicer to map the volumetric 3D results on the centerline."""
         centerline_file = self.project["centerline_path"]
         self.log(f"Slicing 3D output file {three_d_result_file}")
-        num_cpus = min(self.config["num_procs"], multiprocessing.cpu_count())
+        num_cpus = min(self.config["num_procs"], 16)
         self.log(f"Using {num_cpus} parallel threads for slicing")
         run_subprocess(
             [
