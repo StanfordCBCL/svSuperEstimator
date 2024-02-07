@@ -5,6 +5,7 @@ from copy import deepcopy
 from pathlib import Path
 from time import perf_counter as time
 from typing import Any, Dict, List, Optional
+from shutil import copytree
 
 import orjson
 from rich import box
@@ -40,6 +41,7 @@ class Task(ABC):
         "debug": False,
         "core_run": True,
         "post_proc": True,
+        "temporary_output_folder": None,
     }
 
     MUST_EXIST_AT_INIT: List[str] = []
@@ -75,9 +77,13 @@ class Task(ABC):
         if self.config["name"] is None:
             self.config["name"] = prefix + self.TASKNAME  # type: ignore
 
-        self.output_folder = os.path.join(
+        self.final_output_folder = os.path.join(
             parent_folder, self.config["name"]  # type: ignore
         )
+        if self.config["temporary_output_folder"] is None:
+            self.output_folder = self.final_output_folder
+        else:
+            self.output_folder = self.config["temporary_output_folder"]
 
         if log_config:
             self.log(
@@ -88,17 +94,19 @@ class Task(ABC):
         for key, value in self.config.items():
             if key not in self.DEFAULTS:
                 self.log(f"Unused configuration option {key}")
-            if value is None:
-                raise RuntimeError(
-                    f"Required option {key} for task "
-                    f"{type(self).__name__} not specified."
-                )
+            # if value is None:
+            #     raise RuntimeError(
+            #         f"Required option {key} for task "
+            #         f"{type(self).__name__} not specified."
+            #     )
             if key in self.MUST_EXIST_AT_INIT and not os.path.exists(
                 self.config[key]
             ):
                 raise FileNotFoundError(
                     f"File {self.config[key]} does not exist."
                 )
+        if self.output_folder != self.final_output_folder:
+            copytree(self.output_folder, self.final_output_folder)
 
     @abstractmethod
     def core_run(self) -> None:
