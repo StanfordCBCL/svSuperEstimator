@@ -105,8 +105,6 @@ class Task(ABC):
                 raise FileNotFoundError(
                     f"File {self.config[key]} does not exist."
                 )
-        if self.output_folder != self.final_output_folder:
-            copytree(self.output_folder, self.final_output_folder)
 
     @abstractmethod
     def core_run(self) -> None:
@@ -198,6 +196,9 @@ class Task(ABC):
             f"{end_task-start_task:.1f} seconds"
         )
         Path(os.path.join(self.output_folder, ".completed")).touch()
+
+        if self.output_folder != self.final_output_folder:
+            copytree(self.output_folder, self.final_output_folder)
 
     def is_completed(self) -> bool:
         """Check if task is already completed."""
