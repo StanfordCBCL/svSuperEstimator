@@ -5,6 +5,7 @@ import json
 import os
 from datetime import datetime
 from typing import Any
+from time import time
 
 import numpy as np
 import pandas as pd
@@ -238,10 +239,12 @@ class ModelCalibrationLeastSquares(Task):
         output_file = os.path.join(self.output_folder, "solver_0d.in")
         input_file = os.path.join(self.output_folder, "calibrator_0d.in")
         zerod_config_handler.to_file(input_file)
+        start = time()
         calibrated_config = pysvzerod.calibrate(zerod_config_handler.data)
+        end = time()
         with open(output_file, "w") as ff:
             json.dump(calibrated_config, ff, indent=4)
-        self.log("Completed calibration")
+        self.log(f"Completed calibration in {end-start} s")
 
     def post_run(self) -> None:
         """Postprocessing routine of the task."""
