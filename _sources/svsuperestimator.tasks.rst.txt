@@ -4,6 +4,14 @@ svsuperestimator.tasks package
 Submodules
 ----------
 
+svsuperestimator.tasks.grid\_sampling module
+--------------------------------------------
+
+.. automodule:: svsuperestimator.tasks.grid_sampling
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 svsuperestimator.tasks.map\_zero\_d\_result\_to\_three\_d module
 ----------------------------------------------------------------
 
@@ -72,6 +80,14 @@ svsuperestimator.tasks.three\_d\_simulation module
 --------------------------------------------------
 
 .. automodule:: svsuperestimator.tasks.three_d_simulation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+svsuperestimator.tasks.three\_d\_simulation\_from\_zero\_d\_config module
+-------------------------------------------------------------------------
+
+.. automodule:: svsuperestimator.tasks.three_d_simulation_from_zero_d_config
    :members:
    :undoc-members:
    :show-inheritance:
