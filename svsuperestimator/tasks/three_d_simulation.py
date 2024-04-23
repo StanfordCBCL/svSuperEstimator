@@ -175,7 +175,7 @@ class AdaptiveThreeDSimulation(Task):
                     self.output_folder, f"result_cycle_{i+1}.vtp"
                 )
                 cl_handler_current = CenterlineHandler.from_file(
-                    current_centerline_result
+                    current_centerline_result,
                 )
 
                 # Map centerline 3D result to the 0D elements (helps to extract
@@ -198,9 +198,11 @@ class AdaptiveThreeDSimulation(Task):
 
                 error_string = ""
                 if bc_name != "INFLOW":
-                    error = self.database["asymptotic_errors"][i][bc_name]
-
-                    error_string += f" ({error*100:.1f}%)"
+                    try:
+                        error = self.database["asymptotic_errors"][i][bc_name]
+                        error_string += f" ({error*100:.1f}%)"
+                    except KeyError:
+                        pass
 
                 pressure_plot.add_line_trace(
                     x=times,

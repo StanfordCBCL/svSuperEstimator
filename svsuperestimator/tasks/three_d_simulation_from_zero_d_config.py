@@ -12,7 +12,6 @@ from .windkessel_tuning import WindkesselTuning
 
 
 class ThreeDSimulationFromZeroDConfig(Task):
-
     TASKNAME = "three_d_simulation_from_zero_d_config"
     DEFAULTS: dict[str, Any] = {
         "zerod_config_file": None,
@@ -79,7 +78,11 @@ class ThreeDSimulationFromZeroDConfig(Task):
                 "svsolver_executable": self.config["svsolver_executable"],
                 "svpost_executable": self.config["svpost_executable"],
                 "svslicer_executable": self.config["svslicer_executable"],
-                "temporary_output_folder": os.path.join("/scratch", os.environ["USER"], f"job_{os.environ['SLURM_JOB_ID']}"),
+                "temporary_output_folder": os.path.join(
+                    "/scratch",
+                    os.environ["USER"],
+                    f"job_{os.environ['SLURM_JOB_ID']}",
+                ),
                 **global_config,
                 **self.config[AdaptiveThreeDSimulation.TASKNAME],
             },

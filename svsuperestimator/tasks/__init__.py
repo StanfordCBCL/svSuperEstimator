@@ -23,7 +23,9 @@ def get_task_by_name(name: str) -> Type[Task]:
     from .three_d_simulation import AdaptiveThreeDSimulation
     from .windkessel_tuning import WindkesselTuning
     from .grid_sampling import GridSampling
-    from .three_d_simulation_from_zero_d_config import ThreeDSimulationFromZeroDConfig
+    from .three_d_simulation_from_zero_d_config import (
+        ThreeDSimulationFromZeroDConfig,
+    )
 
     task_mapping = {
         ModelCalibration.TASKNAME: ModelCalibration,
@@ -33,6 +35,6 @@ def get_task_by_name(name: str) -> Type[Task]:
         MultiFidelityTuning.TASKNAME: MultiFidelityTuning,
         ModelCalibrationLeastSquares.TASKNAME: ModelCalibrationLeastSquares,
         GridSampling.TASKNAME: GridSampling,
-        ThreeDSimulationFromZeroDConfig.TASKNAME: ThreeDSimulationFromZeroDConfig
+        ThreeDSimulationFromZeroDConfig.TASKNAME: ThreeDSimulationFromZeroDConfig,
     }
     return task_mapping[name]

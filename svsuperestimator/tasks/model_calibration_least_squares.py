@@ -79,7 +79,6 @@ class ModelCalibrationLeastSquares(Task):
             cl_handler,
             threed_config_handler,
             threed_result_handler,
-            #padding=self.config["centerline_padding"],
         )
         times_new = np.linspace(times[0], times[-1], NUM_REFINED)
 
@@ -179,7 +178,9 @@ class ModelCalibrationLeastSquares(Task):
             "tolerance_gradient": 1e-6,
             "tolerance_increment": 1e-10,
             "initial_damping_factor": 1.0,
-            "calibrate_stenosis_coefficient": self.config['calibrate_stenosis_coefficient'],
+            "calibrate_stenosis_coefficient": self.config[
+                "calibrate_stenosis_coefficient"
+            ],
             "initial_damping_factor": self.config["initial_damping_factor"],
             "maximum_iterations": self.config["maximum_iterations"],
         }

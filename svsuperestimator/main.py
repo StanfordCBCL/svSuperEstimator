@@ -57,7 +57,7 @@ slurm_default = {
     "mem": "16GB",
     "ntasks-per-node": 24,
     "python-path": None,
-    "account": None
+    "account": None,
 }
 
 
@@ -80,7 +80,9 @@ def run_file(path: str) -> None:
     MAIN_CONSOLE.log(
         f"Loading project [bold magenta]{project_folder}[/bold magenta]"
     )
-    project = SimVascularProject(project_folder, config.get("file_registry", {}))
+    project = SimVascularProject(
+        project_folder, config.get("file_registry", {})
+    )
 
     global_setting = config.get("global", {})
 
@@ -169,7 +171,9 @@ def run_from_config(config: dict) -> None:
     MAIN_CONSOLE.log(
         f"Loading project [bold magenta]{project_folder}[/bold magenta]"
     )
-    project = SimVascularProject(project_folder, config.get("file_registry", {}))
+    project = SimVascularProject(
+        project_folder, config.get("file_registry", {})
+    )
 
     global_setting = config.get("global", {})
 

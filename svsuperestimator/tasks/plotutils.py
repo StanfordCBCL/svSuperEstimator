@@ -85,29 +85,38 @@ def create_3d_geometry_plot_with_vessels(
 
     return plot
 
-def joint_plot(x: np.ndarray, y: np.ndarray, weights: np.ndarray, lims: list, output_path: str, color_map: str="BuGn"):
 
+def joint_plot(
+    x: np.ndarray,
+    y: np.ndarray,
+    weights: np.ndarray,
+    lims: list,
+    output_path: str,
+    color_map: str = "BuGn",
+):
     plot = sns.JointGrid()
 
     # Create kernel density plot for joint plot
     sns.kdeplot(
-        x=x, 
+        x=x,
         y=y,
         weights=weights,
-        color='r',
+        color="r",
         fill=True,
         cmap="BuGn",
         ax=plot.ax_joint,
-        thresh=0.01
+        thresh=0.01,
     )
 
     # Get color for marginal plots
     cmap = plt.get_cmap(color_map)
     color = np.array(cmap(1000))[:-1]
-    
+
     # Create marginal plots
     plot.ax_marg_x.hist(x=x, weights=weights, color=color, alpha=0.5)
-    plot.ax_marg_y.hist(x=y, weights=weights, orientation="horizontal", color=color, alpha=0.5)
+    plot.ax_marg_y.hist(
+        x=y, weights=weights, orientation="horizontal", color=color, alpha=0.5
+    )
 
     # Set limits
     plot.ax_joint.set_xlim(lims[0])

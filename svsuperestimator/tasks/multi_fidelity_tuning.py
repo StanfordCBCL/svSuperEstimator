@@ -153,9 +153,15 @@ class MultiFidelityTuning(Task):
                         "result.vtp",
                     ),
                     "num_procs": self.config["num_procs"],
-                    "calibrate_stenosis_coefficient": self.config["lsq_calibrate_stenosis_coefficient"],
-                    "initial_damping_factor": self.config["lsq_initial_damping_factor"],
-                    "maximum_iterations": self.config["lsq_maximum_iterations"],
+                    "calibrate_stenosis_coefficient": self.config[
+                        "lsq_calibrate_stenosis_coefficient"
+                    ],
+                    "initial_damping_factor": self.config[
+                        "lsq_initial_damping_factor"
+                    ],
+                    "maximum_iterations": self.config[
+                        "lsq_maximum_iterations"
+                    ],
                     **global_config,
                     **self.config[ModelCalibrationLeastSquares.TASKNAME],
                 },
