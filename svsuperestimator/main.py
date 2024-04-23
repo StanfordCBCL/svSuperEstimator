@@ -96,6 +96,7 @@ def run_file(path: str, slurm_base=slurm_base_sherlock) -> None:
 
     Args:
         path: Path to configuration file.
+        slurm_base: Which template to use for creating the SLURM file.
     """
 
     MAIN_CONSOLE.log(

@@ -94,6 +94,16 @@ def joint_plot(
     output_path: str,
     color_map: str = "BuGn",
 ):
+    """Create a joint grid plot for particles.
+
+    Args:
+        x: X-coordinates of the particles.
+        y: Y-coordinates of the particles.
+        weights: Weights of the particles.
+        lims: X and Y limits.
+        output_path: Target path for the figure.
+        color_map: Color map.
+    """
     plot = sns.JointGrid()
 
     # Create kernel density plot for joint plot

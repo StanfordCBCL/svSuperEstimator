@@ -20,7 +20,7 @@ from .task import Task
 
 
 class GridSampling(Task):
-    """GridSamlping task"""
+    """GridSamlping task."""
 
     TASKNAME = "grid_sampling"
 
@@ -99,6 +99,7 @@ class GridSampling(Task):
         )
 
     def generate_report(self) -> visualizer.Report:
+        """Generate the task report."""
         particles = np.array(self.database["particles"][-1])
         weights = np.array(self.database["weights"][-1])
         assert particles.shape[1] == 2, "Expected 2D particle space"
@@ -219,15 +220,15 @@ class _Forward_Model:
         ]
 
     def to_file(self, filename: str):
-        """Write configuration to 0D input file"""
+        """Write configuration to 0D input file."""
         self.based_zerod.to_file(filename)
 
     def simulate_csv(self, filename: str):
-        """Run forward simulation with base configuration and save results to csv"""
+        """Run forward simulation with base configuration and save results to csv."""
         svzerodplus.simulate(self.base_config).to_csv(filename)
 
     def simulate(self, sample: np.ndarray, num: int) -> Solver:
-        """Run forward simulation with sample and return the solver object"""
+        """Run forward simulation with sample and return the solver object."""
         config = self.base_config.copy()
 
         # Change boundary conditions (set in derived class)
@@ -248,11 +249,11 @@ class _Forward_Model:
             return None
 
     def evaluate(self, sample: np.ndarray) -> np.ndarray:
-        """Objective function for the optimization"""
+        """Objective function for the optimization."""
         raise NotImplementedError
 
     def change_boundary_conditions(self, boundary_conditions, sample):
-        """Specify how boundary conditions are set with parameters"""
+        """Specify how boundary conditions are set with parameters."""
         raise NotImplementedError
 
 
@@ -309,7 +310,7 @@ class _Forward_ModelRpRd(_Forward_Model):
             bc_values["C"] = self._time_constants[i] / bc_values["Rd"]
 
     def evaluate(self, sample: np.ndarray) -> np.ndarray:
-        """Get the pressure curve at the inlet"""
+        """Get the pressure curve at the inlet."""
         num, sample = sample
         solver = self.simulate(sample, num)
         if solver is None:

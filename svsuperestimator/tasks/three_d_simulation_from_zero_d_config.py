@@ -12,6 +12,8 @@ from .windkessel_tuning import WindkesselTuning
 
 
 class ThreeDSimulationFromZeroDConfig(Task):
+    """3D Simulation task based on 0D config file."""
+
     TASKNAME = "three_d_simulation_from_zero_d_config"
     DEFAULTS: dict[str, Any] = {
         "zerod_config_file": None,
