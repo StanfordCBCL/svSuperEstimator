@@ -1,4 +1,5 @@
 """This module holds the SvSolverInputHandler class."""
+
 from __future__ import annotations
 
 import re

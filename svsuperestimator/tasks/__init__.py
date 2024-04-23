@@ -2,6 +2,7 @@
 
 Contains all the tasks for performing multi-fidelity parameter estimation.
 """
+
 from typing import Type
 
 from .task import Task
@@ -16,11 +17,15 @@ def get_task_by_name(name: str) -> Type[Task]:
     Returns:
         cls: Class of the task.
     """
+    from .grid_sampling import GridSampling
     from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
     from .model_calibration import ModelCalibration
     from .model_calibration_least_squares import ModelCalibrationLeastSquares
     from .multi_fidelity_tuning import MultiFidelityTuning
     from .three_d_simulation import AdaptiveThreeDSimulation
+    from .three_d_simulation_from_zero_d_config import (
+        ThreeDSimulationFromZeroDConfig,
+    )
     from .windkessel_tuning import WindkesselTuning
 
     task_mapping = {
@@ -30,5 +35,7 @@ def get_task_by_name(name: str) -> Type[Task]:
         AdaptiveThreeDSimulation.TASKNAME: AdaptiveThreeDSimulation,
         MultiFidelityTuning.TASKNAME: MultiFidelityTuning,
         ModelCalibrationLeastSquares.TASKNAME: ModelCalibrationLeastSquares,
+        GridSampling.TASKNAME: GridSampling,
+        ThreeDSimulationFromZeroDConfig.TASKNAME: ThreeDSimulationFromZeroDConfig,
     }
     return task_mapping[name]

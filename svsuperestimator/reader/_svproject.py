@@ -1,4 +1,5 @@
 """This module holds the SimVascularProject class."""
+
 import os
 from typing import Any, Dict
 
@@ -26,11 +27,13 @@ _HANDLERS = {
 class SimVascularProject:
     """Class handling the SimVascular project folder."""
 
-    def __init__(self, folder: str) -> None:
+    def __init__(self, folder: str, registry_override: dict = None) -> None:
         """Create a new SimVascular project instance from a folder.
 
         Args:
             folder: SimVascular project folder.
+            registry_override: Overwrite file names from the default in
+                sv_file_registry.yaml.
         """
         self._folder = os.path.abspath(folder)
         self._regex: Dict[str, str] = {
@@ -43,6 +46,10 @@ class SimVascularProject:
             os.path.join(os.path.dirname(__file__), "sv_file_registry.yaml")
         ) as ff:
             self._file_registry = yaml.full_load(ff)
+
+        if registry_override is not None:
+            for key, value in registry_override.items():
+                self._file_registry[key]["path"] = value
 
     def __getitem__(self, key: str) -> Any:
         """Get data specified by a key.

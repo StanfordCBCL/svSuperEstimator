@@ -1,4 +1,5 @@
 """This module contains input/output utils."""
+
 from typing import Optional
 
 import numpy as np
@@ -38,9 +39,9 @@ def get_0d_element_coordinates(
         branchdata[branch_id][seg_id]["length"] = vessel_config[
             "vessel_length"
         ]
-        branchdata[branch_id][seg_id][
-            "boundary_conditions"
-        ] = vessel_config.get("boundary_conditions", {})
+        branchdata[branch_id][seg_id]["boundary_conditions"] = (
+            vessel_config.get("boundary_conditions", {})
+        )
 
     for branch_id, branch in branchdata.items():
         branch_data = cl_handler.get_branch_data(branch_id)
@@ -63,13 +64,13 @@ def get_0d_element_coordinates(
             }
 
             if "inlet" in segment["boundary_conditions"]:
-                elements[
-                    segment["boundary_conditions"]["inlet"]
-                ] = branch_data["points"][seg_start_index]
+                elements[segment["boundary_conditions"]["inlet"]] = (
+                    branch_data["points"][seg_start_index]
+                )
             if "outlet" in segment["boundary_conditions"]:
-                elements[
-                    segment["boundary_conditions"]["outlet"]
-                ] = branch_data["points"][seg_end_index]
+                elements[segment["boundary_conditions"]["outlet"]] = (
+                    branch_data["points"][seg_end_index]
+                )
 
             seg_start = seg_end
             seg_start_index = seg_end_index

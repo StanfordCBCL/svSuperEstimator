@@ -1,4 +1,5 @@
 """This module holds the SvSolverRcrHandler class."""
+
 from ._plain_handler import PlainHandler
 
 

@@ -1,4 +1,5 @@
 """This module holds various plotting classes."""
+
 from __future__ import annotations
 
 from typing import Any, Optional, Sequence, Union

@@ -1,4 +1,5 @@
 """This module holds the SvSolverInflowHandler class."""
+
 from __future__ import annotations
 
 from ._plain_handler import PlainHandler

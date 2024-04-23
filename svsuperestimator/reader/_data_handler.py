@@ -1,4 +1,5 @@
 """This module holds the DataHandler class."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

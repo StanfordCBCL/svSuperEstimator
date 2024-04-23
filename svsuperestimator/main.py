@@ -1,4 +1,5 @@
 """Main routine of svSuperEstimator."""
+
 import os
 import platform
 import sys
@@ -19,7 +20,8 @@ if os.environ.get("COLUMNS") is None:
     os.environ["COLUMNS"] = "180"
 MAIN_CONSOLE = Console(log_time_format="[%m/%d/%y %H:%M:%S]")
 
-slurm_base = """#!/bin/bash
+
+slurm_base_sherlock = """#!/bin/bash
 
 #SBATCH --job-name=estimator
 #SBATCH --partition={partition}
@@ -48,22 +50,54 @@ echo "$(date): Job $SLURM_JOBID starting on $SLURM_NODELIST"
 echo "$(date): Job $SLURM_JOBID finished on $SLURM_NODELIST"
 """
 
+slurm_base_expanse = """#!/bin/bash
+
+#SBATCH --job-name=estimator
+#SBATCH --partition={partition}
+#SBATCH --output={logfile}
+#SBATCH --error={logfile}
+#SBATCH --time={walltime}
+#SBATCH --qos={qos}
+#SBATCH --nodes={nodes}
+#SBATCH --mem={mem}
+#SBATCH --account={account}
+#SBATCH --export=ALL
+#SBATCH --ntasks-per-node={ntasks_per_node}
+
+module purge
+module load cpu/0.15.4
+module load shared
+module load slurm
+module load sdsc
+module load gcc/9.2.0
+module load cmake/3.18.2
+module load openmpi
+export SLURM_MPI_TYPE=pmi2
+
+# Command
+echo "$(date): Job $SLURM_JOBID starting on $SLURM_NODELIST"
+{python_path} {estimator_path} {config_file}
+echo "$(date): Job $SLURM_JOBID finished on $SLURM_NODELIST"
+"""
+
 slurm_default = {
     "partition": "normal",
-    "walltime": "96:00:00",
+    "walltime": "48:00:00",
     "qos": "normal",
     "nodes": 2,
     "mem": "16GB",
     "ntasks-per-node": 24,
     "python-path": None,
+    "account": None,
 }
 
 
-def run_file(path: str) -> None:
+def run_file(path: str, slurm_base=slurm_base_sherlock) -> None:
     """Run svSuperEstimator from a configuration file.
 
     Args:
         path: Path to configuration file.
+        slurm_base: Which template to use for creating the SLURM file.
     """
 
     MAIN_CONSOLE.log(
@@ -78,7 +112,9 @@ def run_file(path: str) -> None:
     MAIN_CONSOLE.log(
         f"Loading project [bold magenta]{project_folder}[/bold magenta]"
     )
-    project = SimVascularProject(project_folder)
+    project = SimVascularProject(
+        project_folder, config.get("file_registry", {})
+    )
 
     global_setting = config.get("global", {})
 
@@ -167,7 +203,9 @@ def run_from_config(config: dict) -> None:
     MAIN_CONSOLE.log(
         f"Loading project [bold magenta]{project_folder}[/bold magenta]"
     )
-    project = SimVascularProject(project_folder)
+    project = SimVascularProject(
+        project_folder, config.get("file_registry", {})
+    )
 
     global_setting = config.get("global", {})
 

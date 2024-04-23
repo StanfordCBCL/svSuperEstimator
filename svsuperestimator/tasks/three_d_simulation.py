@@ -1,12 +1,12 @@
 """This module holds the ThreeDSimulation task."""
+
 from __future__ import annotations
 
-import multiprocessing
 import os
 from shutil import copy2, copytree, ignore_patterns
 
 import numpy as np
-from svzerodsolver import runnercpp
+import pysvzerod
 
 from .. import reader, visualizer
 from ..reader import CenterlineHandler, SvZeroDSolverInputHandler
@@ -175,7 +175,7 @@ class AdaptiveThreeDSimulation(Task):
                     self.output_folder, f"result_cycle_{i+1}.vtp"
                 )
                 cl_handler_current = CenterlineHandler.from_file(
-                    current_centerline_result
+                    current_centerline_result,
                 )
 
                 # Map centerline 3D result to the 0D elements (helps to extract
@@ -198,9 +198,11 @@ class AdaptiveThreeDSimulation(Task):
 
                 error_string = ""
                 if bc_name != "INFLOW":
-                    error = self.database["asymptotic_errors"][i][bc_name]
-
-                    error_string += f" ({error*100:.1f}%)"
+                    try:
+                        error = self.database["asymptotic_errors"][i][bc_name]
+                        error_string += f" ({error*100:.1f}%)"
+                    except KeyError:
+                        pass
 
                 pressure_plot.add_line_trace(
                     x=times,
@@ -346,7 +348,7 @@ class AdaptiveThreeDSimulation(Task):
         """Run svSlicer to map the volumetric 3D results on the centerline."""
         centerline_file = self.project["centerline_path"]
         self.log(f"Slicing 3D output file {three_d_result_file}")
-        num_cpus = min(self.config["num_procs"], multiprocessing.cpu_count())
+        num_cpus = min(self.config["num_procs"], 16)
         self.log(f"Using {num_cpus} parallel threads for slicing")
         run_subprocess(
             [
@@ -522,6 +524,6 @@ class AdaptiveThreeDSimulation(Task):
                 }
             ],
         }
-        result = runnercpp.run_from_config(config)
+        result = pysvzerod.simulate(config)
 
         return np.array(result["pressure_out"])

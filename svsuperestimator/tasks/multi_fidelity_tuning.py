@@ -1,4 +1,5 @@
 """This module holds the MultiFidelityTuning task."""
+
 from __future__ import annotations
 
 import os
@@ -17,7 +18,6 @@ class MultiFidelityTuning(Task):
     TASKNAME = "multi_fidelity_tuning"
     DEFAULTS: dict[str, Any] = {
         "num_procs": 1,
-        "num_iter": 1,
         "theta_obs": None,
         "y_obs": None,
         "smc_num_particles": 100,
@@ -30,11 +30,13 @@ class MultiFidelityTuning(Task):
         "three_d_max_asymptotic_error": 0.001,
         "three_d_max_cardiac_cycles": 10,
         "three_d_time_step_size": "auto",
+        "lsq_calibrate_stenosis_coefficient": True,
+        "lsq_initial_damping_factor": 1.0,
+        "lsq_maximum_iterations": 100,
         "svpre_executable": None,
         "svsolver_executable": None,
         "svpost_executable": None,
         "svslicer_executable": None,
-        "svzerodcalibrator_executable": None,
         WindkesselTuning.TASKNAME: {},
         MapZeroDResultToThreeD.TASKNAME: {},
         AdaptiveThreeDSimulation.TASKNAME: {},
@@ -68,7 +70,7 @@ class MultiFidelityTuning(Task):
                 f"{self.config['three_d_theta_source']}"
             )
 
-        for i in range(self.config["num_iter"]):
+        for i in range(2):
             windkessel_task = WindkesselTuning(
                 project=self.project,
                 config={
@@ -95,6 +97,8 @@ class MultiFidelityTuning(Task):
                 parent_folder=self.output_folder,
             )
             task_sequence.append(windkessel_task)
+            if i >= 1:
+                break
             map_zero_three_task = MapZeroDResultToThreeD(
                 project=self.project,
                 config={
@@ -149,10 +153,16 @@ class MultiFidelityTuning(Task):
                         three_d_sim_task.output_folder,
                         "result.vtp",
                     ),
-                    "svzerodcalibrator_executable": self.config[
-                        "svzerodcalibrator_executable"
-                    ],
                     "num_procs": self.config["num_procs"],
+                    "calibrate_stenosis_coefficient": self.config[
+                        "lsq_calibrate_stenosis_coefficient"
+                    ],
+                    "initial_damping_factor": self.config[
+                        "lsq_initial_damping_factor"
+                    ],
+                    "maximum_iterations": self.config[
+                        "lsq_maximum_iterations"
+                    ],
                     **global_config,
                     **self.config[ModelCalibrationLeastSquares.TASKNAME],
                 },

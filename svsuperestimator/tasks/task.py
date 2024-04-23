@@ -1,8 +1,10 @@
 """This module holds the Task base class."""
+
 import os
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from pathlib import Path
+from shutil import copytree
 from time import perf_counter as time
 from typing import Any, Dict, List, Optional
 
@@ -40,6 +42,7 @@ class Task(ABC):
         "debug": False,
         "core_run": True,
         "post_proc": True,
+        "temporary_output_folder": None,
     }
 
     MUST_EXIST_AT_INIT: List[str] = []
@@ -75,9 +78,13 @@ class Task(ABC):
         if self.config["name"] is None:
             self.config["name"] = prefix + self.TASKNAME  # type: ignore
 
-        self.output_folder = os.path.join(
+        self.final_output_folder = os.path.join(
             parent_folder, self.config["name"]  # type: ignore
         )
+        if self.config["temporary_output_folder"] is None:
+            self.output_folder = self.final_output_folder
+        else:
+            self.output_folder = self.config["temporary_output_folder"]
 
         if log_config:
             self.log(
@@ -154,7 +161,8 @@ class Task(ABC):
         # Generate task report and export data
         self.log("Generate task report")
         self.load_database()
-        report = self.generate_report()
+        if self.config["report_html"] or self.config["report_files"]:
+            report = self.generate_report()
 
         # Export report files
         if self.config["report_files"]:
@@ -189,6 +197,9 @@ class Task(ABC):
             f"{end_task-start_task:.1f} seconds"
         )
         Path(os.path.join(self.output_folder, ".completed")).touch()
+
+        if self.output_folder != self.final_output_folder:
+            copytree(self.output_folder, self.final_output_folder)
 
     def is_completed(self) -> bool:
         """Check if task is already completed."""
