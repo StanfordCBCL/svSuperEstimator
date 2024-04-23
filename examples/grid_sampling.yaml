@@ -6,13 +6,8 @@ tasks:
   grid_sampling:
     name: grid_sampling_february2024
     zerod_config_file: /Volumes/richter/final_data/model_calibration_aug28/0104_0001_0d.in
-
-    # Total: Rp, C
-    # Works for outlet 4
     theta_range: [[2.0, 8.0], [3.0, 6.0]]
-
     num_samples: 100
     noise_factor: 0.3
-
     # pressure, max/mean min/mean t_max/nt t_min/nt
     y_obs: [9.32312464e+04, 1.77669235e+05, 7.44259475e+00, 3.38493067e+01, 6.52259072e+00, 2.25376025e+00, 6.43813231e+00]

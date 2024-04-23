@@ -94,11 +94,11 @@ class Task(ABC):
         for key, value in self.config.items():
             if key not in self.DEFAULTS:
                 self.log(f"Unused configuration option {key}")
-            # if value is None:
-            #     raise RuntimeError(
-            #         f"Required option {key} for task "
-            #         f"{type(self).__name__} not specified."
-            #     )
+            if value is None:
+                raise RuntimeError(
+                    f"Required option {key} for task "
+                    f"{type(self).__name__} not specified."
+                )
             if key in self.MUST_EXIST_AT_INIT and not os.path.exists(
                 self.config[key]
             ):

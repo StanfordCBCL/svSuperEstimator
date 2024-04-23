@@ -234,7 +234,7 @@ class ModelCalibrationLeastSquares(Task):
                     plot.to_image(os.path.join(debug_folder, f"{key}_dy.png"))
 
         # Run calibration
-        self.log("Start calibration 1")
+        self.log("Start calibration")
         output_file = os.path.join(self.output_folder, "solver_0d.in")
         input_file = os.path.join(self.output_folder, "calibrator_0d.in")
         zerod_config_handler.to_file(input_file)
