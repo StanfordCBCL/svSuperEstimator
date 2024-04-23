@@ -1,4 +1,5 @@
 """This module holds the Report class."""
+
 from __future__ import annotations
 
 import os

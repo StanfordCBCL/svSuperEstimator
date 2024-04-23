@@ -1,4 +1,5 @@
 """This module holds the Task base class."""
+
 import os
 from abc import ABC, abstractmethod
 from copy import deepcopy

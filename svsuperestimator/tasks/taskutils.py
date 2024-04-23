@@ -1,4 +1,5 @@
 """This module holds general task helper function."""
+
 import subprocess
 from time import sleep
 from typing import Callable, Optional, Sequence, Tuple, Union
@@ -420,12 +421,12 @@ def set_initial_condition(
         if len(junction["outlet_vessels"]) > 1:
             for i, outlet_vessel in enumerate(junction["outlet_vessels"]):
                 ovessel_name = vessel_id_map[outlet_vessel]
-                initial_condition[
-                    f"flow_{i}:{junction_name}"
-                ] = initial_condition[f"flow:{junction_name}:{ovessel_name}"]
-                initial_condition_d[
-                    f"flow_{i}:{junction_name}"
-                ] = initial_condition_d[f"flow:{junction_name}:{ovessel_name}"]
+                initial_condition[f"flow_{i}:{junction_name}"] = (
+                    initial_condition[f"flow:{junction_name}:{ovessel_name}"]
+                )
+                initial_condition_d[f"flow_{i}:{junction_name}"] = (
+                    initial_condition_d[f"flow:{junction_name}:{ovessel_name}"]
+                )
 
     zerod_handler.data["initial_condition"] = initial_condition
     zerod_handler.data["initial_condition_d"] = initial_condition_d

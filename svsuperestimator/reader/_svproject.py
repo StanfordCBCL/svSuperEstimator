@@ -1,4 +1,5 @@
 """This module holds the SimVascularProject class."""
+
 import os
 from typing import Any, Dict
 

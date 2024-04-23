@@ -1,4 +1,5 @@
 """This module holds the ModelCalibrationLeastSquares task."""
+
 from __future__ import annotations
 
 import json
@@ -135,13 +136,13 @@ class ModelCalibrationLeastSquares(Task):
                     NUM_REFINED,
                 )
 
-                y[
-                    f"pressure:{branch_name}:{connection[1]}"
-                ] = pressure.tolist()
+                y[f"pressure:{branch_name}:{connection[1]}"] = (
+                    pressure.tolist()
+                )
                 y[f"flow:{branch_name}:{connection[1]}"] = flow.tolist()
-                dy[
-                    f"pressure:{branch_name}:{connection[1]}"
-                ] = dpressure.tolist()
+                dy[f"pressure:{branch_name}:{connection[1]}"] = (
+                    dpressure.tolist()
+                )
                 dy[f"flow:{branch_name}:{connection[1]}"] = dflow.tolist()
 
             if connection[1].startswith("branch"):
@@ -163,13 +164,13 @@ class ModelCalibrationLeastSquares(Task):
                     NUM_REFINED,
                 )
 
-                y[
-                    f"pressure:{connection[0]}:{branch_name}"
-                ] = pressure.tolist()
+                y[f"pressure:{connection[0]}:{branch_name}"] = (
+                    pressure.tolist()
+                )
                 y[f"flow:{connection[0]}:{branch_name}"] = flow.tolist()
-                dy[
-                    f"pressure:{connection[0]}:{branch_name}"
-                ] = dpressure.tolist()
+                dy[f"pressure:{connection[0]}:{branch_name}"] = (
+                    dpressure.tolist()
+                )
                 dy[f"flow:{connection[0]}:{branch_name}"] = dflow.tolist()
 
         zerod_config_handler.data["y"] = y

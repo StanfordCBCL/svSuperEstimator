@@ -1,4 +1,5 @@
 """This module holds the GridSampling task."""
+
 from __future__ import annotations
 
 import json

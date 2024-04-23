@@ -1,4 +1,5 @@
 """This module holds task helper function related to plotting."""
+
 from __future__ import annotations
 
 from typing import Any

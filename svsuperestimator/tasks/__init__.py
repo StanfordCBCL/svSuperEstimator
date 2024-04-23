@@ -2,6 +2,7 @@
 
 Contains all the tasks for performing multi-fidelity parameter estimation.
 """
+
 from typing import Type
 
 from .task import Task

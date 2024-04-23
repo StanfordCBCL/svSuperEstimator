@@ -1,4 +1,5 @@
 """This module holds the CenterlineHandler class."""
+
 import os
 from typing import Type, TypeVar
 

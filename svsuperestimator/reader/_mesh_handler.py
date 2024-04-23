@@ -1,4 +1,5 @@
 """This module holds the MeshHandler class."""
+
 from __future__ import annotations
 
 import numpy as np

@@ -1,4 +1,5 @@
 """This module holds the ThreeDSimulation task."""
+
 from __future__ import annotations
 
 import os
