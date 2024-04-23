@@ -3,9 +3,9 @@ import os
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from pathlib import Path
+from shutil import copytree
 from time import perf_counter as time
 from typing import Any, Dict, List, Optional
-from shutil import copytree
 
 import orjson
 from rich import box

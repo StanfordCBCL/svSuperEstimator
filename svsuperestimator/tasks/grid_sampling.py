@@ -1,23 +1,21 @@
 """This module holds the GridSampling task."""
 from __future__ import annotations
 
-import seaborn as sns
-import matplotlib.pyplot as plt
+import json
+import os
 from datetime import datetime
 from multiprocessing import get_context
 from typing import Any, Optional
-import json
 
 import numpy as np
 import pysvzerod as svzerodplus
+from pysvzerod import Solver
 from rich.progress import BarColumn, Progress
 from scipy import stats
-from pysvzerod import Solver
-import os
-from .plotutils import joint_plot
 
 from .. import reader, visualizer
 from . import taskutils
+from .plotutils import joint_plot
 from .task import Task
 
 

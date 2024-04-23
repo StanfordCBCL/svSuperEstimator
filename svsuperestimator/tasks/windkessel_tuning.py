@@ -14,9 +14,9 @@ import particles
 import pysvzerod
 from particles import distributions as dists
 from particles import smc_samplers as ssp
+from pysvzerod import Solver
 from rich.progress import BarColumn, Progress
 from scipy import stats
-from pysvzerod import Solver
 
 from .. import reader, visualizer
 from ..reader import utils as readutils

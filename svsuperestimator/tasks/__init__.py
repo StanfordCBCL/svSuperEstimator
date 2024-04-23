@@ -16,16 +16,16 @@ def get_task_by_name(name: str) -> Type[Task]:
     Returns:
         cls: Class of the task.
     """
+    from .grid_sampling import GridSampling
     from .map_zero_d_result_to_three_d import MapZeroDResultToThreeD
     from .model_calibration import ModelCalibration
     from .model_calibration_least_squares import ModelCalibrationLeastSquares
     from .multi_fidelity_tuning import MultiFidelityTuning
     from .three_d_simulation import AdaptiveThreeDSimulation
-    from .windkessel_tuning import WindkesselTuning
-    from .grid_sampling import GridSampling
     from .three_d_simulation_from_zero_d_config import (
         ThreeDSimulationFromZeroDConfig,
     )
+    from .windkessel_tuning import WindkesselTuning
 
     task_mapping = {
         ModelCalibration.TASKNAME: ModelCalibration,

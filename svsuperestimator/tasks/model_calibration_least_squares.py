@@ -4,8 +4,8 @@ from __future__ import annotations
 import json
 import os
 from datetime import datetime
-from typing import Any
 from time import time
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -178,7 +178,6 @@ class ModelCalibrationLeastSquares(Task):
         zerod_config_handler.data["calibration_parameters"] = {
             "tolerance_gradient": 1e-6,
             "tolerance_increment": 1e-10,
-            "initial_damping_factor": 1.0,
             "calibrate_stenosis_coefficient": self.config[
                 "calibrate_stenosis_coefficient"
             ],

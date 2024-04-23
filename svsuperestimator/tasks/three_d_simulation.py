@@ -1,7 +1,6 @@
 """This module holds the ThreeDSimulation task."""
 from __future__ import annotations
 
-import multiprocessing
 import os
 from shutil import copy2, copytree, ignore_patterns
 
