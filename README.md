@@ -35,9 +35,9 @@ pip install git+https://github.com/StanfordCBCL/svSuperEstimator.git
 
 The remaining dependencies have to be installed manually:
 
-* [svZeroDSolver](https://github.com/richterjakob/svZeroDSolver): Install via pip.
-* [3D result slicer](https://gitlab.com/sanddorn/sanddorn-toolbox/-/tree/main/slicer): Build release version and specify path to executable in config file.
-* [svSolver](https://github.com/SimVascular/svSolver): Build release version and specify path to executable in config file.
+* [svZeroDSolver](https://github.com/SimVascular/svZeroDSolver): Install via pip.
+* [svSlicer](https://github.com/StanfordCBCL/svSlicer): Build release version and specify path to executable in config file.
+* [svSolver](https://github.com/SimVascular/svSolver): Build release version and specify path to executables in config file.
 
 ### For Contributors
 
