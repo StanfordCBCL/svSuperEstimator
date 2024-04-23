@@ -19,7 +19,37 @@ if os.environ.get("COLUMNS") is None:
     os.environ["COLUMNS"] = "180"
 MAIN_CONSOLE = Console(log_time_format="[%m/%d/%y %H:%M:%S]")
 
-slurm_base = """#!/bin/bash
+
+slurm_base_sherlock = """#!/bin/bash
+
+#SBATCH --job-name=estimator
+#SBATCH --partition={partition}
+#SBATCH --output={logfile}
+#SBATCH --error={logfile}
+#SBATCH --time={walltime}
+#SBATCH --qos={qos}
+#SBATCH --nodes={nodes}
+#SBATCH --mem={mem}
+#SBATCH --ntasks-per-node={ntasks_per_node}
+
+module purge
+module load system
+module load binutils/2.38
+module load qt
+module load openmpi
+module load mesa
+module load cmake/3.23.1
+module load gcc/12.1.0
+module load x11
+module load sqlite/3.37.2
+
+# Command
+echo "$(date): Job $SLURM_JOBID starting on $SLURM_NODELIST"
+{python_path} {estimator_path} {config_file}
+echo "$(date): Job $SLURM_JOBID finished on $SLURM_NODELIST"
+"""
+
+slurm_base_expanse = """#!/bin/bash
 
 #SBATCH --job-name=estimator
 #SBATCH --partition={partition}
@@ -61,7 +91,7 @@ slurm_default = {
 }
 
 
-def run_file(path: str) -> None:
+def run_file(path: str, slurm_base=slurm_base_sherlock) -> None:
     """Run svSuperEstimator from a configuration file.
 
     Args:

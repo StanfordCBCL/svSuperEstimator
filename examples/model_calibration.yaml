@@ -3,7 +3,7 @@ global:
   num_procs: 4
 tasks:
   model_calibration_least_squares:
-    name: calibration_least_squares_test
+    name: calibration_least_squares
     debug: False
     zerod_config_file: /Volumes/richter/final_data/input_0d/0081_0001_0d.in
     threed_solution_file: /Volumes/richter/final_data/centerline_results/0081_0001.vtp
